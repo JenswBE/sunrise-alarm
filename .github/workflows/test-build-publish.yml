@@ -1,0 +1,27 @@
+name: Test, build and publish
+on:
+  push:
+    branches: [main]
+
+env:
+  DOCKER_HUB_USER: jenswbebot
+
+jobs:
+  srv-config:
+    runs-on: ubuntu-latest
+    env:
+        BUILD_ROOT: src/srv-config
+        DOCKER_HUB_REPO: jenswbe/sunrise-alarm-srv-config
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Login to Docker Hub
+        run: docker login -u $DOCKER_HUB_USER -p $DOCKER_HUB_PASSWORD
+        env:
+          DOCKER_HUB_PASSWORD: ${{ secrets.DOCKER_HUB_PASSWORD }}
+
+      - name: Build Docker image
+        run: docker build -t ${DOCKER_HUB_REPO} ${BUILD_ROOT}
+
+      - name: Push image to Docker Hub
+        run: docker push ${DOCKER_HUB_REPO}:latest 

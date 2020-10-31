@@ -30,7 +30,11 @@ async fn main() {
     // View access logs by setting `RUST_LOG=alarms`.
     let routes = api.with(warp::log("alarms"));
     // Start up the server...
-    warp::serve(routes).run(([127, 0, 0, 1], 3030)).await;
+    let port = env::var("WARP_PORT").unwrap_or("8000".to_string());
+    let port = port
+        .parse()
+        .expect("Provided WARP_PORT is not a valid number");
+    warp::serve(routes).run(([127, 0, 0, 1], port)).await;
 }
 
 // #[cfg(test)]

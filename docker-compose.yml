@@ -1,0 +1,15 @@
+
+version: '3.7'
+services:
+  srv-config:
+    build: src/srv-config
+    container_name: srv-config
+    restart: always
+    networks:
+      - sunrise-alarm
+    ports:
+      - "8000:80"
+
+networks:  
+    sunrise-alarm:
+        name: sunrise-alarm
