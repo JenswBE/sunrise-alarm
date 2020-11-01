@@ -1,5 +1,5 @@
 # Based on https://blog.sedrik.se/posts/my-docker-setup-for-rust/
-FROM ekidd/rust-musl-builder:nightly-2020-10-08 as builder
+FROM ekidd/rust-musl-builder:stable as builder
 
 WORKDIR /home/rust/
 
