@@ -1,14 +1,12 @@
+use srv_config::api;
 use warp::http::StatusCode;
 use warp::test::request;
-
-use srv_config::api;
-use srv_config::Alarm;
 
 mod common;
 use common::*;
 
 #[tokio::test]
-async fn test_update_alarm_success() {
+async fn test_delete_alarm_success() {
     // Setup test data
     let db = fixture_database();
     let alarm = fixture_alarm();
@@ -19,27 +17,25 @@ async fn test_update_alarm_success() {
     // Call service
     let path = format!("/alarms/{}", alarm.id);
     let resp = request()
-        .method("PUT")
+        .method("DELETE")
         .path(&path)
         .json(&alarm)
         .reply(&api)
         .await;
 
     // Assert results
-    assert_eq!(StatusCode::OK, resp.status());
-    let result: Alarm = serde_json::from_slice(resp.body()).unwrap();
-    assert_eq!(alarm, result)
+    assert_eq!(StatusCode::NO_CONTENT, resp.status());
 }
 
 #[tokio::test]
-async fn test_update_alarm_not_found() {
+async fn test_delete_alarm_not_found() {
     // Setup test data
     let db = fixture_database();
     let api = api::alarms::filters(db);
 
     // Call service
     let resp = request()
-        .method("PUT")
+        .method("DELETE")
         .path("/alarms/1")
         .json(&fixture_alarm())
         .reply(&api)

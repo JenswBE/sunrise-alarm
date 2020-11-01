@@ -15,7 +15,7 @@ pub struct ServerData {
     pub alarms: HashMap<Uuid, Alarm>,
 }
 
-#[derive(Debug, Deserialize, Serialize, Clone)]
+#[derive(Debug, Deserialize, Serialize, Clone, Eq, PartialEq)]
 pub struct Alarm {
     #[serde(default = "Uuid::new_v4")]
     pub id: Uuid,
