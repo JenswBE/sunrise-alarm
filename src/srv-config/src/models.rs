@@ -1,19 +1,18 @@
+use std::collections::HashMap;
+use std::path::PathBuf;
+
 use serde::{Deserialize, Serialize};
-use std::sync::Arc;
-use tokio::sync::Mutex;
 use uuid::Uuid;
 
-/// So we don't have to tackle how different database work, we'll just use
-/// a simple in-memory DB, a vector synchronized by a mutex.
-pub type Db = Arc<Mutex<Vec<Alarm>>>;
-
-pub fn blank_db() -> Db {
-    Arc::new(Mutex::new(Vec::new()))
+#[derive(Debug, Clone)]
+pub struct Config {
+    pub data_dir: PathBuf,
+    pub port: u16,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
-struct ServerData {
-    alarms: Vec<Alarm>,
+pub struct ServerData {
+    pub alarms: HashMap<Uuid, Alarm>,
 }
 
 #[derive(Debug, Deserialize, Serialize, Clone)]

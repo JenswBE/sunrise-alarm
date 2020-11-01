@@ -25,6 +25,6 @@ WORKDIR /home/rust/
 COPY --from=builder /home/rust/target/x86_64-unknown-linux-musl/release/srv-config .
 
 ENV WARP_PORT 80
-ENV DATA_FILE_PATH /data/data.yml
+ENV DATA_DIR_PATH /data
 EXPOSE 80
 ENTRYPOINT ["./srv-config"]

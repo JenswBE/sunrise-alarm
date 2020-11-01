@@ -1,4 +1,5 @@
-use crate::models::{Alarm, Db, Error, ERROR_ALARM_EXISTS, ERROR_ALARM_NOT_FOUND};
+use crate::database::Db;
+use crate::models::{Alarm, Error, ERROR_ALARM_EXISTS, ERROR_ALARM_NOT_FOUND};
 use std::convert::Infallible;
 use uuid::Uuid;
 use warp::http::StatusCode;
@@ -21,9 +22,11 @@ fn list(db: Db) -> impl Filter<Extract = impl warp::Reply, Error = warp::Rejecti
 }
 
 async fn list_alarms(db: Db) -> Result<impl warp::Reply, Infallible> {
-    // Just return a JSON array of alarms, applying the limit and offset.
-    let alarms = db.lock().await;
-    let alarms: Vec<Alarm> = alarms.clone().into_iter().collect();
+    let mut alarms = vec![];
+    db.read(|db| {
+        alarms = db.alarms.values().cloned().collect();
+    })
+    .expect("Error while listing alarms");
     Ok(warp::reply::json(&alarms))
 }
 
@@ -37,27 +40,31 @@ fn create(db: Db) -> impl Filter<Extract = impl warp::Reply, Error = warp::Rejec
 }
 
 async fn create_alarm(alarm: Alarm, db: Db) -> Result<impl warp::Reply, Infallible> {
-    log::debug!("create_alarm: {:?}", alarm);
+    log::info!("create_alarm: {:?}", alarm);
 
-    let mut vec = db.lock().await;
-
-    for item in vec.iter() {
-        if item.id == alarm.id {
-            log::debug!("    -> id already exists: {}", alarm.id);
-            // Alarm with id already exists
-            let error = Error {
-                code: ERROR_ALARM_EXISTS,
-            };
-            return Ok(warp::reply::with_status(
-                warp::reply::json(&error),
-                StatusCode::CONFLICT,
-            ));
+    // Insert alarm in database
+    let mut found: bool = false;
+    db.write(|db| {
+        found = db.alarms.contains_key(&alarm.id);
+        if !found {
+            db.alarms.insert(alarm.id, alarm.clone());
         }
+    })
+    .expect("Error while creating alarm");
+    db.save().expect("Failed to save database");
+
+    // Alarm with id already exists
+    if found {
+        let error = Error {
+            code: ERROR_ALARM_EXISTS,
+        };
+        return Ok(warp::reply::with_status(
+            warp::reply::json(&error),
+            StatusCode::CONFLICT,
+        ));
     }
 
-    // No existing Alarm with id, so insert and return `201 Created`.
-    vec.push(alarm.clone());
-
+    // Create alarm success
     let json_reply = warp::reply::json(&alarm);
     Ok(warp::reply::with_status(json_reply, StatusCode::CREATED))
 }
@@ -72,28 +79,35 @@ fn update(db: Db) -> impl Filter<Extract = impl warp::Reply, Error = warp::Rejec
 }
 
 async fn update_alarm(id: Uuid, alarm: Alarm, db: Db) -> Result<impl warp::Reply, Infallible> {
-    // Lock database
-    let mut vec = db.lock().await;
-
-    // Set id to alarm
+    // Set alarm id
     let mut alarm: Alarm = alarm.clone();
     alarm.id = id;
 
-    // Update alarm
-    for item in vec.iter_mut() {
-        if item.id == id {
-            *item = alarm.clone();
-            let json_reply = warp::reply::json(&alarm);
-            return Ok(warp::reply::with_status(json_reply, StatusCode::OK));
+    // Update alarm in database
+    let mut found: bool = false;
+    db.write(|db| {
+        found = db.alarms.contains_key(&alarm.id);
+        if found {
+            db.alarms.insert(alarm.id, alarm.clone());
         }
+    })
+    .expect("Error while updating alarm");
+    db.save().expect("Failed to save database");
+
+    // Alarm with id not found
+    if !found {
+        let error = Error {
+            code: ERROR_ALARM_NOT_FOUND,
+        };
+        return Ok(warp::reply::with_status(
+            warp::reply::json(&error),
+            StatusCode::NOT_FOUND,
+        ));
     }
 
-    // Alarm not found
-    let error = Error {
-        code: ERROR_ALARM_NOT_FOUND,
-    };
-    let json_reply = warp::reply::json(&error);
-    return Ok(warp::reply::with_status(json_reply, StatusCode::NOT_FOUND));
+    // Update alarm success
+    let json_reply = warp::reply::json(&alarm);
+    return Ok(warp::reply::with_status(json_reply, StatusCode::OK));
 }
 
 /// DELETE /alarms/:id
@@ -107,22 +121,21 @@ fn delete(db: Db) -> impl Filter<Extract = impl warp::Reply, Error = warp::Rejec
 pub async fn delete_alarm(id: Uuid, db: Db) -> Result<impl warp::Reply, Infallible> {
     log::debug!("delete_alarm: id={}", id);
 
-    let mut vec = db.lock().await;
+    // Delete alarm from database
+    let mut found: bool = false;
+    db.write(|db| {
+        found = db.alarms.remove(&id).is_some();
+    })
+    .expect("Error while deleting alarm");
+    db.save().expect("Failed to save database");
 
-    let len = vec.len();
-    vec.retain(|alarm| {
-        // Retain all Alarms that aren't this id...
-        // In other words, remove all that *are* this id...
-        alarm.id != id
-    });
-
-    // If the vec is smaller, we found and deleted a Alarm!
-    let deleted = vec.len() != len;
-
-    if deleted {
+    // Return result
+    if found {
+        // Delete alarm success
         Ok(StatusCode::NO_CONTENT)
     } else {
-        log::debug!("    -> alarm id not found!");
+        // Alarm not found
+        log::warn!("    -> alarm id not found!");
         Ok(StatusCode::NOT_FOUND)
     }
 }
