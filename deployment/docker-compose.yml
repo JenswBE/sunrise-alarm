@@ -1,0 +1,13 @@
+
+version: '3.7'
+services:
+  srv-config:
+    image: jenswbe/sunrise-alarm-srv-config
+    container_name: srv-config
+    restart: always
+    networks:
+      - sunrise-alarm
+
+networks:  
+    sunrise-alarm:
+        name: sunrise-alarm
