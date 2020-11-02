@@ -7,7 +7,13 @@ services:
     networks:
       - sunrise-alarm
     ports:
-      - "8000:80"
+      - "9000:80"
+
+  mosquitto:
+    image: eclipse-mosquitto:latest
+    container_name: ha-mosquitto
+    networks:
+      - sunrise-alarm
 
 networks:  
     sunrise-alarm:

@@ -8,6 +8,17 @@ services:
     networks:
       - sunrise-alarm
 
+  mosquitto:
+    image: eclipse-mosquitto:latest
+    container_name: ha-mosquitto
+    networks:
+      - sunrise-alarm
+    volumes:
+      - "mosquitto-data:/mosquitto/data"
+      - "mosquitto-log:/mosquitto/log"
+    environment:
+      - "TZ=${TIMEZONE}"
+
 networks:  
     sunrise-alarm:
         name: sunrise-alarm
