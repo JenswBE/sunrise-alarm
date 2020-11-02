@@ -22,6 +22,7 @@ RUN cargo build --release
 # Start building the final image
 FROM scratch
 WORKDIR /home/rust/
+VOLUME [ "/data" ]
 COPY --from=builder /home/rust/target/x86_64-unknown-linux-musl/release/srv-config .
 
 ENV WARP_PORT 80

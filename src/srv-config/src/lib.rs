@@ -36,5 +36,5 @@ pub async fn run(config: models::Config) {
     let routes = api.with(warp::log("alarms"));
 
     // Start up the server
-    warp::serve(routes).run(([127, 0, 0, 1], config.port)).await;
+    warp::serve(routes).run(([0, 0, 0, 0], config.port)).await;
 }
