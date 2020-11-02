@@ -7,13 +7,17 @@ services:
     networks:
       - sunrise-alarm
     ports:
-      - "9000:80"
+      - "127.0.0.1:9000:80"
+    environment:
+      - "MQTT_BROKER_HOST=mosquitto"
 
   mosquitto:
     image: eclipse-mosquitto:latest
     container_name: ha-mosquitto
     networks:
       - sunrise-alarm
+    ports:
+      - "127.0.0.1:1883:1883"
 
 networks:  
     sunrise-alarm:

@@ -14,10 +14,22 @@ async fn main() {
     let data_dir = env::var("DATA_DIR_PATH")
         .unwrap_or("../../data".to_string())
         .parse()
-        .expect("test");
+        .expect("Provided DATA_DIR_PATH is not a valid path");
+    let mqtt_broker_host = env::var("MQTT_BROKER_HOST").unwrap_or("localhost".to_string());
+    let mqtt_broker_port = env::var("MQTT_BROKER_PORT")
+        .unwrap_or("1883".to_string())
+        .parse()
+        .expect("Provided MQTT_BROKER_PORT is not a valid number");
 
     // Build config
-    let config = models::Config { port, data_dir };
+    let config = models::Config {
+        port,
+        data_dir,
+        mqtt_config: models::MqttConfig {
+            host: mqtt_broker_host,
+            port: mqtt_broker_port,
+        },
+    };
 
     // Run service
     srv_config::run(config).await;

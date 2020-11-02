@@ -7,8 +7,7 @@ use warp::Filter;
 pub mod api;
 pub mod database;
 pub mod models;
-
-pub use models::Alarm;
+pub mod mqtt;
 
 /// Provides a RESTful web server for managing Sunrise Alarm's config
 ///
@@ -30,11 +29,11 @@ pub async fn run(config: models::Config) {
     let mut db_path = config.data_dir.clone();
     db_path.push("server_data.ron");
     let db = database::load_or_init(db_path);
-    let api = api::alarms::filters(db);
 
-    // Add middleware for access logs
+    // Setup server
+    let api = api::alarms::filters(db, config.mqtt_config);
     let routes = api.with(warp::log("alarms"));
 
-    // Start up the server
+    // Start the server
     warp::serve(routes).run(([0, 0, 0, 0], config.port)).await;
 }

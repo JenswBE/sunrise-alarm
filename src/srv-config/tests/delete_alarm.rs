@@ -1,6 +1,7 @@
-use srv_config::api;
 use warp::http::StatusCode;
 use warp::test::request;
+
+use srv_config::api;
 
 mod common;
 use common::*;
@@ -9,10 +10,11 @@ use common::*;
 async fn test_delete_alarm_success() {
     // Setup test data
     let db = fixture_database();
+    let mqtt_config = fixture_mqtt_config();
     let alarm = fixture_alarm();
     db.write(|db| db.alarms.insert(alarm.id, alarm.clone()))
         .unwrap();
-    let api = api::alarms::filters(db);
+    let api = api::alarms::filters(db, mqtt_config);
 
     // Call service
     let path = format!("/alarms/{}", alarm.id);
@@ -31,7 +33,8 @@ async fn test_delete_alarm_success() {
 async fn test_delete_alarm_not_found() {
     // Setup test data
     let db = fixture_database();
-    let api = api::alarms::filters(db);
+    let mqtt_config = fixture_mqtt_config();
+    let api = api::alarms::filters(db, mqtt_config);
 
     // Call service
     let resp = request()

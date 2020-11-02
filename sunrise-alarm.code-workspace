@@ -1,9 +1,15 @@
 {
 	"folders": [
 		{
+			"name": "sunrise-alarm",
 			"path": "."
 		},
 		{
+			"name": "common-models",
+			"path": "src/common-models"
+		},
+		{
+			"name": "srv-config",
 			"path": "src/srv-config"
 		}
 	],

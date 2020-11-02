@@ -1,8 +1,8 @@
 use warp::http::StatusCode;
 use warp::test::request;
 
+use common_models::general::Alarm;
 use srv_config::api;
-use srv_config::Alarm;
 
 mod common;
 use common::*;
@@ -11,7 +11,8 @@ use common::*;
 async fn test_create_alarm_success() {
     // Setup test data
     let db = fixture_database();
-    let api = api::alarms::filters(db);
+    let mqtt_config = fixture_mqtt_config();
+    let api = api::alarms::filters(db, mqtt_config);
     let alarm = &fixture_alarm();
 
     // Call service
@@ -32,10 +33,11 @@ async fn test_create_alarm_success() {
 async fn test_create_alarm_conflict() {
     // Setup test data
     let db = fixture_database();
+    let mqtt_config = fixture_mqtt_config();
     let alarm = fixture_alarm();
     db.write(|db| db.alarms.insert(alarm.id, alarm.clone()))
         .unwrap();
-    let api = api::alarms::filters(db);
+    let api = api::alarms::filters(db, mqtt_config);
 
     // Call service
     let resp = request()

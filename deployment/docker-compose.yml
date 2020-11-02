@@ -7,6 +7,11 @@ services:
     restart: always
     networks:
       - sunrise-alarm
+    volumes:
+      - "srv-config-data:/data"
+    environment:
+      - "TZ=${TIMEZONE}"
+      - "MQTT_BROKER_HOST=mosquitto"
 
   mosquitto:
     image: eclipse-mosquitto:latest

@@ -1,8 +1,8 @@
 use warp::http::StatusCode;
 use warp::test::request;
 
+use common_models::general::Alarm;
 use srv_config::api;
-use srv_config::Alarm;
 
 mod common;
 use common::*;
@@ -11,7 +11,8 @@ use common::*;
 async fn test_list_alarms_empty() {
     // Setup test data
     let db = fixture_database();
-    let api = api::alarms::filters(db);
+    let mqtt_config = fixture_mqtt_config();
+    let api = api::alarms::filters(db, mqtt_config);
 
     // Call service
     let resp = request().method("GET").path("/alarms").reply(&api).await;
@@ -26,6 +27,7 @@ async fn test_list_alarms_empty() {
 async fn test_list_alarms_not_empty() {
     // Setup test data
     let db = fixture_database();
+    let mqtt_config = fixture_mqtt_config();
     let alarm = fixture_alarm();
     let alarm2 = fixture_alarm();
     db.write(|db| {
@@ -33,7 +35,7 @@ async fn test_list_alarms_not_empty() {
         db.alarms.insert(alarm2.id, alarm2.clone());
     })
     .unwrap();
-    let api = api::alarms::filters(db);
+    let api = api::alarms::filters(db, mqtt_config);
 
     // Call service
     let resp = request().method("GET").path("/alarms").reply(&api).await;
