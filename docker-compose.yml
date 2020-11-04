@@ -13,7 +13,7 @@ services:
 
   mosquitto:
     image: eclipse-mosquitto:latest
-    container_name: ha-mosquitto
+    container_name: mosquitto
     networks:
       - sunrise-alarm
     ports:
