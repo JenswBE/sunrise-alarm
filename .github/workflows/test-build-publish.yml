@@ -10,7 +10,8 @@ jobs:
   srv-config:
     runs-on: ubuntu-latest
     env:
-        BUILD_ROOT: src/srv-config
+        BUILD_PATH: src
+        BUILD_FILE: srv-config.Dockerfile
         DOCKER_HUB_REPO: jenswbe/sunrise-alarm-srv-config
     steps:
       - uses: actions/checkout@v2
@@ -21,7 +22,7 @@ jobs:
           DOCKER_HUB_PASSWORD: ${{ secrets.DOCKER_HUB_PASSWORD }}
 
       - name: Build Docker image
-        run: docker build -t ${DOCKER_HUB_REPO} ${BUILD_ROOT}
+        run: docker build -f ${BUILD_PATH}/${BUILD_FILE} -t ${DOCKER_HUB_REPO} ${BUILD_PATH}
 
       - name: Push image to Docker Hub
         run: docker push ${DOCKER_HUB_REPO}:latest 

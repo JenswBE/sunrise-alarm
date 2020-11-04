@@ -2,7 +2,9 @@
 version: '3.7'
 services:
   srv-config:
-    build: src/srv-config
+    build:
+      context: src
+      dockerfile: srv-config.Dockerfile
     container_name: srv-config
     networks:
       - sunrise-alarm
