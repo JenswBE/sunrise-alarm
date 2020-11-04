@@ -1,23 +1,24 @@
 use std::convert::Infallible;
 
+use rumqttc::AsyncClient;
 use uuid::Uuid;
 use warp::http::StatusCode;
 use warp::Filter;
 
 use crate::database::Db;
-use crate::models::{Error, MqttConfig, ERROR_ALARM_EXISTS, ERROR_ALARM_NOT_FOUND};
+use crate::models::{Error, ERROR_ALARM_EXISTS, ERROR_ALARM_NOT_FOUND};
 use crate::mqtt;
-use common_models::{general::Alarm, mqtt::AlarmsChanged};
+use common_models::general::Alarm;
 
 /// Combination of all alarm related filters
 pub fn filters(
     db: Db,
-    mqtt_config: MqttConfig,
+    mqtt_client: AsyncClient,
 ) -> impl Filter<Extract = impl warp::Reply, Error = warp::Rejection> + Clone {
     list(db.clone())
-        .or(create(db.clone(), mqtt_config.clone()))
-        .or(update(db.clone(), mqtt_config.clone()))
-        .or(delete(db, mqtt_config))
+        .or(create(db.clone(), mqtt_client.clone()))
+        .or(update(db.clone(), mqtt_client.clone()))
+        .or(delete(db, mqtt_client))
 }
 
 /// GET /alarms
@@ -45,20 +46,20 @@ fn get_alarms(db: Db) -> Vec<Alarm> {
 /// POST /alarms with JSON body
 fn create(
     db: Db,
-    mqtt_config: MqttConfig,
+    mqtt_client: AsyncClient,
 ) -> impl Filter<Extract = impl warp::Reply, Error = warp::Rejection> + Clone {
     warp::path!("alarms")
         .and(warp::post())
         .and(json_body())
         .and(with_db(db))
-        .and(with_mqtt(mqtt_config))
+        .and(with_mqtt(mqtt_client))
         .and_then(create_alarm)
 }
 
 async fn create_alarm(
     alarm: Alarm,
     db: Db,
-    mqtt_config: MqttConfig,
+    mqtt_client: AsyncClient,
 ) -> Result<impl warp::Reply, Infallible> {
     log::info!("create_alarm: {:?}", alarm);
 
@@ -85,7 +86,7 @@ async fn create_alarm(
     }
 
     // Create alarm success
-    publish_alarms_changed(db, mqtt_config).await;
+    mqtt::publish_alarms_changed(mqtt_client, get_alarms(db)).await;
     let json_reply = warp::reply::json(&alarm);
     Ok(warp::reply::with_status(json_reply, StatusCode::CREATED))
 }
@@ -93,13 +94,13 @@ async fn create_alarm(
 /// PUT /alarms/:id with JSON body
 fn update(
     db: Db,
-    mqtt_config: MqttConfig,
+    mqtt_client: AsyncClient,
 ) -> impl Filter<Extract = impl warp::Reply, Error = warp::Rejection> + Clone {
     warp::path!("alarms" / Uuid)
         .and(warp::put())
         .and(json_body())
         .and(with_db(db))
-        .and(with_mqtt(mqtt_config))
+        .and(with_mqtt(mqtt_client))
         .and_then(update_alarm)
 }
 
@@ -107,7 +108,7 @@ async fn update_alarm(
     id: Uuid,
     alarm: Alarm,
     db: Db,
-    mqtt_config: MqttConfig,
+    mqtt_client: AsyncClient,
 ) -> Result<impl warp::Reply, Infallible> {
     // Set alarm id
     let mut alarm: Alarm = alarm.clone();
@@ -136,7 +137,7 @@ async fn update_alarm(
     }
 
     // Update alarm success
-    publish_alarms_changed(db, mqtt_config).await;
+    mqtt::publish_alarms_changed(mqtt_client, get_alarms(db)).await;
     let json_reply = warp::reply::json(&alarm);
     return Ok(warp::reply::with_status(json_reply, StatusCode::OK));
 }
@@ -144,19 +145,19 @@ async fn update_alarm(
 /// DELETE /alarms/:id
 fn delete(
     db: Db,
-    mqtt_config: MqttConfig,
+    mqtt_client: AsyncClient,
 ) -> impl Filter<Extract = impl warp::Reply, Error = warp::Rejection> + Clone {
     warp::path!("alarms" / Uuid)
         .and(warp::delete())
         .and(with_db(db))
-        .and(with_mqtt(mqtt_config))
+        .and(with_mqtt(mqtt_client))
         .and_then(delete_alarm)
 }
 
 pub async fn delete_alarm(
     id: Uuid,
     db: Db,
-    mqtt_config: MqttConfig,
+    mqtt_client: AsyncClient,
 ) -> Result<impl warp::Reply, Infallible> {
     log::debug!("delete_alarm: id={}", id);
 
@@ -171,7 +172,7 @@ pub async fn delete_alarm(
     // Return result
     if found {
         // Delete alarm success
-        publish_alarms_changed(db, mqtt_config).await;
+        mqtt::publish_alarms_changed(mqtt_client, get_alarms(db)).await;
         Ok(StatusCode::NO_CONTENT)
     } else {
         // Alarm not found
@@ -185,21 +186,13 @@ fn with_db(db: Db) -> impl Filter<Extract = (Db,), Error = std::convert::Infalli
 }
 
 fn with_mqtt(
-    mqtt_config: MqttConfig,
-) -> impl Filter<Extract = (MqttConfig,), Error = std::convert::Infallible> + Clone {
-    warp::any().map(move || mqtt_config.clone())
+    mqtt_client: AsyncClient,
+) -> impl Filter<Extract = (AsyncClient,), Error = std::convert::Infallible> + Clone {
+    warp::any().map(move || mqtt_client.clone())
 }
 
 fn json_body() -> impl Filter<Extract = (Alarm,), Error = warp::Rejection> + Clone {
     // When accepting a body, we want a JSON body
     // (and to reject huge payloads)...
     warp::body::content_length_limit(1024 * 16).and(warp::body::json())
-}
-
-async fn publish_alarms_changed(db: Db, mqtt_config: MqttConfig) {
-    let msg = AlarmsChanged {
-        alarms: get_alarms(db),
-    };
-    let json = serde_json::to_vec(&msg).unwrap();
-    mqtt::publish(mqtt_config, "alarms_changed", json).await;
 }

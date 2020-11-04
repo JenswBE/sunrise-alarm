@@ -30,8 +30,11 @@ pub async fn run(config: models::Config) {
     db_path.push("server_data.ron");
     let db = database::load_or_init(db_path);
 
+    // Setup MQTT
+    let mqtt_client = mqtt::get_client(config.mqtt_config).await;
+
     // Setup server
-    let api = api::alarms::filters(db, config.mqtt_config);
+    let api = api::alarms::filters(db, mqtt_client);
     let routes = api.with(warp::log("alarms"));
 
     // Start the server

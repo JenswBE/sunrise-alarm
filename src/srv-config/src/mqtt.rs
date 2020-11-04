@@ -1,23 +1,40 @@
-use mqtt_async_client::client::{Client, Publish, QoS};
+use rumqttc::{AsyncClient, MqttOptions, QoS};
 
 use crate::models;
+use common_models::{general::Alarm, mqtt::AlarmsChanged};
 
-pub async fn publish(config: models::MqttConfig, topic: &str, message: Vec<u8>) {
-    let mut client = get_client(config);
-    client
-        .connect()
-        .await
-        .expect("Failed to connect to MQTT broker");
-    let mut p = Publish::new("sunrise_alarm/".to_string() + topic, message);
-    p.set_qos(QoS::AtLeastOnce);
-    client.publish(&p).await.expect("Failed to publish message")
+const TOPIC_PREFIX: &str = "sunrise_alarm/";
+
+pub async fn get_client(config: models::MqttConfig) -> AsyncClient {
+    // Build client
+    let mut mqttoptions = MqttOptions::new("srv-config", config.host, config.port);
+    mqttoptions.set_keep_alive(5);
+    let (mqtt_client, mut eventloop) = AsyncClient::new(mqttoptions, 10);
+
+    // Start client loop
+    tokio::task::spawn(async move {
+        loop {
+            let notification = eventloop.poll().await.unwrap();
+            handle_mqtt_notification(notification).await;
+        }
+    });
+
+    // Create client successful
+    return mqtt_client;
 }
 
-fn get_client(config: models::MqttConfig) -> Client {
-    let mut b = Client::builder();
-    b.set_host(config.host)
-        .set_port(config.port)
-        .set_client_id(Some("srv-config".to_string()))
-        .build()
-        .expect("Failed to create MQTT client")
+async fn handle_mqtt_notification(_notification: rumqttc::Event) {}
+
+pub async fn publish_alarms_changed(client: AsyncClient, alarms: Vec<Alarm>) {
+    let msg = AlarmsChanged { alarms };
+    let json = serde_json::to_vec(&msg).unwrap();
+    client
+        .publish(
+            TOPIC_PREFIX.to_string() + "alarms_changed",
+            QoS::AtLeastOnce,
+            false,
+            json,
+        )
+        .await
+        .unwrap();
 }
