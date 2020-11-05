@@ -1,8 +1,8 @@
-FROM ekidd/rust-musl-builder:stable as builder
-
 ARG SERVICE_NAME=srv-config
 
 # Copy sources
+FROM ekidd/rust-musl-builder:stable as builder
+ARG SERVICE_NAME
 WORKDIR /home/rust/
 COPY . .
 
@@ -13,8 +13,7 @@ RUN cargo build --release
 
 # Start building the final image
 FROM scratch
-
-ARG SERVICE_NAME=srv-config
+ARG SERVICE_NAME
 ENV WARP_PORT 80
 ENV DATA_DIR_PATH /data
 EXPOSE 80
