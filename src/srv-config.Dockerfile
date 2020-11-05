@@ -13,11 +13,12 @@ RUN cargo build --release
 
 # Start building the final image
 FROM scratch
-WORKDIR /home/rust/
-VOLUME [ "/data" ]
-COPY --from=builder /home/rust/target/x86_64-unknown-linux-musl/release/$SERVICE_NAME .
 
+ARG SERVICE_NAME=srv-config
 ENV WARP_PORT 80
 ENV DATA_DIR_PATH /data
 EXPOSE 80
-ENTRYPOINT ["./${SERVICE_NAME}"]
+VOLUME [ "/data" ]
+
+COPY --from=builder /home/rust/target/x86_64-unknown-linux-musl/release/${SERVICE_NAME} service
+ENTRYPOINT ["./service"]
