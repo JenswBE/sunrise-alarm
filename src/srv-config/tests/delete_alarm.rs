@@ -10,11 +10,11 @@ use common::*;
 async fn test_delete_alarm_success() {
     // Setup test data
     let db = fixture_database();
-    let mqtt_config = fixture_mqtt_config();
+    let (mqtt_client, mqtt_server) = fixture_mqtt_client().await;
     let alarm = fixture_alarm();
     db.write(|db| db.alarms.insert(alarm.id, alarm.clone()))
         .unwrap();
-    let api = api::alarms::filters(db, mqtt_config);
+    let api = api::alarms::filters(db, mqtt_client);
 
     // Call service
     let path = format!("/alarms/{}", alarm.id);
@@ -27,14 +27,18 @@ async fn test_delete_alarm_success() {
 
     // Assert results
     assert_eq!(StatusCode::NO_CONTENT, resp.status());
+
+    // Assert MQTT server
+    let stats = mqtt_server.fut.await.unwrap();
+    assert_eq!(1, stats.len());
 }
 
 #[tokio::test]
 async fn test_delete_alarm_not_found() {
     // Setup test data
     let db = fixture_database();
-    let mqtt_config = fixture_mqtt_config();
-    let api = api::alarms::filters(db, mqtt_config);
+    let (mqtt_client, mqtt_server) = fixture_mqtt_client().await;
+    let api = api::alarms::filters(db, mqtt_client);
 
     // Call service
     let resp = request()
@@ -46,4 +50,8 @@ async fn test_delete_alarm_not_found() {
 
     // Assert results
     assert_eq!(StatusCode::NOT_FOUND, resp.status());
+
+    // Assert MQTT server
+    let stats = mqtt_server.fut.await.unwrap();
+    assert_eq!(1, stats.len());
 }

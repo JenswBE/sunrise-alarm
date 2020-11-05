@@ -11,8 +11,8 @@ use common::*;
 async fn test_list_alarms_empty() {
     // Setup test data
     let db = fixture_database();
-    let mqtt_config = fixture_mqtt_config();
-    let api = api::alarms::filters(db, mqtt_config);
+    let (mqtt_client, mqtt_server) = fixture_mqtt_client().await;
+    let api = api::alarms::filters(db, mqtt_client);
 
     // Call service
     let resp = request().method("GET").path("/alarms").reply(&api).await;
@@ -20,14 +20,18 @@ async fn test_list_alarms_empty() {
     // Assert results
     assert_eq!(StatusCode::OK, resp.status());
     let result: Vec<Alarm> = serde_json::from_slice(resp.body()).unwrap();
-    assert_eq!(0, result.len())
+    assert_eq!(0, result.len());
+
+    // Assert MQTT server
+    let stats = mqtt_server.fut.await.unwrap();
+    assert_eq!(1, stats.len());
 }
 
 #[tokio::test]
 async fn test_list_alarms_not_empty() {
     // Setup test data
     let db = fixture_database();
-    let mqtt_config = fixture_mqtt_config();
+    let (mqtt_client, mqtt_server) = fixture_mqtt_client().await;
     let alarm = fixture_alarm();
     let alarm2 = fixture_alarm();
     db.write(|db| {
@@ -35,7 +39,7 @@ async fn test_list_alarms_not_empty() {
         db.alarms.insert(alarm2.id, alarm2.clone());
     })
     .unwrap();
-    let api = api::alarms::filters(db, mqtt_config);
+    let api = api::alarms::filters(db, mqtt_client);
 
     // Call service
     let resp = request().method("GET").path("/alarms").reply(&api).await;
@@ -43,5 +47,9 @@ async fn test_list_alarms_not_empty() {
     // Assert results
     assert_eq!(StatusCode::OK, resp.status());
     let result: Vec<Alarm> = serde_json::from_slice(resp.body()).unwrap();
-    assert_eq!(2, result.len())
+    assert_eq!(2, result.len());
+
+    // Assert MQTT server
+    let stats = mqtt_server.fut.await.unwrap();
+    assert_eq!(1, stats.len());
 }

@@ -1,7 +1,8 @@
 use std::collections::HashMap;
-use std::env;
 use std::sync::Arc;
+use std::time::Duration;
 
+use mqttest;
 use rustbreak::PathDatabase;
 use tempfile::NamedTempFile;
 use uuid::Uuid;
@@ -9,6 +10,7 @@ use uuid::Uuid;
 use common_models::general::Alarm;
 use srv_config::database;
 use srv_config::models;
+use srv_config::mqtt;
 
 pub fn fixture_alarm() -> Alarm {
     Alarm {
@@ -35,9 +37,18 @@ pub fn fixture_database() -> database::Db {
     Arc::new(db)
 }
 
-pub fn fixture_mqtt_config() -> models::MqttConfig {
-    models::MqttConfig {
-        host: env::var("MQTT_BROKER_HOST").unwrap_or("localhost".to_string()),
-        port: 1883,
-    }
+pub async fn fixture_mqtt_client() -> (rumqttc::AsyncClient, mqttest::Mqttest) {
+    let srv_conf = mqttest::Conf::new()
+        .max_connect(1)
+        .max_time(vec![Duration::from_millis(500)])
+        .strict(true);
+    let srv = mqttest::Mqttest::start(srv_conf)
+        .await
+        .expect("Failed to start MQTT test server");
+    let config = models::MqttConfig {
+        host: "localhost".to_string(),
+        port: srv.port,
+    };
+    let client = mqtt::get_client(config).await;
+    return (client, srv);
 }
