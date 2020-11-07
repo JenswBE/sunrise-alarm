@@ -11,6 +11,10 @@
 		{
 			"name": "srv-config",
 			"path": "src/srv-config"
+		},
+		{
+			"name": "srv-physical",
+			"path": "src/srv-physical"
 		}
 	],
 	"settings": {}
