@@ -1,16 +1,14 @@
 """This module contains helpers for the display backlight"""
 
+import asyncio
 import atexit
 import logging
-from datetime import timedelta
+from datetime import time, timedelta
 
 import board
 import busio
 from adafruit_tsl2591 import TSL2591
-from kivy.clock import Clock
 from rpi_backlight import Backlight
-
-from sunrise_alarm.helpers.decorators import ignore_args_and_kwargs
 
 MIN_LIGHT = 66000
 MAX_LIGHT = 1700000
@@ -33,9 +31,10 @@ class Display:
 
         # Init sleep timeout
         self._backlight.power = True
-        self._sleep_event = Clock.schedule_once(
-            self.sleep,             # Callback
-            SLEEP_TIMEOUT.seconds,  # Timeout
+        loop = asyncio.get_running_loop()
+        self._sleep_event = loop.call_later(
+            callback=self.sleep,
+            delay=SLEEP_TIMEOUT.seconds,
         )
         atexit.register(self.enable_keep_awake)
 
@@ -44,9 +43,8 @@ class Display:
         self._sleep_callback = None
 
         # Start updating brightness
-        Clock.schedule_interval(self.update_brightness, 1)
+        loop.call_later(1, self.update_brightness)
 
-    @ignore_args_and_kwargs
     def lock_brightness(self):
         """Lock the backlight brightness"""
         self._brightness_locked = True
@@ -54,14 +52,13 @@ class Display:
     def unlock_brightness(self):
         """Unlock the backlight brightness"""
         # Delay unlock as sensor caches readings
-        Clock.schedule_once(self._unlock_brightness, 1)
+        loop = asyncio.get_running_loop()
+        loop.call_later(1, self._unlock_brightness)
 
-    @ignore_args_and_kwargs
     def _unlock_brightness(self):
         """Unlock the backlight brightness (really this time)"""
         self._brightness_locked = False
 
-    @ignore_args_and_kwargs
     def update_brightness(self):
         """Update the current backlight brightness"""
         # Check if brightness is locked
@@ -72,6 +69,10 @@ class Display:
         current_light = self._sensor.visible
         new_brightness = self.calculate_brightness(current_light)
         self._backlight.brightness = new_brightness
+
+        # Reschedule call
+        loop = asyncio.get_running_loop()
+        loop.call_later(1, self.update_brightness)
 
     def calculate_brightness(self, current_light):
         """Calculates the current brightness for the display"""
@@ -93,7 +94,6 @@ class Display:
         # Strip decimals and return result
         return int(new_brightness)
 
-    @ignore_args_and_kwargs
     def sleep(self):
         """Put screen into sleep"""
         # Disable screen
@@ -117,9 +117,10 @@ class Display:
         # (Re)set timeout
         if self._sleep_event is not None:
             self._sleep_event.cancel()
-        self._sleep_event = Clock.schedule_once(
-            self.sleep,             # Callback
-            SLEEP_TIMEOUT.seconds,  # Timeout
+        loop = asyncio.get_running_loop()
+        self._sleep_event = loop.call_later(
+            callback=self.sleep,
+            delay=SLEEP_TIMEOUT.seconds,
         )
 
         # Enable backlight
@@ -149,7 +150,8 @@ class Display:
         # (Re)set timeout
         if self._sleep_event is not None:
             self._sleep_event.cancel()
-        self._sleep_event = Clock.schedule_once(
-            self.sleep,             # Callback
-            SLEEP_TIMEOUT.seconds,  # Timeout
+        loop = asyncio.get_running_loop()
+        self._sleep_event = loop.call_later(
+            callback=self.sleep,
+            delay=SLEEP_TIMEOUT.seconds,
         )

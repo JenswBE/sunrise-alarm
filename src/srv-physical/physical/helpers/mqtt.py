@@ -13,7 +13,7 @@ class MQTT:
     """Helper class to abstract MQTT client implementation"""
     _topic_prefix = "sunrise_alarm/"
 
-    def __init__(self, client) -> "MQTT":
+    def __init__(self, client):
         self.client = client
 
     async def stop(self):
@@ -38,7 +38,7 @@ async def get() -> MQTT:
     # Build new client from settings
     config = settings.get()
     client = Client(config.MQTT_CLIENT_ID)
-    await client.connect(config.MQTT_HOST, config.MQTT_PORT, keepalive=60, version=MQTTv311)
+    await client.connect(config.MQTT_BROKER_HOST, config.MQTT_BROKER_PORT, keepalive=60, version=MQTTv311)
     mqtt = MQTT(client)
     return mqtt
 

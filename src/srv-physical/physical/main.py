@@ -35,9 +35,11 @@ async def setup_service():
 
     config = settings.get()
     if not config.MOCK:
-        from physical.devices import (button)
+        from physical.devices import (button, display, leds)
         app.state.devices = {
             "button": button.Button(config.BUTTON_GPIO_PIN),
+            "display": display.Display(),
+            "leds": leds.Leds(),
         }
 
 

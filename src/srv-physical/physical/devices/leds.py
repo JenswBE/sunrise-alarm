@@ -1,13 +1,12 @@
 """This module contains helpers to work with RGB leds"""
 
+import asyncio
 import atexit
 from collections import namedtuple
 
-from kivy.clock import Clock, ClockEvent
 from rpi_ws281x import PixelStrip
 
-import sunrise_alarm.const as const
-from sunrise_alarm.helpers.decorators import ignore_args_and_kwargs
+from physical.helpers import settings
 
 Color = namedtuple('Color', 'red green blue')
 BLACK = Color(0, 0, 0)
@@ -22,10 +21,11 @@ class Leds:
 
     def __init__(self):
         # Create led strip
+        config = settings.get()
         self.strip = PixelStrip(
-            num=const.LED_COUNT,
-            pin=const.LED_GPIO_PIN,
-            strip_type=const.LED_STRIP_TYPE
+            num=config.LED_COUNT,
+            pin=config.LED_GPIO_PIN,
+            strip_type=config.LED_STRIP_TYPE
         )
         self.strip.begin()
 
@@ -36,7 +36,7 @@ class Leds:
 
         # Init sunrise
         self._sunrise = False
-        self._update_sunrise_event: ClockEvent = None
+        self._update_sunrise_event = None
 
         # Register cleanup on exit
         atexit.register(self.cleanup)
@@ -83,12 +83,13 @@ class Leds:
         self.set_color(RED, 1)
 
         # Set timer to update sunrise
-        self._update_sunrise_event = Clock.schedule_interval(
-            self.update_sunrise_simulation,               # Callback
-            const.LIGHT_INCREASE_DURATION.seconds / 100,  # Timout
+        config = settings.get()
+        loop = asyncio.get_running_loop()
+        self._update_sunrise_event = loop.call_later(
+            callback=self.update_sunrise_simulation,
+            delay=config.LIGHT_INCREASE_DURATION.seconds / 100,
         )
 
-    @ignore_args_and_kwargs
     def update_sunrise_simulation(self):
         """Update the sunrise simulation"""
         # Derive color from brightness
@@ -109,6 +110,14 @@ class Leds:
         if brightness >= 100 and self._update_sunrise_event is not None:
             self._update_sunrise_event.cancel()
             self._update_sunrise_event = None
+
+        # Reschedule
+        config = settings.get()
+        loop = asyncio.get_running_loop()
+        self._update_sunrise_event = loop.call_later(
+            callback=self.update_sunrise_simulation,
+            delay=config.LIGHT_INCREASE_DURATION.seconds / 100,
+        )
 
     def stop_sunrise_simulation(self):
         """Stop simulating a sunrise"""
