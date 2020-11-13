@@ -7,7 +7,7 @@ use rustbreak::PathDatabase;
 use tempfile::NamedTempFile;
 use uuid::Uuid;
 
-use common_models::general::Alarm;
+use common::general::Alarm;
 use srv_config::database;
 use srv_config::models;
 use srv_config::mqtt;

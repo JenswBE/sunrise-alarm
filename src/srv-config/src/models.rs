@@ -4,7 +4,7 @@ use std::path::PathBuf;
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
-use common_models::general::Alarm;
+use common::general::Alarm;
 
 #[derive(Debug, Clone)]
 pub struct Config {

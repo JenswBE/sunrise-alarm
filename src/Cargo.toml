@@ -1,7 +1,7 @@
 [workspace]
 
 members = [
-  "common-models",
+  "common",
   "srv-audio",
   "srv-config"
 ]

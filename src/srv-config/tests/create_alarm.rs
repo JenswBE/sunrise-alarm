@@ -1,7 +1,7 @@
 use warp::http::StatusCode;
 use warp::test::request;
 
-use common_models::general::Alarm;
+use common::general::Alarm;
 use srv_config::api;
 
 mod common;

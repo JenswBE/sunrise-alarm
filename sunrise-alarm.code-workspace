@@ -5,8 +5,8 @@
 			"path": "."
 		},
 		{
-			"name": "common-models",
-			"path": "src/common-models"
+			"name": "common",
+			"path": "src/common"
 		},
 		{
 			"name": "srv-config",
@@ -17,6 +17,7 @@
 			"path": "src/srv-physical"
 		},
 		{
+			"name": "srv-audio",
 			"path": "src/srv-audio"
 		}
 	],
