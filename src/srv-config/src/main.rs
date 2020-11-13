@@ -8,7 +8,7 @@ use srv_config::models;
 async fn main() {
     // Parse env variables
     let port = env::var("WARP_PORT")
-        .unwrap_or("8000".to_string())
+        .unwrap_or("8001".to_string())
         .parse()
         .expect("Provided WARP_PORT is not a valid number");
     let data_dir = env::var("DATA_DIR_PATH")
