@@ -7,10 +7,10 @@ use rustbreak::PathDatabase;
 use tempfile::NamedTempFile;
 use uuid::Uuid;
 
-use common::general::Alarm;
 use srv_config::database;
 use srv_config::models;
 use srv_config::mqtt;
+use sunrise_common::general::Alarm;
 
 pub fn fixture_alarm() -> Alarm {
     Alarm {

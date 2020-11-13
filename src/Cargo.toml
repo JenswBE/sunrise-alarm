@@ -1,7 +1,7 @@
 [workspace]
 
 members = [
-  "common",
+  "sunrise-common",
   "srv-audio",
   "srv-config"
 ]

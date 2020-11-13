@@ -1,7 +1,7 @@
 use rumqttc::{AsyncClient, MqttOptions, QoS};
 
 use crate::models;
-use common::{general::Alarm, mqtt::AlarmsChanged};
+use sunrise_common::{general::Alarm, mqtt::AlarmsChanged};
 
 const TOPIC_PREFIX: &str = "sunrise_alarm/";
 

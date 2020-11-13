@@ -5,8 +5,8 @@
 			"path": "."
 		},
 		{
-			"name": "common",
-			"path": "src/common"
+			"name": "sunrise-common",
+			"path": "src/sunrise-common"
 		},
 		{
 			"name": "srv-config",

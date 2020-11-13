@@ -8,7 +8,7 @@ edition = "2018"
 
 [dependencies]
 convert_case = "0.4"
-common = { path = "../common" }
+sunrise-common = { path = "../sunrise-common" }
 log = "0.4"
 pretty_env_logger = "0.4"
 rumqttc = "0.2"

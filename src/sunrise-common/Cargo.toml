@@ -1,5 +1,5 @@
 [package]
-name = "common"
+name = "sunrise-common"
 version = "0.1.0"
 authors = ["Jens Willemsens <jens@jensw.be>"]
 edition = "2018"
