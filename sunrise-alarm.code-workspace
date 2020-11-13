@@ -15,6 +15,9 @@
 		{
 			"name": "srv-physical",
 			"path": "src/srv-physical"
+		},
+		{
+			"path": "src/srv-audio"
 		}
 	],
 	"settings": {}

@@ -2,5 +2,6 @@
 
 members = [
   "common-models",
+  "srv-audio",
   "srv-config"
 ]
