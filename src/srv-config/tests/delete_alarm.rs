@@ -3,8 +3,8 @@ use warp::test::request;
 
 use srv_config::api;
 
-mod common;
-use common::*;
+mod fixtures;
+use fixtures::*;
 
 #[tokio::test]
 async fn test_delete_alarm_success() {

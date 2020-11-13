@@ -4,8 +4,8 @@ use warp::test::request;
 use common::general::Alarm;
 use srv_config::api;
 
-mod common;
-use common::*;
+mod fixtures;
+use fixtures::*;
 
 #[tokio::test]
 async fn test_list_alarms_empty() {
