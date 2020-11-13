@@ -11,6 +11,7 @@ use srv_config::database;
 use srv_config::models;
 use srv_config::mqtt;
 use sunrise_common::general::Alarm;
+use sunrise_common::mqtt::MqttConfig;
 
 pub fn fixture_alarm() -> Alarm {
     Alarm {
@@ -45,7 +46,7 @@ pub async fn fixture_mqtt_client() -> (rumqttc::AsyncClient, mqttest::Mqttest) {
     let srv = mqttest::Mqttest::start(srv_conf)
         .await
         .expect("Failed to start MQTT test server");
-    let config = models::MqttConfig {
+    let config = MqttConfig {
         host: "localhost".to_string(),
         port: srv.port,
     };

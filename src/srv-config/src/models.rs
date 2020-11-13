@@ -5,18 +5,13 @@ use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
 use sunrise_common::general::Alarm;
+use sunrise_common::mqtt::MqttConfig;
 
 #[derive(Debug, Clone)]
 pub struct Config {
     pub data_dir: PathBuf,
     pub port: u16,
     pub mqtt_config: MqttConfig,
-}
-
-#[derive(Debug, Clone)]
-pub struct MqttConfig {
-    pub host: String,
-    pub port: u16,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]

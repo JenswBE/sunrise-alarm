@@ -3,6 +3,7 @@
 use std::env;
 
 use srv_config::models;
+use sunrise_common::mqtt::MqttConfig;
 
 #[tokio::main]
 async fn main() {
@@ -25,7 +26,7 @@ async fn main() {
     let config = models::Config {
         port,
         data_dir,
-        mqtt_config: models::MqttConfig {
+        mqtt_config: MqttConfig {
             host: mqtt_broker_host,
             port: mqtt_broker_port,
         },
