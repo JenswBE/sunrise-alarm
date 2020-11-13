@@ -9,7 +9,7 @@ DIY alarm clock using microservices
 | srv-alarm     | Main logic of the alarm                             | 8000     | Rust       | Warp            |
 | srv-config    | Configuration management                            | 8001     | Rust       | Warp, Rustbreak |
 | srv-physical  | Interacts with physical features: button, leds, ... | 8002     | Python     | FastAPI         |
-| srv-audio     | Alarm sound handling                                | 8003     | Rust       | Warp, SFML      |
+| srv-audio     | Alarm sound handling                                | 8003     | Rust       | Warp, Rodio     |
 | api-watchface | REST API for watchface UI                           | 8004     | Rust       | Warp            |
 | gui-watchface | Web UI for touchscreen                              | 8080     | Javascript | Vue.js          |
 | mosquitto     | MQTT broker                                         | 1883     | N/A        | N/A             |
