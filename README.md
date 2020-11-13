@@ -4,23 +4,15 @@ DIY alarm clock using microservices
 ![Scheme](schematics/scheme.jpg)
 
 ## Services
-- srv-config: Configuration management (Rust)
-- srv-alarm: Contains main logic of the alarm (Rust)
-- srv-physical: Service which interacts with physical alarm features: buttons, LED's, ... (Python FastAPI)
-- srv-audio: Everything related to sound (Rust)
-- api-watchface: REST API to support watchface UI (Rust)
-- gui-watchface: Web UI for touchscreen (Vue.js)
-
-## Ports
-| Service       | Development | Deployment (inside container) |
-|---------------|:-----------:|:-----------------------------:|
-| srv-alarm     |     8000    |               80              |
-| srv-config    |     8001    |               80              |
-| srv-physical  |     8002    |               80              |
-| srv-audio     |     8003    |               80              |
-| api-watchface |     8004    |               80              |
-| gui-watchface |     8080    |               80              |
-| MQTT broker   |     1883    |              1883             |
+| Service       | Description                                         | Dev port | Language   | Frameworks      |
+|---------------|-----------------------------------------------------|:--------:|:----------:|:---------------:|
+| srv-alarm     | Main logic of the alarm                             | 8000     | Rust       | Warp            |
+| srv-config    | Configuration management                            | 8001     | Rust       | Warp, Rustbreak |
+| srv-physical  | Interacts with physical features: button, leds, ... | 8002     | Python     | FastAPI         |
+| srv-audio     | Alarm sound handling                                | 8003     | Rust       | Warp, SFML      |
+| api-watchface | REST API for watchface UI                           | 8004     | Rust       | Warp            |
+| gui-watchface | Web UI for touchscreen                              | 8080     | Javascript | Vue.js          |
+| mosquitto     | MQTT broker                                         | 1883     | N/A        | N/A             |
 
 ## Cross-compilation
 https://users.rust-lang.org/t/static-cross-build-for-arm/9100/2
