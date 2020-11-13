@@ -8,13 +8,13 @@ edition = "2018"
 
 [dependencies]
 convert_case = "0.4"
-sunrise-common = { path = "../sunrise-common" }
 log = "0.4"
 pretty_env_logger = "0.4"
 rumqttc = "0.2"
 rustbreak = {version = "2.0", features = ["ron_enc"] }
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
+sunrise-common = { path = "../sunrise-common" }
 tokio = { version = "0.2", features = ["macros"] }
 uuid = { version = "0.8", features = ["serde", "v4"] }
 warp = "0.2"

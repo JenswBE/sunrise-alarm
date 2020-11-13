@@ -9,16 +9,16 @@
 			"path": "src/sunrise-common"
 		},
 		{
+			"name": "srv-audio",
+			"path": "src/srv-audio"
+		},
+		{
 			"name": "srv-config",
 			"path": "src/srv-config"
 		},
 		{
 			"name": "srv-physical",
 			"path": "src/srv-physical"
-		},
-		{
-			"name": "srv-audio",
-			"path": "src/srv-audio"
 		}
 	],
 	"settings": {}
