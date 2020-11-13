@@ -20,8 +20,8 @@ pub mod mqtt;
 pub async fn run(config: models::Config) {
     // Setup logging
     if env::var_os("RUST_LOG").is_none() {
-        // Set `RUST_LOG=alarms=debug` to see debug logs
-        env::set_var("RUST_LOG", "alarms=info");
+        // Set `RUST_LOG=config=debug` to see debug logs
+        env::set_var("RUST_LOG", "config=info");
     }
     pretty_env_logger::init();
 
@@ -35,7 +35,7 @@ pub async fn run(config: models::Config) {
 
     // Setup server
     let api = api::alarms::filters(db, mqtt_client);
-    let routes = api.with(warp::log("alarms"));
+    let routes = api.with(warp::log("config"));
 
     // Start the server
     warp::serve(routes).run(([0, 0, 0, 0], config.port)).await;
