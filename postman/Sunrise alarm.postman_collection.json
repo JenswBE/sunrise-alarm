@@ -1,0 +1,198 @@
+{
+	"info": {
+		"_postman_id": "466ddbb5-31e7-46d8-bc93-07044403bf8a",
+		"name": "Sunrise alarm",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "srv-config",
+			"item": [
+				{
+					"name": "List alarms",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "152f169a-00e1-4ee3-8784-d1ec5c9d6d37",
+								"exec": [
+									"let jsonData = pm.response.json();",
+									"if (jsonData.length > 0 && jsonData[0].id.length > 0) {",
+									"    pm.environment.set(\"alarm_id\", jsonData[0].id);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{srv-config-base-url}}/alarms",
+							"host": [
+								"{{srv-config-base-url}}"
+							],
+							"path": [
+								"alarms"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create alarm",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "d6d367da-c599-46d2-a7b5-fc4dba832310",
+								"exec": [
+									"let jsonData = pm.response.json();",
+									"if (jsonData.id.length > 0) {",
+									"    pm.environment.set(\"alarm_id\", jsonData.id);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"enabled\": true,\n    \"name\": \"Test\",\n    \"hour\": 12,\n    \"minute\": 0,\n    \"days\": [],\n    \"skip_next\": false\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{srv-config-base-url}}/alarms",
+							"host": [
+								"{{srv-config-base-url}}"
+							],
+							"path": [
+								"alarms"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update alarm",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "1f76fcdd-49dd-40d2-8e5e-3c457877ff82",
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"enabled\": true,\n    \"name\": \"New name\",\n    \"hour\": 12,\n    \"minute\": 0,\n    \"days\": [],\n    \"skip_next\": false\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{srv-config-base-url}}/alarms/{{alarm_id}}",
+							"host": [
+								"{{srv-config-base-url}}"
+							],
+							"path": [
+								"alarms",
+								"{{alarm_id}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete alarm",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{srv-config-base-url}}/alarms/{{alarm_id}}",
+							"host": [
+								"{{srv-config-base-url}}"
+							],
+							"path": [
+								"alarms",
+								"{{alarm_id}}"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"protocolProfileBehavior": {}
+		},
+		{
+			"name": "srv-audio",
+			"item": [
+				{
+					"name": "Start music",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "0946f4eb-973e-4a8e-95dd-6e03fbe7bc2f",
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"url": {
+							"raw": "{{srv-audio-base-url}}/music",
+							"host": [
+								"{{srv-audio-base-url}}"
+							],
+							"path": [
+								"music"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Stop music",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{srv-audio-base-url}}/music",
+							"host": [
+								"{{srv-audio-base-url}}"
+							],
+							"path": [
+								"music"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"protocolProfileBehavior": {}
+		}
+	],
+	"protocolProfileBehavior": {}
+}
