@@ -13,6 +13,19 @@ services:
       - "TZ=${TIMEZONE}"
       - "MQTT_BROKER_HOST=mosquitto"
 
+  srv-audio:
+    image: jenswbe/sunrise-alarm-srv-audio
+    container_name: srv-audio
+    restart: always
+    networks:
+      - sunrise-alarm
+    volumes:
+      - "srv-audio-music:/music"
+      - "/tmp/pa-sunrise-alarm.socket:/pulse/pulseaudio.socket"
+    environment:
+      - "TZ=${TIMEZONE}"
+      - "MQTT_BROKER_HOST=mosquitto"
+
   mosquitto:
     image: eclipse-mosquitto:latest
     container_name: mosquitto
