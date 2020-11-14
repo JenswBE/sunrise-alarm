@@ -27,6 +27,21 @@ services:
       - "MQTT_BROKER_HOST=mosquitto"
       - "MQTT_CLIENT_ID=srv-physical-docker"
 
+  srv-audio:
+    build:
+      context: src
+      dockerfile: srv-audio.Dockerfile
+    container_name: srv-audio
+    volumes:
+      - "/tmp/pa-sunrise-alarm.socket:/pulse/pulseaudio.socket"
+    networks:
+      - sunrise-alarm
+    ports:
+      - "127.0.0.1:8003:80"
+    environment:
+      - "MQTT_BROKER_HOST=mosquitto"
+      - "RUST_BACKTRACE=1"
+
   mosquitto:
     image: eclipse-mosquitto:latest
     container_name: mosquitto

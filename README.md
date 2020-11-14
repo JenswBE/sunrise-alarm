@@ -14,6 +14,12 @@ DIY alarm clock using microservices
 | gui-watchface | Web UI for touchscreen                              | 8080     | Javascript | Vue.js          |
 | mosquitto     | MQTT broker                                         | 1883     | N/A        | N/A             |
 
+## Setup
+Add following to `~/.config/pulse/default.pa` (Thanks to [Arch wiki](https://wiki.archlinux.org/index.php/PulseAudio/Examples#Allowing_multiple_users_to_use_PulseAudio_at_the_same_time)):
+```
+load-module module-native-protocol-unix auth-anonymous=1 socket=/tmp/pa-sunrise-alarm.socket
+```
+
 ## Cross-compilation
 https://users.rust-lang.org/t/static-cross-build-for-arm/9100/2
 
