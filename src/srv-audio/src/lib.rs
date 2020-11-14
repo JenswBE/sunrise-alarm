@@ -11,8 +11,8 @@ pub mod player;
 pub async fn run(config: models::Config) {
     // Setup logging
     if env::var_os("RUST_LOG").is_none() {
-        // Set `RUST_LOG=audio=debug` to see debug logs
-        env::set_var("RUST_LOG", "audio=info");
+        // Set `RUST_LOG=debug` to see debug logs
+        env::set_var("RUST_LOG", "info");
     }
     pretty_env_logger::init();
 
