@@ -16,13 +16,45 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
-      - name: Login to Docker Hub
-        run: docker login -u $DOCKER_HUB_USER -p $DOCKER_HUB_PASSWORD
-        env:
-          DOCKER_HUB_PASSWORD: ${{ secrets.DOCKER_HUB_PASSWORD }}
+      - name: Login to DockerHub
+        uses: docker/login-action@v1
+        with:
+          username: ${{ secrets.DOCKER_HUB_USER }}
+          password: ${{ secrets.DOCKER_HUB_PASSWORD }}
 
       - name: Build Docker image
         run: docker build -f ${BUILD_PATH}/${BUILD_FILE} -t ${DOCKER_HUB_REPO} ${BUILD_PATH}
 
       - name: Push image to Docker Hub
         run: docker push ${DOCKER_HUB_REPO}:latest 
+
+  srv-audio:
+    runs-on: ubuntu-latest
+    env:
+        BUILD_PATH: src
+        BUILD_FILE: srv-audio.Dockerfile
+        DOCKER_HUB_REPO: jenswbe/sunrise-alarm-srv-audio
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v1
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+
+      - name: Login to DockerHub
+        uses: docker/login-action@v1
+        with:
+          username: ${{ secrets.DOCKER_HUB_USER }}
+          password: ${{ secrets.DOCKER_HUB_PASSWORD }}
+
+      - name: Build and push
+        uses: docker/build-push-action@v2
+        with:
+          context: ${BUILD_PATH}
+          file: ${BUILD_PATH}/${BUILD_FILE}
+          platforms: linux/amd64,linux/arm/v7
+          push: true
+          tags: ${DOCKER_HUB_REPO}:latest
