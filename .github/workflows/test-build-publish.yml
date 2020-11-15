@@ -10,15 +10,13 @@ env:
 jobs:
   srv-config:
     runs-on: ubuntu-latest
-    env:
-      BUILD_PATH: src
     strategy:
       matrix:
-        include:
-          - BUILD_FILE: srv-config.Dockerfile
-            DOCKER_HUB_REPO: jenswbe/sunrise-alarm-srv-config
-          - BUILD_FILE: srv-audio.Dockerfile
-            DOCKER_HUB_REPO: jenswbe/sunrise-alarm-srv-audio
+        service: [srv-config, srv-audio]
+    env:
+      BUILD_PATH: src
+      BUILD_FILE: ${{ matrix.service }}.Dockerfile
+      DOCKER_HUB_REPO: jenswbe/sunrise-alarm-${{ matrix.service }}
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -39,14 +37,14 @@ jobs:
         uses: docker/build-push-action@v2
         with:
           context: ${{ env.BUILD_PATH }}
-          file: ${{ env.BUILD_PATH }}/${{ matrix.BUILD_FILE }}
+          file: ${{ env.BUILD_PATH }}/${{ env.BUILD_FILE }}
           platforms: ${{ env.PLATFORMS }}
           push: true
-          tags: ${{ matrix.DOCKER_HUB_REPO }}:latest
+          tags: ${{ env.DOCKER_HUB_REPO }}:latest
 
       - name: Update repo description
         uses: peter-evans/dockerhub-description@v2
         with:
           username: ${{ env.DOCKER_HUB_USER }}
           password: ${{ secrets.DOCKER_HUB_PASSWORD }}
-          repository: ${{ matrix.DOCKER_HUB_REPO }}
+          repository: ${{ env.DOCKER_HUB_REPO }}
