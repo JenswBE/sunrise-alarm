@@ -14,7 +14,7 @@ DIY alarm clock using microservices
 | srv-audio     | Alarm sound handling                                | [![DockerHub Repo](https://img.shields.io/badge/DockerHub-repo-blue?logo=docker)](https://hub.docker.com/r/jenswbe/sunrise-alarm-srv-audio)  | 8003     | Rust       | Warp, Rodio     |
 | api-watchface | REST API for watchface UI                           |                                                                                                                                              | 8004     | Rust       | Warp            |
 | gui-watchface | Web UI for touchscreen                              |                                                                                                                                              | 8080     | Javascript | Vue.js          |
-| mosquitto     | MQTT broker                                         |                                                                                                                                              | 1883     | N/A        | N/A             |
+| mosquitto     | MQTT broker                                         | [![DockerHub Repo](https://img.shields.io/badge/DockerHub-repo-blue?logo=docker)](https://hub.docker.com/_/eclipse-mosquitto)                | 1883     | N/A        | N/A             |
 
 ## Setup
 Add following to `~/.config/pulse/default.pa` (Thanks to [Arch wiki](https://wiki.archlinux.org/index.php/PulseAudio/Examples#Allowing_multiple_users_to_use_PulseAudio_at_the_same_time)):
