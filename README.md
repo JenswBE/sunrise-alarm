@@ -17,9 +17,17 @@ DIY alarm clock using microservices
 | mosquitto     | MQTT broker                                         | [![DockerHub Repo](https://img.shields.io/badge/DockerHub-repo-blue?logo=docker)](https://hub.docker.com/_/eclipse-mosquitto)                | 1883     | N/A        | N/A             |
 
 ## Setup
-Add following to `~/.config/pulse/default.pa` (Thanks to [Arch wiki](https://wiki.archlinux.org/index.php/PulseAudio/Examples#Allowing_multiple_users_to_use_PulseAudio_at_the_same_time)):
+
+### PulseAudio
+Based on [Arch wiki](https://wiki.archlinux.org/index.php/PulseAudio/Examples#Allowing_multiple_users_to_use_PulseAudio_at_the_same_time)
+and [Ubuntu man pages](http://manpages.ubuntu.com/manpages/xenial/man5/default.pa.5.html)
 ```
+cp /etc/pulse/default.pa ~/.config/pulse/default.pa
+tee --append ~/.config/pulse/default.pa <<EOF
+
+# Sunrise alarm
 load-module module-native-protocol-unix auth-anonymous=1 socket=/tmp/pa-sunrise-alarm.socket
+EOF
 ```
 
 ## Cross-compilation
