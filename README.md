@@ -21,9 +21,11 @@ DIY alarm clock using microservices
 ### PulseAudio
 Based on [Arch wiki](https://wiki.archlinux.org/index.php/PulseAudio/Examples#Allowing_multiple_users_to_use_PulseAudio_at_the_same_time)
 and [Ubuntu man pages](http://manpages.ubuntu.com/manpages/xenial/man5/default.pa.5.html)
-```
-cp /etc/pulse/default.pa ~/.config/pulse/default.pa
-tee --append ~/.config/pulse/default.pa <<EOF
+```bash
+tee ~/.config/pulse/default.pa <<EOF
+#!/usr/bin/pulseaudio -nF
+
+.include /etc/pulse/default.pa
 
 # Sunrise alarm
 load-module module-native-protocol-unix auth-anonymous=1 socket=/tmp/pa-sunrise-alarm.socket
