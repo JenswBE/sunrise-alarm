@@ -8,11 +8,14 @@ env:
   PLATFORMS: linux/amd64,linux/arm/v7
 
 jobs:
-  srv-config:
+  build-services:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        service: [srv-config, srv-audio]
+        service:
+          - srv-config
+          - srv-physical
+          - srv-audio
     env:
       BUILD_PATH: src
       BUILD_FILE: ${{ matrix.service }}.Dockerfile
