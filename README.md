@@ -31,15 +31,3 @@ tee ~/.config/pulse/default.pa <<EOF
 load-module module-native-protocol-unix auth-anonymous=1 socket=/tmp/pa-sunrise-alarm.socket
 EOF
 ```
-
-## Cross-compilation
-https://users.rust-lang.org/t/static-cross-build-for-arm/9100/2
-
-```bash
-sudo apt-get install -qq gcc-arm-linux-gnueabihf
-rustup target add armv7-unknown-linux-musleabihf
-cd src/srv-config
-export CARGO_TARGET_ARMV7_UNKNOWN_LINUX_MUSLEABIHF_LINKER=arm-linux-gnueabihf-gcc
-export CC_armv7_unknown_linux_musleabihf=arm-linux-gnueabihf-gcc
-cargo build --target armv7-unknown-linux-musleabihf
-```
