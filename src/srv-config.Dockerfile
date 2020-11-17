@@ -12,7 +12,6 @@ RUN apt-get update && \
 
 FROM builder-base AS builder-arm
 ENV TARGET=armv7-unknown-linux-musleabihf
-ENV CARGO_TARGET_ARMV7_UNKNOWN_LINUX_MUSLEABIHF_LINKER=arm-linux-gnueabihf-gcc
 ENV CC_armv7_unknown_linux_musleabihf=arm-linux-gnueabihf-gcc
 RUN apt-get update && \
     apt-get install -qq \
@@ -32,7 +31,6 @@ RUN cp /usr/src/sunrise-alarm/target/${TARGET}/release/${SERVICE_NAME} /service
 
 # Build final image
 FROM scratch
-ARG SERVICE_NAME
 ENV WARP_PORT 80
 ENV DATA_DIR_PATH /data
 EXPOSE 80
