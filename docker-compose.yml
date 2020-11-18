@@ -10,6 +10,7 @@ services:
       - "127.0.0.1:8001:80"
     environment:
       - "MQTT_BROKER_HOST=mosquitto"
+      - "RUST_BACKTRACE=1"
 
   srv-physical:
     build:
@@ -38,6 +39,27 @@ services:
     environment:
       - "MQTT_BROKER_HOST=mosquitto"
       - "RUST_BACKTRACE=1"
+
+  api-watchface:
+    image: jenswbe/sunrise-alarm-api-watchface
+    container_name: api-watchface
+    networks:
+      - sunrise-alarm
+    ports:
+      - "127.0.0.1:8004:80"
+    environment:
+      - "MQTT_BROKER_HOST=mosquitto"
+      - "RUST_BACKTRACE=1"
+
+  gui-watchface:
+    build:
+      context: src
+      dockerfile: gui-watchface.Dockerfile
+    container_name: gui-watchface
+    networks:
+      - sunrise-alarm
+    ports:
+      - "127.0.0.1:8080:80"
 
   mosquitto:
     image: eclipse-mosquitto:latest

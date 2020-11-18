@@ -16,6 +16,8 @@ jobs:
           - srv-config
           - srv-physical
           - srv-audio
+          - api-watchface
+          - gui-watchface
     env:
       BUILD_PATH: src
       BUILD_FILE: ${{ matrix.service }}.Dockerfile
