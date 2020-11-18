@@ -3,5 +3,6 @@
 members = [
   "sunrise-common",
   "srv-audio",
-  "srv-config"
+  "srv-config",
+  "api-watchface"
 ]

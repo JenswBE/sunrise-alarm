@@ -19,6 +19,14 @@
 		{
 			"name": "srv-physical",
 			"path": "src/srv-physical"
+		},
+		{
+			"name": "api-watchface",
+			"path": "src/api-watchface"
+		},
+		{
+			"name": "gui-watchface",
+			"path": "src/gui-watchface"
 		}
 	],
 	"settings": {}
