@@ -6,15 +6,15 @@ DIY alarm clock using microservices
 ![Scheme](schematics/scheme.jpg)
 
 ## Services
-| Service       | Description                                         | Links                                                                                                                                        | Dev port | Language   | Frameworks      |
-|---------------|-----------------------------------------------------|:--------------------------------------------------------------------------------------------------------------------------------------------:|:--------:|:----------:|:---------------:|
-| srv-alarm     | Main logic of the alarm                             |                                                                                                                                              | 8000     | Rust       | Warp            |
-| srv-config    | Configuration management                            | [![DockerHub Repo](https://img.shields.io/badge/DockerHub-repo-blue?logo=docker)](https://hub.docker.com/r/jenswbe/sunrise-alarm-srv-config) | 8001     | Rust       | Warp, Rustbreak |
-| srv-physical  | Interacts with physical features: button, leds, ... |                                                                                                                                              | 8002     | Python     | FastAPI         |
-| srv-audio     | Alarm sound handling                                | [![DockerHub Repo](https://img.shields.io/badge/DockerHub-repo-blue?logo=docker)](https://hub.docker.com/r/jenswbe/sunrise-alarm-srv-audio)  | 8003     | Rust       | Warp, Rodio     |
-| api-watchface | REST API for watchface UI                           |                                                                                                                                              | 8004     | Rust       | Warp            |
-| gui-watchface | Web UI for touchscreen                              |                                                                                                                                              | 8080     | Javascript | Vue.js          |
-| mosquitto     | MQTT broker                                         | [![DockerHub Repo](https://img.shields.io/badge/DockerHub-repo-blue?logo=docker)](https://hub.docker.com/_/eclipse-mosquitto)                | 1883     | N/A        | N/A             |
+| Service       | Description                                         | Links                                                                                                                                           | Dev port | Language   | Frameworks      |
+|---------------|-----------------------------------------------------|:-----------------------------------------------------------------------------------------------------------------------------------------------:|:--------:|:----------:|:---------------:|
+| srv-alarm     | Main logic of the alarm                             |                                                                                                                                                 | 8000     | Rust       | Warp            |
+| srv-config    | Configuration management                            | [![DockerHub Repo](https://img.shields.io/badge/DockerHub-repo-blue?logo=docker)](https://hub.docker.com/r/jenswbe/sunrise-alarm-srv-config)    | 8001     | Rust       | Warp, Rustbreak |
+| srv-physical  | Interacts with physical features: button, leds, ... |                                                                                                                                                 | 8002     | Python     | FastAPI         |
+| srv-audio     | Alarm sound handling                                | [![DockerHub Repo](https://img.shields.io/badge/DockerHub-repo-blue?logo=docker)](https://hub.docker.com/r/jenswbe/sunrise-alarm-srv-audio)     | 8003     | Rust       | Warp, Rodio     |
+| api-watchface | REST API for watchface UI                           | [![DockerHub Repo](https://img.shields.io/badge/DockerHub-repo-blue?logo=docker)](https://hub.docker.com/r/jenswbe/sunrise-alarm-api-watchface) | 8004     | Rust       | Warp            |
+| gui-watchface | Web UI for touchscreen                              | [![DockerHub Repo](https://img.shields.io/badge/DockerHub-repo-blue?logo=docker)](https://hub.docker.com/r/jenswbe/sunrise-alarm-gui-watchface) | 8080     | Javascript | Vue.js          |
+| mosquitto     | MQTT broker                                         | [![DockerHub Repo](https://img.shields.io/badge/DockerHub-repo-blue?logo=docker)](https://hub.docker.com/_/eclipse-mosquitto)                   | 1883     | N/A        | N/A             |
 
 ## Setup
 
