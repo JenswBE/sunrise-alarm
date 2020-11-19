@@ -11,5 +11,5 @@ RUN pip install --no-cache-dir -U pip wheel && \
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Limiting workers is required for MQTT to work correctly
-EXPOSE 80
-CMD [ "gunicorn", "physical.main:app", "-w", "1", "-k", "uvicorn.workers.UvicornWorker" ]
+EXPOSE 8080
+CMD [ "gunicorn", "physical.main:app", "-w", "1", "-k", "uvicorn.workers.UvicornWorker", "-b", "0.0.0.0:8080" ]

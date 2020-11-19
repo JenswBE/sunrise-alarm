@@ -37,9 +37,9 @@ RUN cp /usr/src/sunrise-alarm/target/${TARGET}/release/${SERVICE_NAME} /service
 # Build final image
 FROM ${BASE_IMAGE}
 ARG SERVICE_NAME
-ENV WARP_PORT 80
+ENV WARP_PORT 8080
 ENV MUSIC_DIR_PATH /music
-EXPOSE 80
+EXPOSE 8080
 VOLUME [ "/music" ]
 
 RUN apt-get update && \

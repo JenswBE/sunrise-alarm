@@ -31,9 +31,9 @@ RUN cp /usr/src/sunrise-alarm/target/${TARGET}/release/${SERVICE_NAME} /service
 
 # Build final image
 FROM scratch
-ENV WARP_PORT 80
+ENV WARP_PORT 8080
 ENV DATA_DIR_PATH /data
-EXPOSE 80
+EXPOSE 8080
 VOLUME [ "/data" ]
 
 COPY --from=builder /service service
