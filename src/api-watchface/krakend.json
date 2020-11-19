@@ -51,12 +51,12 @@
     {
       "endpoint": "/alarms",
       "method": "POST",
-      "output_encoding": "json",
+      "output_encoding": "no-op",
       "extra_config": {},
       "backend": [
         {
           "url_pattern": "/alarms",
-          "encoding": "json",
+          "encoding": "no-op",
           "sd": "static",
           "method": "POST",
           "extra_config": {},
@@ -70,12 +70,12 @@
     {
       "endpoint": "/alarms/{alarm_id}",
       "method": "PUT",
-      "output_encoding": "json",
+      "output_encoding": "no-op",
       "extra_config": {},
       "backend": [
         {
           "url_pattern": "/alarms/{alarm_id}",
-          "encoding": "json",
+          "encoding": "no-op",
           "sd": "static",
           "method": "PUT",
           "extra_config": {},
@@ -89,12 +89,12 @@
     {
       "endpoint": "/alarms/{alarm_id}",
       "method": "DELETE",
-      "output_encoding": "json",
+      "output_encoding": "no-op",
       "extra_config": {},
       "backend": [
         {
           "url_pattern": "/alarms/{alarm_id}",
-          "encoding": "json",
+          "encoding": "no-op",
           "sd": "static",
           "method": "DELETE",
           "extra_config": {},
