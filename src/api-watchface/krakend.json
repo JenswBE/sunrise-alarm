@@ -1,0 +1,92 @@
+{
+  "version": 2,
+  "extra_config": {},
+  "timeout": "3000ms",
+  "cache_ttl": "300s",
+  "output_encoding": "json",
+  "name": "api-watchface",
+  "port": 8080,
+  "endpoints": [
+    {
+      "endpoint": "/alarms",
+      "method": "GET",
+      "output_encoding": "json",
+      "extra_config": {},
+      "backend": [
+        {
+          "url_pattern": "/alarms",
+          "encoding": "json",
+          "sd": "static",
+          "method": "GET",
+          "extra_config": {},
+          "host": [
+            "http://srv-config"
+          ],
+          "disable_host_sanitize": false,
+          "is_collection": true,
+          "target": "",
+          "mapping": {
+            "collection": "alarms"
+          }
+        }
+      ]
+    },
+    {
+      "endpoint": "/alarms",
+      "method": "POST",
+      "output_encoding": "json",
+      "extra_config": {},
+      "backend": [
+        {
+          "url_pattern": "/alarms",
+          "encoding": "json",
+          "sd": "static",
+          "method": "POST",
+          "extra_config": {},
+          "host": [
+            "http://srv-config"
+          ],
+          "disable_host_sanitize": false
+        }
+      ]
+    },
+    {
+      "endpoint": "/alarms/{alarm_id}",
+      "method": "PUT",
+      "output_encoding": "json",
+      "extra_config": {},
+      "backend": [
+        {
+          "url_pattern": "/alarms/{alarm_id}",
+          "encoding": "json",
+          "sd": "static",
+          "method": "PUT",
+          "extra_config": {},
+          "host": [
+            "http://srv-config"
+          ],
+          "disable_host_sanitize": false
+        }
+      ]
+    },
+    {
+      "endpoint": "/alarms/{alarm_id}",
+      "method": "DELETE",
+      "output_encoding": "json",
+      "extra_config": {},
+      "backend": [
+        {
+          "url_pattern": "/alarms/{alarm_id}",
+          "encoding": "json",
+          "sd": "static",
+          "method": "DELETE",
+          "extra_config": {},
+          "host": [
+            "http://srv-config"
+          ],
+          "disable_host_sanitize": false
+        }
+      ]
+    }
+  ]
+}

@@ -53,10 +53,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "api-watchface"
-version = "0.1.0"
-
-[[package]]
 name = "ascii"
 version = "0.9.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
