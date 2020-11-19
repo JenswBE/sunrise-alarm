@@ -50,7 +50,7 @@ fn create(
 ) -> impl Filter<Extract = impl warp::Reply, Error = warp::Rejection> + Clone {
     warp::path!("alarms")
         .and(warp::post())
-        .and(json_body())
+        .and(warp::body::json())
         .and(with_db(db))
         .and(with_mqtt(mqtt_client))
         .and_then(create_alarm)
@@ -98,7 +98,7 @@ fn update(
 ) -> impl Filter<Extract = impl warp::Reply, Error = warp::Rejection> + Clone {
     warp::path!("alarms" / Uuid)
         .and(warp::put())
-        .and(json_body())
+        .and(warp::body::json())
         .and(with_db(db))
         .and(with_mqtt(mqtt_client))
         .and_then(update_alarm)
@@ -189,10 +189,4 @@ fn with_mqtt(
     mqtt_client: AsyncClient,
 ) -> impl Filter<Extract = (AsyncClient,), Error = std::convert::Infallible> + Clone {
     warp::any().map(move || mqtt_client.clone())
-}
-
-fn json_body() -> impl Filter<Extract = (Alarm,), Error = warp::Rejection> + Clone {
-    // When accepting a body, we want a JSON body
-    // (and to reject huge payloads)...
-    warp::body::content_length_limit(1024 * 16).and(warp::body::json())
 }
