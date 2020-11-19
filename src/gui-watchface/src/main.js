@@ -5,6 +5,7 @@ import store from "./store";
 import vuetify from "./plugins/vuetify";
 
 Vue.config.productionTip = false;
+
 Vue.prototype.$days = [
   "Monday",
   "Tuesday",
@@ -14,12 +15,15 @@ Vue.prototype.$days = [
   "Saturday",
   "Sunday",
 ]
-
-Vue.filter('padTime', function (value) {
-  if (!value) return "00";
-  if (value < 10) return "0" + value.toString();
-  return value;
-})
+Vue.prototype.$emptyAlarm = {
+  enabled: false,
+  name: "",
+  hour: 0,
+  minute: 0,
+  days: [],
+  skip_next: false,
+};
+Vue.prototype.$scrollToTop = () => window.scrollTo(0, 0)
 
 new Vue({
   router,

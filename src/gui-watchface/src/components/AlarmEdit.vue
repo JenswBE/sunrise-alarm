@@ -37,7 +37,11 @@
         </v-time-picker>
       </v-dialog>
 
-      <v-text-field label="Name" :disabled="disabled"></v-text-field>
+      <v-text-field
+        label="Name"
+        :disabled="disabled"
+        v-model="alarm.name"
+      ></v-text-field>
     </v-col>
     <v-col cols="6" class="pt-0">
       <v-list-item-group v-model="repeat" multiple>
@@ -76,7 +80,7 @@
       </v-row>
     </v-col>
     <v-col cols="6" class="text-center">
-      <v-btn outlined block :disabled="disabled">
+      <v-btn outlined block :disabled="disabled" @click="saveAlarm(alarm)">
         <v-icon left>mdi-alarm-check</v-icon>
         Save alarm
       </v-btn>
@@ -119,14 +123,31 @@
 </template>
 
 <script>
+import axios from "axios";
+import helpers from "../helpers";
+
 export default {
   name: "AlarmEdit",
 
   props: {
-    alarm: Object,
+    value: String,
+  },
+
+  watch: {
+    value: {
+      immediate: true,
+      handler(alarmID) {
+        if (alarmID) {
+          this.alarm = this.$store.getters.getAlarm(alarmID);
+        } else {
+          this.alarm = this.$emptyAlarm;
+        }
+      },
+    },
   },
 
   data: ({ $root }) => ({
+    alarm: {},
     timePicker: false,
     confirmDelete: false,
     repeat: [],
@@ -141,10 +162,7 @@ export default {
   computed: {
     alarmTime: {
       get() {
-        if (!this.alarm) return "00:00";
-        const { hour, minute } = this.alarm;
-        const padTime = this.$options.filters.padTime;
-        return `${padTime(hour)}:${padTime(minute)}`;
+        return helpers.formatTime(this.alarm);
       },
       set(value) {
         const [hour, minute] = value.split(":");
@@ -154,13 +172,30 @@ export default {
     },
 
     disabled() {
-      return !this.alarm;
+      return !this.value;
     },
   },
 
   methods: {
     pickDays(days) {
       this.repeat = days;
+    },
+
+    async saveAlarm(alarm) {
+      axios
+        .put(`/alarms/${alarm.id}`, alarm)
+        .then(() => {
+          this.$store.commit("upsertAlarm", alarm);
+          this.$store.commit("setAlert", {
+            type: "success",
+            message: "Alarm successfully saved",
+          });
+          this.$scrollToTop();
+        })
+        .catch((e) => {
+          this.$store.commit("setAlert", { type: "error", message: e });
+          this.$scrollToTop();
+        });
     },
   },
 };
