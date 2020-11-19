@@ -13,6 +13,7 @@ RUN yarn build
 
 # Build final image
 FROM nginx:stable-alpine
+ARG SERVICE_NAME
 COPY ${SERVICE_NAME}/nginx.conf /etc/nginx/nginx.conf
 COPY --from=builder /app/dist /usr/share/nginx/html
 EXPOSE 8080
