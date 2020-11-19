@@ -3,17 +3,19 @@
     <v-row>
       <v-col cols="6" max-height="100%" class="overflow-y-auto">
         <v-list-item-group v-model="settings">
-          <v-list-item>
-            <template v-slot:default="{ enabled }">
+          <v-list-item v-for="alarm in alarms" :key="alarm.id">
+            <template>
               <v-list-item-action>
                 <v-btn icon>
-                  <v-icon v-if="enabled">mdi-alarm</v-icon>
-                  <v-icon v-else>mdi-alarm-off</v-icon>
+                  <v-icon v-if="alarm.enabled">mdi-alarm-off</v-icon>
+                  <v-icon v-else>mdi-alarm</v-icon>
                 </v-btn>
               </v-list-item-action>
 
               <v-list-item-content>
-                <v-list-item-title>07:00</v-list-item-title>
+                <v-list-item-title>
+                  {{ alarm.hour | padTime }}:{{ alarm.minute | padTime }}
+                </v-list-item-title>
                 <v-list-item-subtitle>_ _ _ _ _ _ _</v-list-item-subtitle>
               </v-list-item-content>
 
@@ -108,8 +110,11 @@
 </template>
 
 <script>
+import { mapState } from "vuex";
+
 export default {
   name: "Home",
+
   data: () => ({
     settings: [],
     alarmTime: "07:00",
@@ -139,10 +144,27 @@ export default {
       ],
     },
   }),
+
+  computed: {
+    ...mapState(["alarms"]),
+  },
+
   methods: {
     pickDays(days) {
       this.repeat = days;
     },
+  },
+
+  filters: {
+    padTime(value) {
+      if (!value) return "00";
+      if (value < 10) return "0" + value.toString();
+      return value;
+    },
+  },
+
+  mounted() {
+    this.$store.dispatch("getAlarms");
   },
 };
 </script>
