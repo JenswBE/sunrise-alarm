@@ -203,7 +203,8 @@ export default {
           helpers.scrollToTop();
         })
         .catch((e) => {
-          this.$store.commit("setAlert", { type: "error", message: e });
+          const msg = `Unable to save alarm: ${e.message}`;
+          this.$store.commit("setAlert", { type: "error", message: msg });
           helpers.scrollToTop();
         });
     },

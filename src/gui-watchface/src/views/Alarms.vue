@@ -38,9 +38,10 @@ export default {
           this.$store.commit("upsertAlarm", data);
           this.selectedAlarm = data.id;
         })
-        .catch((e) =>
-          this.$store.commit("setAlert", { type: "error", message: e })
-        );
+        .catch((e) => {
+          const msg = `Unable to add alarm: ${e.message}`;
+          this.$store.commit("setAlert", { type: "error", message: msg });
+        });
     },
 
     async toggleAlarm(alarmID) {
@@ -60,9 +61,10 @@ export default {
       axios
         .put(`/alarms/${alarm.id}`, alarm)
         .then(() => this.$store.commit("upsertAlarm", alarm))
-        .catch((e) =>
-          this.$store.commit("setAlert", { type: "error", message: e })
-        );
+        .catch((e) => {
+          const msg = `Unable to save alarm: ${e.message}`;
+          this.$store.commit("setAlert", { type: "error", message: msg });
+        });
     },
 
     async deleteAlarm() {
@@ -72,9 +74,10 @@ export default {
           this.$store.commit("deleteAlarm", this.selectedAlarm);
           this.selectedAlarm = "";
         })
-        .catch((e) =>
-          this.$store.commit("setAlert", { type: "error", message: e })
-        );
+        .catch((e) => {
+          const msg = `Unable to delete alarm: ${e.message}`;
+          this.$store.commit("setAlert", { type: "error", message: msg });
+        });
     },
   },
 

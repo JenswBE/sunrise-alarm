@@ -4,7 +4,7 @@ import axios from "axios";
 import cloneDeep from "lodash.clonedeep";
 
 Vue.use(Vuex);
-axios.defaults.baseURL = "http://localhost:8004";
+axios.defaults.baseURL = `http://${window.location.hostname}:8004`;
 
 export default new Vuex.Store({
   state: {
@@ -13,9 +13,9 @@ export default new Vuex.Store({
   },
 
   getters: {
-    getAlarm: state => id => cloneDeep(state.alarms[id]),
+    getAlarm: (state) => (id) => cloneDeep(state.alarms[id]),
 
-    sortedAlarms: state =>
+    sortedAlarms: (state) =>
       Object.values(state.alarms).sort(
         (a, b) => a.hour * 100 + a.minute - b.hour * 100 - b.minute
       ),
@@ -54,8 +54,15 @@ export default new Vuex.Store({
 
   actions: {
     async getAlarms(context) {
-      const { data } = await axios.get(`/alarms`);
-      context.commit("setAlarms", data);
+      axios
+        .get(`/alarms`)
+        .then(({ data }) => {
+          context.commit("setAlarms", data);
+        })
+        .catch((e) => {
+          const msg = `Unable to fetch alarms: ${e.message}`;
+          context.commit("setAlert", { type: "error", message: msg });
+        });
     },
   },
 
