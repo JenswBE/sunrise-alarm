@@ -44,9 +44,9 @@
       ></v-text-field>
     </v-col>
     <v-col cols="6" class="pt-0">
-      <v-list-item-group v-model="repeat" multiple>
+      <v-list-item-group v-model="alarmDays" multiple>
         <v-list-item
-          v-for="day in $days"
+          v-for="day in days"
           :key="day"
           :value="day"
           :disabled="disabled"
@@ -125,6 +125,7 @@
 <script>
 import axios from "axios";
 import helpers from "../helpers";
+import { DAYS, EMPTY_ALARM } from "../constants";
 
 export default {
   name: "AlarmEdit",
@@ -140,26 +141,30 @@ export default {
         if (alarmID) {
           this.alarm = this.$store.getters.getAlarm(alarmID);
         } else {
-          this.alarm = this.$emptyAlarm;
+          this.alarm = EMPTY_ALARM;
         }
       },
     },
   },
 
-  data: ({ $root }) => ({
+  data: () => ({
     alarm: {},
     timePicker: false,
     confirmDelete: false,
-    repeat: [],
+    days: DAYS,
     dayPickers: {
       None: [],
-      Week: $root.$days.slice(0, 5),
-      Weekend: $root.$days.slice(5, 7),
-      All: $root.$days,
+      Week: DAYS.slice(0, 5),
+      Weekend: DAYS.slice(5, 7),
+      All: DAYS,
     },
   }),
 
   computed: {
+    disabled() {
+      return !this.value;
+    },
+
     alarmTime: {
       get() {
         return helpers.formatTime(this.alarm);
@@ -171,14 +176,19 @@ export default {
       },
     },
 
-    disabled() {
-      return !this.value;
+    alarmDays: {
+      get() {
+        return this.alarm.days.map((dayIndex) => DAYS[dayIndex]);
+      },
+      set(value) {
+        this.alarm.days = value.map((day) => DAYS.indexOf(day));
+      },
     },
   },
 
   methods: {
     pickDays(days) {
-      this.repeat = days;
+      this.alarmDays = days;
     },
 
     async saveAlarm(alarm) {
@@ -190,11 +200,11 @@ export default {
             type: "success",
             message: "Alarm successfully saved",
           });
-          this.$scrollToTop();
+          helpers.scrollToTop();
         })
         .catch((e) => {
           this.$store.commit("setAlert", { type: "error", message: e });
-          this.$scrollToTop();
+          helpers.scrollToTop();
         });
     },
   },

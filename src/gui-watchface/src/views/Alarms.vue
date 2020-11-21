@@ -20,6 +20,7 @@
 import axios from "axios";
 import AlarmEdit from "../components/AlarmEdit.vue";
 import AlarmList from "../components/AlarmList.vue";
+import { EMPTY_ALARM } from "../constants";
 
 export default {
   name: "Alarms",
@@ -32,7 +33,7 @@ export default {
   methods: {
     async addAlarm() {
       axios
-        .post("/alarms", this.$emptyAlarm)
+        .post("/alarms", EMPTY_ALARM)
         .then(({ data }) => {
           this.$store.commit("upsertAlarm", data);
           this.selectedAlarm = data.id;

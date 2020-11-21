@@ -28,7 +28,7 @@
               {{ alarm | formatTime }}
             </v-list-item-title>
             <v-list-item-subtitle :class="alarm | getTextColor">
-              _ _ _ _ _ _ _
+              {{ alarm | formatDays }}
             </v-list-item-subtitle>
           </v-list-item-content>
 
@@ -50,6 +50,7 @@
 <script>
 import { mapGetters } from "vuex";
 import helpers from "../helpers";
+import { DAYS } from "../constants";
 
 export default {
   name: "AlarmList",
@@ -63,15 +64,21 @@ export default {
   },
 
   filters: {
+    getTextColor: (alarm) => {
+      if (alarm.skip_next) return "red--text";
+      if (!alarm.enabled) return "grey--text";
+      return "";
+    },
+
     formatTime: (alarm) => {
       const time = helpers.formatTime(alarm);
       return alarm.name ? `${time} - ${alarm.name}` : time;
     },
 
-    getTextColor: (alarm) => {
-      if (alarm.skip_next) return "red--text";
-      if (!alarm.enabled) return "grey--text";
-      return "";
+    formatDays: (alarm) => {
+      return DAYS.map((day, i) => (alarm.days.includes(i) ? day[0] : "_")).join(
+        " "
+      );
     },
   },
 };

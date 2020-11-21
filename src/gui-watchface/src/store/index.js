@@ -31,7 +31,7 @@ export default new Vuex.Store({
 
     upsertAlarm(state, alarm) {
       console.debug("mut upsertAlarm - Input", alarm)
-      Vue.set(state.alarms, alarm.id, alarm)
+      Vue.set(state.alarms, alarm.id, cloneDeep(alarm))
       console.debug("mut upsertAlarm - Output", state.alarms)
     },
 
