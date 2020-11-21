@@ -12,27 +12,35 @@
           :key="alarm.id"
           :value="alarm.id"
         >
-          <template>
-            <v-list-item-action>
-              <v-btn icon @click.stop="$emit('toggle-alarm', alarm.id)">
-                <v-icon v-if="alarm.enabled">mdi-alarm-off</v-icon>
-                <v-icon v-else>mdi-alarm</v-icon>
-              </v-btn>
-            </v-list-item-action>
+          <v-list-item-action>
+            <v-btn
+              icon
+              @click.stop="$emit('toggle-alarm', alarm.id)"
+              :class="alarm | getTextColor"
+            >
+              <v-icon v-if="alarm.enabled">mdi-alarm</v-icon>
+              <v-icon v-else>mdi-alarm-off</v-icon>
+            </v-btn>
+          </v-list-item-action>
 
-            <v-list-item-content>
-              <v-list-item-title>
-                {{ alarm | formatTime }}
-              </v-list-item-title>
-              <v-list-item-subtitle>_ _ _ _ _ _ _</v-list-item-subtitle>
-            </v-list-item-content>
+          <v-list-item-content>
+            <v-list-item-title :class="alarm | getTextColor">
+              {{ alarm | formatTime }}
+            </v-list-item-title>
+            <v-list-item-subtitle :class="alarm | getTextColor">
+              _ _ _ _ _ _ _
+            </v-list-item-subtitle>
+          </v-list-item-content>
 
-            <v-list-item-action>
-              <v-btn icon @click.stop="$emit('skip-alarm', alarm.id)">
-                <v-icon>mdi-debug-step-over</v-icon>
-              </v-btn>
-            </v-list-item-action>
-          </template>
+          <v-list-item-action>
+            <v-btn
+              icon
+              @click.stop="$emit('skip-alarm', alarm.id)"
+              :class="alarm | getTextColor"
+            >
+              <v-icon>mdi-debug-step-over</v-icon>
+            </v-btn>
+          </v-list-item-action>
         </v-list-item>
       </v-list-item-group>
     </v-col>
@@ -58,6 +66,12 @@ export default {
     formatTime: (alarm) => {
       const time = helpers.formatTime(alarm);
       return alarm.name ? `${time} - ${alarm.name}` : time;
+    },
+
+    getTextColor: (alarm) => {
+      if (alarm.skip_next) return "red--text";
+      if (!alarm.enabled) return "grey--text";
+      return "";
     },
   },
 };

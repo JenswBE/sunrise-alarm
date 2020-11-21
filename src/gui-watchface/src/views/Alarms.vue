@@ -45,6 +45,7 @@ export default {
     async toggleAlarm(alarmID) {
       let alarm = this.$store.getters.getAlarm(alarmID);
       alarm.enabled = !alarm.enabled;
+      alarm.skip_next = false;
       await this.saveAlarm(alarm);
     },
 
