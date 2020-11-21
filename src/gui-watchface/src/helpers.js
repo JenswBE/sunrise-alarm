@@ -1,7 +1,7 @@
 export default {
   padTime,
   formatTime,
-  scrollToTop
+  scrollToTop,
 };
 
 function padTime(value) {
