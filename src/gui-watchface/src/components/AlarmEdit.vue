@@ -200,13 +200,12 @@ export default {
             type: "success",
             message: "Alarm successfully saved",
           });
-          helpers.scrollToTop();
         })
         .catch((e) => {
           const msg = `Unable to save alarm: ${e.message}`;
           this.$store.commit("setAlert", { type: "error", message: msg });
-          helpers.scrollToTop();
-        });
+        })
+        .finally(() => helpers.scrollToTop());
     },
   },
 };

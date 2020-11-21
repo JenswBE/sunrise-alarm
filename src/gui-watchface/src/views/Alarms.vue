@@ -20,6 +20,7 @@
 import axios from "axios";
 import AlarmEdit from "../components/AlarmEdit.vue";
 import AlarmList from "../components/AlarmList.vue";
+import helpers from "../helpers";
 import { EMPTY_ALARM } from "../constants";
 
 export default {
@@ -77,7 +78,8 @@ export default {
         .catch((e) => {
           const msg = `Unable to delete alarm: ${e.message}`;
           this.$store.commit("setAlert", { type: "error", message: msg });
-        });
+        })
+        .finally(() => helpers.scrollToTop());
     },
   },
 
