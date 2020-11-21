@@ -1,7 +1,7 @@
 <template>
   <v-app>
     <v-main>
-      <router-view />
+      <router-view @toggle-fullscreen="toggleFullscreen" />
     </v-main>
 
     <v-snackbar v-model="showAlert" :color="alert.type" top absolute>
@@ -18,6 +18,11 @@
         <span>ALARMS</span>
         <v-icon>mdi-alarm</v-icon>
       </v-btn>
+
+      <v-btn value="settings" to="/settings" exact>
+        <span>SETTINGS</span>
+        <v-icon>mdi-wrench-outline</v-icon>
+      </v-btn>
     </v-bottom-navigation>
   </v-app>
 </template>
@@ -30,6 +35,7 @@ export default {
 
   computed: {
     ...mapState(["alert"]),
+
     showAlert: {
       get() {
         return Boolean(this.alert.message);
@@ -37,6 +43,19 @@ export default {
       set() {
         this.$store.commit("clearAlert");
       },
+    },
+  },
+
+  methods: {
+    toggleFullscreen() {
+      // Based on https://developer.mozilla.org/en-US/docs/Web/API/Fullscreen_API
+      if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen();
+      } else {
+        if (document.exitFullscreen) {
+          document.exitFullscreen();
+        }
+      }
     },
   },
 };
