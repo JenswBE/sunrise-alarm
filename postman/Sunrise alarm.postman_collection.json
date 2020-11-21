@@ -192,6 +192,142 @@
 				}
 			],
 			"protocolProfileBehavior": {}
+		},
+		{
+			"name": "api-watchface",
+			"item": [
+				{
+					"name": "List alarms",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "8b0cdde0-95a7-4fad-8bd6-72965c5c8918",
+								"exec": [
+									"let jsonData = pm.response.json();",
+									"if (jsonData.alarms.length > 0 && jsonData.alarms[0].id.length > 0) {",
+									"    pm.environment.set(\"alarm_id\", jsonData.alarms[0].id);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{api-watchface-base-url}}/alarms",
+							"host": [
+								"{{api-watchface-base-url}}"
+							],
+							"path": [
+								"alarms"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create alarm",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "2b33b83f-0882-4cf1-83e3-235a9aef1cf6",
+								"exec": [
+									"let jsonData = pm.response.json();",
+									"if (jsonData.id.length > 0) {",
+									"    pm.environment.set(\"alarm_id\", jsonData.id);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"enabled\": true,\n    \"name\": \"Test\",\n    \"hour\": 12,\n    \"minute\": 0,\n    \"days\": [],\n    \"skip_next\": false\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{api-watchface-base-url}}/alarms",
+							"host": [
+								"{{api-watchface-base-url}}"
+							],
+							"path": [
+								"alarms"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update alarm",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "4cbcabc3-be96-4059-85a4-f3dd10ecfcca",
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"enabled\": true,\n    \"name\": \"New name\",\n    \"hour\": 12,\n    \"minute\": 0,\n    \"days\": [],\n    \"skip_next\": false\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{api-watchface-base-url}}/alarms/{{alarm_id}}",
+							"host": [
+								"{{api-watchface-base-url}}"
+							],
+							"path": [
+								"alarms",
+								"{{alarm_id}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete alarm",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{api-watchface-base-url}}/alarms/{{alarm_id}}",
+							"host": [
+								"{{api-watchface-base-url}}"
+							],
+							"path": [
+								"alarms",
+								"{{alarm_id}}"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"protocolProfileBehavior": {}
 		}
 	],
 	"protocolProfileBehavior": {}
