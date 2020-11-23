@@ -2102,6 +2102,21 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "6e63cff320ae2c57904679ba7cb63280a3dc4613885beafb148ee7bf9aa9042d"
 
 [[package]]
+name = "srv-alarm"
+version = "0.1.0"
+dependencies = [
+ "log",
+ "pretty_env_logger",
+ "rumqttc",
+ "serde",
+ "serde_json",
+ "sunrise-common",
+ "tokio",
+ "uuid",
+ "warp",
+]
+
+[[package]]
 name = "srv-audio"
 version = "0.1.0"
 dependencies = [

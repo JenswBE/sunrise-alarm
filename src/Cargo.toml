@@ -2,6 +2,7 @@
 
 members = [
   "sunrise-common",
+  "srv-alarm",
+  "srv-config",
   "srv-audio",
-  "srv-config"
 ]

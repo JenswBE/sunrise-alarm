@@ -1,33 +1,37 @@
 {
-	"folders": [
-		{
-			"name": "sunrise-alarm",
-			"path": "."
-		},
-		{
-			"name": "sunrise-common",
-			"path": "src/sunrise-common"
-		},
-		{
-			"name": "srv-audio",
-			"path": "src/srv-audio"
-		},
-		{
-			"name": "srv-config",
-			"path": "src/srv-config"
-		},
-		{
-			"name": "srv-physical",
-			"path": "src/srv-physical"
-		},
-		{
-			"name": "api-watchface",
-			"path": "src/api-watchface"
-		},
-		{
-			"name": "gui-watchface",
-			"path": "src/gui-watchface"
-		}
-	],
-	"settings": {}
+  "folders": [
+    {
+      "name": "sunrise-alarm",
+      "path": "."
+    },
+    {
+      "name": "sunrise-common",
+      "path": "src/sunrise-common"
+    },
+    {
+      "name": "srv-alarm",
+      "path": "src/srv-alarm"
+    },
+    {
+      "name": "srv-config",
+      "path": "src/srv-config"
+    },
+    {
+      "name": "srv-physical",
+      "path": "src/srv-physical"
+    },
+    {
+      "name": "srv-audio",
+      "path": "src/srv-audio"
+    },
+    {
+      "name": "api-watchface",
+      "path": "src/api-watchface"
+    },
+    {
+      "name": "gui-watchface",
+      "path": "src/gui-watchface"
+    }
+  ],
+  "settings": {}
 }
