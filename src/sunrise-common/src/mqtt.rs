@@ -3,7 +3,7 @@ use std::future::Future;
 use rumqttc::{AsyncClient, MqttOptions, QoS};
 use serde::{Deserialize, Serialize};
 
-use crate::general::Alarm;
+use crate::alarm::Alarm;
 
 // =============================================
 // =                 CONSTANTS                 =

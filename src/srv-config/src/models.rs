@@ -4,7 +4,7 @@ use std::path::PathBuf;
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
-use sunrise_common::general::Alarm;
+use sunrise_common::alarm::Alarm;
 use sunrise_common::mqtt::MqttConfig;
 
 #[derive(Debug, Clone)]

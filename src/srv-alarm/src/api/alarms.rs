@@ -1,8 +1,8 @@
 use std::convert::Infallible;
-
 use warp::Filter;
 
-use crate::models::{NextAlarm, State};
+use crate::models::State;
+use sunrise_common::alarm::NextAlarm;
 
 /// Combination of all alarm related filters
 pub fn filters(

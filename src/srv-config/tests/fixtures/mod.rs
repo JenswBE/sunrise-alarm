@@ -10,7 +10,7 @@ use uuid::Uuid;
 use srv_config::database;
 use srv_config::models;
 use srv_config::mqtt;
-use sunrise_common::general::Alarm;
+use sunrise_common::alarm::Alarm;
 use sunrise_common::mqtt::MqttConfig;
 
 pub fn fixture_alarm() -> Alarm {
