@@ -7,6 +7,7 @@ use warp::Filter;
 pub mod api;
 pub mod models;
 pub mod mqtt;
+pub mod time;
 
 /// Provides a RESTful web server for general management of Sunrise Alarm
 ///

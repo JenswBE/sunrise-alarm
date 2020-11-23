@@ -27,8 +27,15 @@ pub struct LocalState {
 pub struct NextAlarm {
     #[serde(skip_serializing_if = "Uuid::is_nil")]
     pub id: Uuid,
+
     #[serde(skip_serializing_if = "String::is_empty")]
-    pub datetime: String,
+    pub alarm_datetime: String,
+
+    #[serde(skip_serializing_if = "String::is_empty")]
+    pub next_action: String,
+
+    #[serde(skip_serializing_if = "String::is_empty")]
+    pub next_action_datetime: String,
 }
 
 #[derive(Debug, Serialize, Clone)]
