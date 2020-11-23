@@ -1,9 +1,44 @@
 use chrono::prelude::*;
 
-use sunrise_common::general::Alarm;
+use sunrise_common::alarm::{Alarm, NextAction, NextAlarm};
+
+/// Calculates the next alarm for the alarm
+pub fn calculate_next_alarm(alarm: &Alarm) -> NextAlarm {
+    calculate_next_alarm_testable(alarm, &Local::now())
+}
+
+/// Calculates the next alarm for the alarm (testable version)
+fn calculate_next_alarm_testable(alarm: &Alarm, now: &DateTime<Local>) -> NextAlarm {
+    // Check enabled
+    if !alarm.enabled {
+        return NextAlarm::default();
+    }
+
+    // Calculate next alarm
+    let next_alarm = calculate_next_datetime(alarm, now);
+
+    // Check if we need to skip
+    if !alarm.skip_next {
+        // Shouldn't skip next alarm
+        NextAlarm {
+            id: alarm.id.clone(),
+            alarm_datetime: Some(next_alarm),
+            next_action: NextAction::Ring,
+            next_action_datetime: Some(next_alarm),
+        }
+    } else {
+        // Skip next alarm
+        NextAlarm {
+            id: alarm.id.clone(),
+            alarm_datetime: Some(calculate_next_datetime(alarm, &next_alarm)),
+            next_action: NextAction::Skip,
+            next_action_datetime: Some(next_alarm),
+        }
+    }
+}
 
 /// Calculates the next datetime the alarm should trigger
-pub fn calculate_next_datetime(alarm: &Alarm, after: &DateTime<Local>) -> DateTime<Local> {
+fn calculate_next_datetime(alarm: &Alarm, after: &DateTime<Local>) -> DateTime<Local> {
     // Create possible next alarm date
     let alarm_dt = after
         .with_hour(alarm.hour as u32)
@@ -64,5 +99,56 @@ fn weekday_from_u8(day_number: &u8) -> Option<Weekday> {
         5 => Some(Weekday::Sat),
         6 => Some(Weekday::Sun),
         _ => None,
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use uuid::Uuid;
+
+    use super::*;
+
+    fn alarm(hour: u8, minute: u8) -> Alarm {
+        Alarm {
+            id: uuid(),
+            enabled: true,
+            hour,
+            minute,
+            ..Default::default()
+        }
+    }
+
+    fn parse_date(date: &str) -> DateTime<Local> {
+        let date = date.to_string() + ":00+02:00";
+        DateTime::parse_from_rfc3339(&date)
+            .unwrap()
+            .with_timezone(&Local)
+    }
+
+    fn now() -> DateTime<Local> {
+        parse_date("2020-09-19T14:30")
+    }
+
+    fn uuid() -> Uuid {
+        Uuid::parse_str("51d2e380-3611-4857-8659-98f787858e98").unwrap()
+    }
+
+    fn assert_alarm(alarm: Alarm, alarm_dt: &str, action: NextAction, action_dt: &str) {
+        let next_alarm = calculate_next_alarm_testable(&alarm, &now());
+        assert_eq!(uuid(), next_alarm.id);
+        assert_eq!(action, next_alarm.next_action);
+        assert_eq!(Some(parse_date(alarm_dt)), next_alarm.alarm_datetime);
+        assert_eq!(Some(parse_date(action_dt)), next_alarm.alarm_datetime);
+    }
+
+    #[test]
+    fn test_still_today() {
+        let alarm = alarm(16, 0);
+        assert_alarm(
+            alarm,
+            "2020-09-19T16:00",
+            NextAction::Ring,
+            "2020-09-19T16:00",
+        )
     }
 }

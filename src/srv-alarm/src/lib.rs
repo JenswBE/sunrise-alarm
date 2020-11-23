@@ -22,6 +22,11 @@ pub async fn run(config: models::Config) {
     }
     pretty_env_logger::init();
 
+    // Validate config
+    if config.light_duration < config.sound_duration {
+        panic!("Sound should start after or together with light (duration light >= sound)")
+    }
+
     // Setup state
     let state = models::LocalState::new();
 

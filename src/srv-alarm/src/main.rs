@@ -1,5 +1,6 @@
 #![deny(warnings)]
 
+use chrono::Duration;
 use std::env;
 
 use srv_alarm::models;
@@ -21,6 +22,8 @@ async fn main() {
     // Build config
     let config = models::Config {
         port,
+        light_duration: Duration::minutes(10),
+        sound_duration: Duration::minutes(5),
         mqtt_config: MqttConfig {
             host: mqtt_broker_host,
             port: mqtt_broker_port,
