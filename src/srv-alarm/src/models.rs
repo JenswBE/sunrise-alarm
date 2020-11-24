@@ -38,5 +38,7 @@ impl LocalState {
 #[derive(Debug, Clone, Default)]
 pub struct LocalState {
     pub alarms: Vec<Alarm>,
-    pub next_alarm: Option<NextAlarm>,
+    pub next_alarms: Vec<NextAlarm>,
+    pub next_alarm_ring: Option<NextAlarm>,
+    pub next_alarm_action: Option<NextAlarm>,
 }

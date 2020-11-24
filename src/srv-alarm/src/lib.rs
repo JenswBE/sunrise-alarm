@@ -31,7 +31,7 @@ pub async fn run(config: models::Config) {
     let state = models::LocalState::new();
 
     // Setup MQTT
-    let _mqtt_client = mqtt::get_client(config.mqtt_config).await;
+    let _mqtt_client = mqtt::get_client(&config, state.clone()).await;
 
     // Setup server
     let api = api::alarms::filters(state);

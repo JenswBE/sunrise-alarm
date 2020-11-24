@@ -22,7 +22,7 @@ fn next(state: State) -> impl Filter<Extract = impl warp::Reply, Error = warp::R
 
 async fn get_next_alarm(state: State) -> Result<impl warp::Reply, Infallible> {
     let locked_state = state.lock().unwrap();
-    if let Some(next_alarm) = &locked_state.next_alarm {
+    if let Some(next_alarm) = &locked_state.next_alarm_ring {
         Ok(warp::reply::json(&next_alarm))
     } else {
         Ok(warp::reply::json(&NextAlarm::default()))

@@ -1,19 +1,34 @@
 use chrono::prelude::*;
 
-use crate::models::AlarmConfig;
+use crate::models::{AlarmConfig, State};
 use sunrise_common::alarm::{Alarm, NextAction, NextAlarm};
 
-/// Calculates the next alarm for the alarm
-pub fn calculate_next_alarm(alarm: &Alarm, config: &AlarmConfig) -> NextAlarm {
-    calculate_next_alarm_testable(alarm, &Local::now(), config)
+/// Update next alarms based on alarms in state
+pub fn update_next_alarms(state: State, config: &AlarmConfig) {
+    let mut state = state.lock().unwrap();
+    state.next_alarms = calculate_next_alarms(&state.alarms, config);
+    state.next_alarm_ring = state
+        .next_alarms
+        .iter()
+        .min_by_key(|&a| a.alarm_datetime)
+        .map(NextAlarm::to_owned);
+    state.next_alarm_action = state
+        .next_alarms
+        .iter()
+        .min_by_key(|&a| a.next_action_datetime)
+        .map(NextAlarm::to_owned);
 }
 
-/// Calculates the next alarm for the alarm (testable version)
-fn calculate_next_alarm_testable(
-    alarm: &Alarm,
-    now: &DateTime<Local>,
-    config: &AlarmConfig,
-) -> NextAlarm {
+/// Calculates the next alarms
+pub fn calculate_next_alarms(alarms: &Vec<Alarm>, config: &AlarmConfig) -> Vec<NextAlarm> {
+    alarms
+        .into_iter()
+        .map(|a| calculate_next_alarm(a, &Local::now(), config))
+        .collect()
+}
+
+/// Calculates the next alarm for the alarm
+fn calculate_next_alarm(alarm: &Alarm, now: &DateTime<Local>, config: &AlarmConfig) -> NextAlarm {
     // Check enabled
     if !alarm.enabled {
         return NextAlarm::default();
@@ -142,7 +157,7 @@ mod tests {
             ..Default::default()
         };
 
-        let next_alarm = calculate_next_alarm_testable(&alarm, &now(), &config);
+        let next_alarm = calculate_next_alarm(&alarm, &now(), &config);
         assert_eq!(uuid(), next_alarm.id);
         assert_eq!(action, next_alarm.next_action);
         assert_eq!(Some(parse_date(alarm_dt)), next_alarm.alarm_datetime);
