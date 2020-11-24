@@ -12,4 +12,8 @@ pretty_env_logger = "0.4"
 rodio = "0.13"
 sunrise-common = { path = "../sunrise-common" }
 tokio = { version = "0.2", features = ["macros"] }
-warp = "0.2"
+
+[dependencies.warp]
+version = "0.2"
+default-features = false
+features = ["multipart"]
