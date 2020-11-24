@@ -1,21 +1,14 @@
-use std::future::Future;
-
-use rumqttc::{AsyncClient, MqttOptions, QoS};
+use rumqttc::{AsyncClient, Publish, QoS};
 use serde::{Deserialize, Serialize};
 
 use crate::alarm::Alarm;
 
 // =============================================
-// =                 CONSTANTS                 =
-// =============================================
-const TOPIC_PREFIX: &str = "sunrise_alarm/";
-
-// =============================================
 // =                   TOPICS                  =
 // =============================================
-const TOPIC_ALARMS_CHANGED: &str = "alarms_changed";
-const TOPIC_BUTTON_PRESSED: &str = "button_pressed";
-const TOPIC_BUTTON_LONG_PRESSED: &str = "button_long_pressed";
+pub const TOPIC_ALARMS_CHANGED: &str = "sunrise_alarm/alarms_changed";
+pub const TOPIC_BUTTON_PRESSED: &str = "sunrise_alarm/button_pressed";
+pub const TOPIC_BUTTON_LONG_PRESSED: &str = "sunrise_alarm/button_long_pressed";
 
 // =============================================
 // =                   CLIENT                  =
@@ -26,28 +19,8 @@ pub struct MqttConfig {
     pub port: u16,
 }
 
-pub async fn get_client<Fut>(
-    config: MqttConfig,
-    notification_handler: fn(rumqttc::Event) -> Fut,
-) -> AsyncClient
-where
-    Fut: Future<Output = ()> + Send + 'static,
-{
-    // Build client
-    let mut options = MqttOptions::new("srv-config", config.host, config.port);
-    options.set_keep_alive(5);
-    let (mqtt_client, mut eventloop) = AsyncClient::new(options, 10);
-
-    // Start client loop
-    tokio::task::spawn(async move {
-        loop {
-            let notification = eventloop.poll().await.unwrap();
-            notification_handler(notification).await;
-        }
-    });
-
-    // Create client successful
-    return mqtt_client;
+pub async fn subscribe(client: &AsyncClient, topic: &str) {
+    client.subscribe(topic, QoS::AtLeastOnce).await.unwrap()
 }
 
 // =============================================
@@ -62,12 +35,11 @@ pub async fn publish_alarms_changed(client: AsyncClient, alarms: Vec<Alarm>) {
     let msg = AlarmsChanged { alarms };
     let json = serde_json::to_vec(&msg).unwrap();
     client
-        .publish(
-            TOPIC_PREFIX.to_string() + "alarms_changed",
-            QoS::AtLeastOnce,
-            false,
-            json,
-        )
+        .publish(TOPIC_ALARMS_CHANGED, QoS::AtLeastOnce, false, json)
         .await
         .unwrap();
+}
+
+pub fn parse_alarms_changed(packet: Publish) -> AlarmsChanged {
+    serde_json::from_slice(&packet.payload[..]).unwrap()
 }
