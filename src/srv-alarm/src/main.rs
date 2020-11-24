@@ -1,7 +1,8 @@
 #![deny(warnings)]
 
-use chrono::Duration;
 use std::env;
+
+use chrono::Duration;
 
 use srv_alarm::models;
 use sunrise_common::mqtt::MqttConfig;

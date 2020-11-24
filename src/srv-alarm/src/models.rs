@@ -1,5 +1,6 @@
-use chrono::Duration;
 use std::sync::{Arc, Mutex};
+
+use chrono::Duration;
 
 use sunrise_common::alarm::{Alarm, NextAlarm};
 use sunrise_common::mqtt::MqttConfig;
