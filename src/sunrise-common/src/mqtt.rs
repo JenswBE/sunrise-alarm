@@ -13,12 +13,6 @@ pub const TOPIC_BUTTON_LONG_PRESSED: &str = "sunrise_alarm/button_long_pressed";
 // =============================================
 // =                   CLIENT                  =
 // =============================================
-#[derive(Debug, Clone, Default)]
-pub struct MqttConfig {
-    pub host: String,
-    pub port: u16,
-}
-
 pub async fn subscribe(client: &AsyncClient, topic: &str) {
     client.subscribe(topic, QoS::AtLeastOnce).await.unwrap()
 }

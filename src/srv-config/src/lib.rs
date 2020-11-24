@@ -31,12 +31,14 @@ pub async fn run(config: models::Config) {
     let db = database::load_or_init(db_path);
 
     // Setup MQTT
-    let mqtt_client = mqtt::get_client(config.mqtt_config).await;
+    let mqtt_client = mqtt::get_client(config.mqtt).await;
 
     // Setup server
     let api = api::alarms::filters(db, mqtt_client);
     let routes = api.with(warp::log("config"));
 
     // Start the server
-    warp::serve(routes).run(([0, 0, 0, 0], config.port)).await;
+    warp::serve(routes)
+        .run(([0, 0, 0, 0], config.warp.port))
+        .await;
 }

@@ -1,4 +1,3 @@
-use log::error;
 use rumqttc::{AsyncClient, Event, MqttOptions, Packet, Publish};
 
 use crate::models::{Config, State};
@@ -9,11 +8,7 @@ const CLIENT_ID: &str = "srv-alarm";
 
 pub async fn get_client(config: &Config, state: State) -> AsyncClient {
     // Build client
-    let mut options = MqttOptions::new(
-        CLIENT_ID,
-        config.mqtt_config.host.clone(),
-        config.mqtt_config.port,
-    );
+    let mut options = MqttOptions::new(CLIENT_ID, config.mqtt.host.clone(), config.mqtt.port);
     options.set_keep_alive(5);
     let (mqtt_client, mut eventloop) = AsyncClient::new(options, 10);
 
@@ -34,12 +29,15 @@ pub async fn get_client(config: &Config, state: State) -> AsyncClient {
 }
 
 async fn notification_handler(notification: Event, state: State, config: Config) {
+    // Debug logging
+    log::debug!("MQTT notification received: {:?}", notification);
+
     // Only handle incoming publish notifications
     if let Event::Incoming(event) = notification {
         if let Packet::Publish(packet) = event {
             match packet.topic.as_str() {
                 mqtt::TOPIC_ALARMS_CHANGED => handle_alarms_changed(packet, state, config).await,
-                _ => error!("Unhandled MQTT topic: {}", packet.topic),
+                _ => log::error!("Unhandled MQTT topic: {}", packet.topic),
             }
         }
     }
@@ -50,5 +48,5 @@ async fn handle_alarms_changed(packet: Publish, state: State, config: Config) {
         let mut state = state.lock().unwrap();
         state.alarms = mqtt::parse_alarms_changed(packet).alarms;
     }
-    time::update_next_alarms(state, &config.alarm_config)
+    time::update_next_alarms(state, &config.alarm)
 }

@@ -3,13 +3,23 @@ use std::sync::{Arc, Mutex};
 use chrono::Duration;
 
 use sunrise_common::alarm::{Alarm, NextAlarm};
-use sunrise_common::mqtt::MqttConfig;
+use sunrise_common::config::{MqttConfig, WarpConfig};
 
-#[derive(Debug, Clone, Default)]
+#[derive(Debug, Clone)]
 pub struct Config {
-    pub port: u16,
-    pub alarm_config: AlarmConfig,
-    pub mqtt_config: MqttConfig,
+    pub warp: WarpConfig,
+    pub alarm: AlarmConfig,
+    pub mqtt: MqttConfig,
+}
+
+impl Config {
+    pub fn from_env() -> Self {
+        Config {
+            warp: WarpConfig::from_env(8000),
+            alarm: AlarmConfig::default(),
+            mqtt: MqttConfig::from_env(),
+        }
+    }
 }
 
 #[derive(Debug, Clone)]

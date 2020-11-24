@@ -11,7 +11,7 @@ use srv_config::database;
 use srv_config::models;
 use srv_config::mqtt;
 use sunrise_common::alarm::Alarm;
-use sunrise_common::mqtt::MqttConfig;
+use sunrise_common::config::MqttConfig;
 
 pub fn fixture_alarm() -> Alarm {
     Alarm {

@@ -1,6 +1,6 @@
 use rumqttc::{AsyncClient, MqttOptions};
 
-use sunrise_common::mqtt::MqttConfig;
+use sunrise_common::config::MqttConfig;
 
 const CLIENT_ID: &str = "srv-config";
 

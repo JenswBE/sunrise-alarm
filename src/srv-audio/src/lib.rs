@@ -25,6 +25,6 @@ pub async fn run(config: models::Config) {
 
     // Start the server
     warp::serve(routes)
-        .run(([0, 0, 0, 0], config.warp_port))
+        .run(([0, 0, 0, 0], config.warp.port))
         .await;
 }
