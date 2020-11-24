@@ -1,6 +1,15 @@
-
-version: '3.7'
+version: "3.7"
 services:
+  srv-alarm:
+    image: jenswbe/sunrise-alarm-srv-alarm
+    container_name: srv-alarm
+    restart: always
+    networks:
+      - sunrise-alarm
+    environment:
+      - "TZ=${TIMEZONE}"
+      - "MQTT_BROKER_HOST=mosquitto"
+
   srv-config:
     image: jenswbe/sunrise-alarm-srv-config
     container_name: srv-config
@@ -37,6 +46,6 @@ services:
     environment:
       - "TZ=${TIMEZONE}"
 
-networks:  
-    sunrise-alarm:
-        name: sunrise-alarm
+networks:
+  sunrise-alarm:
+    name: sunrise-alarm
