@@ -23,7 +23,7 @@ pub async fn run(config: models::Config) {
     pretty_env_logger::init();
 
     // Validate config
-    if config.light_duration < config.sound_duration {
+    if config.alarm_config.light_duration < config.alarm_config.sound_duration {
         panic!("Sound should start after or together with light (duration light >= sound)")
     }
 

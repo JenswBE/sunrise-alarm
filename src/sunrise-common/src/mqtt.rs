@@ -20,7 +20,7 @@ const TOPIC_BUTTON_LONG_PRESSED: &str = "button_long_pressed";
 // =============================================
 // =                   CLIENT                  =
 // =============================================
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Default)]
 pub struct MqttConfig {
     pub host: String,
     pub port: u16,

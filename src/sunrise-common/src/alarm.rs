@@ -21,6 +21,18 @@ pub enum NextAction {
     Skip,
 }
 
+impl NextAction {
+    fn is_none(&self) -> bool {
+        *self == NextAction::None
+    }
+}
+
+impl Default for NextAction {
+    fn default() -> Self {
+        NextAction::None
+    }
+}
+
 #[derive(Debug, Serialize, Clone, Default)]
 pub struct NextAlarm {
     #[serde(skip_serializing_if = "Uuid::is_nil")]
@@ -34,18 +46,6 @@ pub struct NextAlarm {
 
     #[serde(skip_serializing_if = "Option::is_some")]
     pub next_action_datetime: Option<DateTime<Local>>,
-}
-
-impl NextAction {
-    fn is_none(&self) -> bool {
-        *self == NextAction::None
-    }
-}
-
-impl Default for NextAction {
-    fn default() -> Self {
-        NextAction::None
-    }
 }
 
 impl Serialize for NextAction {

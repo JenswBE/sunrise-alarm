@@ -1,14 +1,19 @@
 use chrono::prelude::*;
 
+use crate::models::AlarmConfig;
 use sunrise_common::alarm::{Alarm, NextAction, NextAlarm};
 
 /// Calculates the next alarm for the alarm
-pub fn calculate_next_alarm(alarm: &Alarm) -> NextAlarm {
-    calculate_next_alarm_testable(alarm, &Local::now())
+pub fn calculate_next_alarm(alarm: &Alarm, config: &AlarmConfig) -> NextAlarm {
+    calculate_next_alarm_testable(alarm, &Local::now(), config)
 }
 
 /// Calculates the next alarm for the alarm (testable version)
-fn calculate_next_alarm_testable(alarm: &Alarm, now: &DateTime<Local>) -> NextAlarm {
+fn calculate_next_alarm_testable(
+    alarm: &Alarm,
+    now: &DateTime<Local>,
+    config: &AlarmConfig,
+) -> NextAlarm {
     // Check enabled
     if !alarm.enabled {
         return NextAlarm::default();
@@ -24,7 +29,7 @@ fn calculate_next_alarm_testable(alarm: &Alarm, now: &DateTime<Local>) -> NextAl
             id: alarm.id.clone(),
             alarm_datetime: Some(next_alarm),
             next_action: NextAction::Ring,
-            next_action_datetime: Some(next_alarm),
+            next_action_datetime: Some(next_alarm - config.light_duration),
         }
     } else {
         // Skip next alarm
@@ -52,8 +57,8 @@ fn calculate_next_datetime(alarm: &Alarm, after: &DateTime<Local>) -> DateTime<L
 
     // Check if alarm is exactly at date
     let weekday_number = after.weekday().num_days_from_monday() as u8;
-    if alarm.days.len() > 0 || alarm.days.contains(&weekday_number) {
-        if *after > alarm_dt {
+    if alarm.days.len() == 0 || alarm.days.contains(&weekday_number) {
+        if *after < alarm_dt {
             // Alarm is at date and still to come
             return alarm_dt;
         }
@@ -104,6 +109,7 @@ fn weekday_from_u8(day_number: &u8) -> Option<Weekday> {
 
 #[cfg(test)]
 mod tests {
+    use chrono::Duration;
     use uuid::Uuid;
 
     use super::*;
@@ -119,14 +125,11 @@ mod tests {
     }
 
     fn parse_date(date: &str) -> DateTime<Local> {
-        let date = date.to_string() + ":00+02:00";
-        DateTime::parse_from_rfc3339(&date)
-            .unwrap()
-            .with_timezone(&Local)
+        Local.datetime_from_str(date, "%Y-%m-%d %H:%M").unwrap()
     }
 
     fn now() -> DateTime<Local> {
-        parse_date("2020-09-19T14:30")
+        parse_date("2020-09-19 14:30")
     }
 
     fn uuid() -> Uuid {
@@ -134,11 +137,16 @@ mod tests {
     }
 
     fn assert_alarm(alarm: Alarm, alarm_dt: &str, action: NextAction, action_dt: &str) {
-        let next_alarm = calculate_next_alarm_testable(&alarm, &now());
+        let config = AlarmConfig {
+            light_duration: Duration::minutes(7),
+            ..Default::default()
+        };
+
+        let next_alarm = calculate_next_alarm_testable(&alarm, &now(), &config);
         assert_eq!(uuid(), next_alarm.id);
         assert_eq!(action, next_alarm.next_action);
         assert_eq!(Some(parse_date(alarm_dt)), next_alarm.alarm_datetime);
-        assert_eq!(Some(parse_date(action_dt)), next_alarm.alarm_datetime);
+        assert_eq!(Some(parse_date(action_dt)), next_alarm.next_action_datetime);
     }
 
     #[test]
@@ -146,9 +154,144 @@ mod tests {
         let alarm = alarm(16, 0);
         assert_alarm(
             alarm,
-            "2020-09-19T16:00",
+            "2020-09-19 16:00",
             NextAction::Ring,
-            "2020-09-19T16:00",
+            "2020-09-19 15:53",
+        )
+    }
+
+    #[test]
+    fn test_for_tomorrow() {
+        let alarm = alarm(14, 0);
+        assert_alarm(
+            alarm,
+            "2020-09-20 14:00",
+            NextAction::Ring,
+            "2020-09-20 13:53",
+        )
+    }
+
+    #[test]
+    fn test_for_today_but_skipped() {
+        let mut alarm = alarm(16, 0);
+        alarm.skip_next = true;
+        assert_alarm(
+            alarm,
+            "2020-09-20 16:00",
+            NextAction::Skip,
+            "2020-09-19 16:00",
+        )
+    }
+
+    #[test]
+    fn test_for_tomorrow_but_skipped() {
+        let mut alarm = alarm(14, 0);
+        alarm.skip_next = true;
+        assert_alarm(
+            alarm,
+            "2020-09-21 14:00",
+            NextAction::Skip,
+            "2020-09-20 14:00",
+        )
+    }
+
+    #[test]
+    fn test_repeated_and_for_today() {
+        let mut alarm = alarm(16, 0);
+        alarm.days = vec![5];
+        assert_alarm(
+            alarm,
+            "2020-09-19 16:00",
+            NextAction::Ring,
+            "2020-09-19 15:53",
+        )
+    }
+
+    #[test]
+    fn test_repeated_but_not_for_today() {
+        let mut alarm = alarm(14, 0);
+        alarm.days = vec![5];
+        assert_alarm(
+            alarm,
+            "2020-09-26 14:00",
+            NextAction::Ring,
+            "2020-09-26 13:53",
+        )
+    }
+
+    #[test]
+    fn test_repeated_for_monday_time_still_to_come() {
+        let mut alarm = alarm(16, 0);
+        alarm.days = vec![0, 1, 2, 3, 4];
+        assert_alarm(
+            alarm,
+            "2020-09-21 16:00",
+            NextAction::Ring,
+            "2020-09-21 15:53",
+        )
+    }
+
+    #[test]
+    fn test_repeated_for_monday_time_past() {
+        let mut alarm = alarm(14, 0);
+        alarm.days = vec![0, 1, 2, 3, 4];
+        assert_alarm(
+            alarm,
+            "2020-09-21 14:00",
+            NextAction::Ring,
+            "2020-09-21 13:53",
+        )
+    }
+
+    #[test]
+    fn test_repeated_for_today_but_skipped() {
+        let mut alarm = alarm(16, 0);
+        alarm.days = vec![5];
+        alarm.skip_next = true;
+        assert_alarm(
+            alarm,
+            "2020-09-26 16:00",
+            NextAction::Skip,
+            "2020-09-19 16:00",
+        )
+    }
+
+    #[test]
+    fn test_repeated_but_not_for_today_and_skipped() {
+        let mut alarm = alarm(14, 0);
+        alarm.days = vec![5];
+        alarm.skip_next = true;
+        assert_alarm(
+            alarm,
+            "2020-10-03 14:00",
+            NextAction::Skip,
+            "2020-09-26 14:00",
+        )
+    }
+
+    #[test]
+    fn test_repeated_for_monday_but_skipped_time_still_to_come() {
+        let mut alarm = alarm(16, 0);
+        alarm.days = vec![0, 1, 2, 3, 4];
+        alarm.skip_next = true;
+        assert_alarm(
+            alarm,
+            "2020-09-22 16:00",
+            NextAction::Skip,
+            "2020-09-21 16:00",
+        )
+    }
+
+    #[test]
+    fn test_repeated_for_monday_but_skipped_time_past() {
+        let mut alarm = alarm(14, 0);
+        alarm.days = vec![0, 1, 2, 3, 4];
+        alarm.skip_next = true;
+        assert_alarm(
+            alarm,
+            "2020-09-22 14:00",
+            NextAction::Skip,
+            "2020-09-21 14:00",
         )
     }
 }

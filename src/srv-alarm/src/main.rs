@@ -22,8 +22,10 @@ async fn main() {
     // Build config
     let config = models::Config {
         port,
-        light_duration: Duration::minutes(10),
-        sound_duration: Duration::minutes(5),
+        alarm_config: models::AlarmConfig {
+            light_duration: Duration::minutes(10),
+            sound_duration: Duration::minutes(5),
+        },
         mqtt_config: MqttConfig {
             host: mqtt_broker_host,
             port: mqtt_broker_port,
