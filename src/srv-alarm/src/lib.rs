@@ -23,12 +23,22 @@ pub async fn run(config: models::Config) {
     pretty_env_logger::init();
 
     // Validate config
-    if config.alarm_config.light_duration < config.alarm_config.sound_duration {
+    if config.alarm.light_duration < config.alarm.sound_duration {
         panic!("Sound should start after or together with light (duration light >= sound)")
     }
 
     // Setup state
     let state = models::LocalState::new();
+    {
+        let mut state = state.lock().unwrap();
+        state.alarms = reqwest::get("http://localhost:8001/alarms")
+            .await
+            .unwrap()
+            .json()
+            .await
+            .unwrap();
+    }
+    time::update_next_alarms(state.clone(), &config.alarm);
 
     // Setup MQTT
     let _mqtt_client = mqtt::get_client(&config, state.clone()).await;
@@ -38,5 +48,7 @@ pub async fn run(config: models::Config) {
     let routes = api.with(warp::log("alarm"));
 
     // Start the server
-    warp::serve(routes).run(([0, 0, 0, 0], config.port)).await;
+    warp::serve(routes)
+        .run(([0, 0, 0, 0], config.warp.port))
+        .await;
 }
