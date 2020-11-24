@@ -38,13 +38,13 @@ pub struct NextAlarm {
     #[serde(skip_serializing_if = "Uuid::is_nil")]
     pub id: Uuid,
 
-    #[serde(skip_serializing_if = "Option::is_some")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub alarm_datetime: Option<DateTime<Local>>,
 
     #[serde(skip_serializing_if = "NextAction::is_none")]
     pub next_action: NextAction,
 
-    #[serde(skip_serializing_if = "Option::is_some")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub next_action_datetime: Option<DateTime<Local>>,
 }
 
