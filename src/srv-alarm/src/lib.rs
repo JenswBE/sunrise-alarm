@@ -5,6 +5,7 @@ use std::env;
 use warp::Filter;
 
 pub mod api;
+pub mod manager;
 pub mod models;
 pub mod mqtt;
 pub mod time;
@@ -38,10 +39,15 @@ pub async fn run(config: models::Config) {
             .await
             .unwrap();
     }
-    time::update_next_alarms(state.clone(), &config.alarm);
+
+    // Setup manager
+    let radio = manager::start(state.clone(), config.clone());
+
+    // Initial update of next alarms
+    time::update_next_alarms(state.clone(), &config.alarm, radio.clone());
 
     // Setup MQTT
-    let _mqtt_client = mqtt::get_client(&config, state.clone()).await;
+    let _mqtt_client = mqtt::get_client(&config, state.clone(), radio).await;
 
     // Setup server
     let api = api::alarms::filters(state);

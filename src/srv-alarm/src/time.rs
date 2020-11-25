@@ -1,22 +1,26 @@
 use chrono::prelude::*;
 
+use crate::manager::{Action, Radio};
 use crate::models::{AlarmConfig, State};
 use sunrise_common::alarm::{Alarm, NextAction, NextAlarm};
 
 /// Update next alarms based on alarms in state
-pub fn update_next_alarms(state: State, config: &AlarmConfig) {
-    let mut state = state.lock().unwrap();
-    state.next_alarms = calculate_next_alarms(&state.alarms, config);
-    state.next_alarm_ring = state
-        .next_alarms
-        .iter()
-        .min_by_key(|&a| a.alarm_datetime)
-        .map(NextAlarm::to_owned);
-    state.next_alarm_action = state
-        .next_alarms
-        .iter()
-        .min_by_key(|&a| a.next_action_datetime)
-        .map(NextAlarm::to_owned);
+pub fn update_next_alarms(state: State, config: &AlarmConfig, radio: Radio) {
+    {
+        let mut state = state.lock().unwrap();
+        state.next_alarms = calculate_next_alarms(&state.alarms, config);
+        state.next_alarm_ring = state
+            .next_alarms
+            .iter()
+            .min_by_key(|&a| a.alarm_datetime)
+            .map(NextAlarm::to_owned);
+        state.next_alarm_action = state
+            .next_alarms
+            .iter()
+            .min_by_key(|&a| a.next_action_datetime)
+            .map(NextAlarm::to_owned);
+    }
+    radio.send(Action::UpdateSchedule).unwrap();
 }
 
 /// Calculates the next alarms

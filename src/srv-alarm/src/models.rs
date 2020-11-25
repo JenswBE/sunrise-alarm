@@ -1,6 +1,7 @@
 use std::sync::{Arc, Mutex};
 
 use chrono::Duration;
+use tokio::time::Delay;
 
 use sunrise_common::alarm::{Alarm, NextAlarm};
 use sunrise_common::config::{MqttConfig, WarpConfig};
@@ -37,6 +38,19 @@ impl Default for AlarmConfig {
     }
 }
 
+#[derive(Debug, Clone, Eq, PartialEq)]
+pub enum Status {
+    Idle,
+    RingLight,
+    RingSound,
+}
+
+impl Default for Status {
+    fn default() -> Self {
+        Status::Idle
+    }
+}
+
 pub type State = Arc<Mutex<LocalState>>;
 
 impl LocalState {
@@ -45,10 +59,12 @@ impl LocalState {
     }
 }
 
-#[derive(Debug, Clone, Default)]
+#[derive(Debug, Default)]
 pub struct LocalState {
+    pub status: Status,
     pub alarms: Vec<Alarm>,
     pub next_alarms: Vec<NextAlarm>,
     pub next_alarm_ring: Option<NextAlarm>,
     pub next_alarm_action: Option<NextAlarm>,
+    pub delay_next_action: Option<Delay>,
 }
