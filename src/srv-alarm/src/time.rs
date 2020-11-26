@@ -27,15 +27,19 @@ pub fn update_next_alarms(state: State, config: &AlarmConfig, radio: Radio) {
 pub fn calculate_next_alarms(alarms: &Vec<Alarm>, config: &AlarmConfig) -> Vec<NextAlarm> {
     alarms
         .into_iter()
-        .map(|a| calculate_next_alarm(a, &Local::now(), config))
+        .filter_map(|a| calculate_next_alarm(a, &Local::now(), config))
         .collect()
 }
 
 /// Calculates the next alarm for the alarm
-fn calculate_next_alarm(alarm: &Alarm, now: &DateTime<Local>, config: &AlarmConfig) -> NextAlarm {
+fn calculate_next_alarm(
+    alarm: &Alarm,
+    now: &DateTime<Local>,
+    config: &AlarmConfig,
+) -> Option<NextAlarm> {
     // Check enabled
     if !alarm.enabled {
-        return NextAlarm::default();
+        return None;
     }
 
     // Calculate next alarm
@@ -44,20 +48,20 @@ fn calculate_next_alarm(alarm: &Alarm, now: &DateTime<Local>, config: &AlarmConf
     // Check if we need to skip
     if !alarm.skip_next {
         // Shouldn't skip next alarm
-        NextAlarm {
+        Some(NextAlarm {
             id: alarm.id.clone(),
             alarm_datetime: Some(next_alarm),
             next_action: NextAction::Ring,
             next_action_datetime: Some(next_alarm - config.light_duration),
-        }
+        })
     } else {
         // Skip next alarm
-        NextAlarm {
+        Some(NextAlarm {
             id: alarm.id.clone(),
             alarm_datetime: Some(calculate_next_datetime(alarm, &next_alarm)),
             next_action: NextAction::Skip,
             next_action_datetime: Some(next_alarm),
-        }
+        })
     }
 }
 
@@ -161,11 +165,26 @@ mod tests {
             ..Default::default()
         };
 
-        let next_alarm = calculate_next_alarm(&alarm, &now(), &config);
-        assert_eq!(uuid(), next_alarm.id);
-        assert_eq!(action, next_alarm.next_action);
-        assert_eq!(Some(parse_date(alarm_dt)), next_alarm.alarm_datetime);
-        assert_eq!(Some(parse_date(action_dt)), next_alarm.next_action_datetime);
+        if let Some(next_alarm) = calculate_next_alarm(&alarm, &now(), &config) {
+            assert_eq!(uuid(), next_alarm.id);
+            assert_eq!(action, next_alarm.next_action);
+            assert_eq!(Some(parse_date(alarm_dt)), next_alarm.alarm_datetime);
+            assert_eq!(Some(parse_date(action_dt)), next_alarm.next_action_datetime);
+        } else {
+            let msg = format!(
+                "Alarm shouldn't be None. Expected: {:?} {:?} {:?}",
+                alarm_dt, action, action_dt
+            );
+            panic!(msg);
+        }
+    }
+
+    #[test]
+    fn test_disabled() {
+        let mut alarm = alarm(16, 0);
+        alarm.enabled = false;
+        let result = calculate_next_alarm(&alarm, &now(), &AlarmConfig::default());
+        assert!(result.is_none(), "Disabled alarms should return None");
     }
 
     #[test]

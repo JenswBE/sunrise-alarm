@@ -31,17 +31,15 @@ pub fn start(state: State, _config: Config) -> Radio {
                         break;
                     }
 
-                    if let Some(duration) = handle_action(action.unwrap(), state.clone()).await {
-                        log::debug!("Reset delay to {:?}s", duration.as_secs());
-                        delay_next_action.reset(Instant::now() + duration);
-                    }
+                    let duration = handle_action(action.unwrap(), state.clone()).await;
+                    let delay = calculate_delay(duration);
+                    delay_next_action.reset(delay);
                 }
 
                 _ = &mut delay_next_action => {
-                    if let Some(duration) = handle_next_action(state.clone()).await {
-                        log::debug!("Reset delay to {:?}s", duration.as_secs());
-                        delay_next_action.reset(Instant::now() + duration);
-                    }
+                    let duration = handle_next_action(state.clone()).await;
+                    let delay = calculate_delay(duration);
+                    delay_next_action.reset(delay);
                 }
             }
         }
@@ -50,6 +48,7 @@ pub fn start(state: State, _config: Config) -> Radio {
     return tx;
 }
 
+/// Calculate the duration until the next action
 fn duration_until_next_action(state: State) -> Result<Duration, String> {
     let state = state.lock().unwrap();
     let alarm = state
@@ -62,6 +61,17 @@ fn duration_until_next_action(state: State) -> Result<Duration, String> {
     dt.signed_duration_since(Local::now())
         .to_std()
         .map_err(|_| "Next action already passed".to_string())
+}
+
+/// Calculate next Instant until we have to sleep
+fn calculate_delay(duration: Option<Duration>) -> Instant {
+    if let Some(duration) = duration {
+        log::debug!("Reset delay to {:?}s", duration.as_secs());
+        return Instant::now() + duration;
+    } else {
+        log::debug!("No next action. Force check in 15 minutes");
+        return Instant::now() + Duration::from_secs(60 * 15);
+    }
 }
 
 async fn handle_action(action: Action, state: State) -> Option<Duration> {
