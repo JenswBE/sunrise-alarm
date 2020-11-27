@@ -1,13 +1,17 @@
 """Main entry point for srv-physical"""
 
 import logging
+from physical import devices
 
 from fastapi import FastAPI
 from starlette.responses import RedirectResponse
 from starlette.middleware.cors import CORSMiddleware
 
-from physical.helpers import (mqtt, settings)
+from physical.devices import button, display, leds
+from physical.devices.common import Devices
+from physical.helpers import mqtt, settings
 from physical.rest import (
+    leds as router_leds,
     mock as router_mock,
 )
 
@@ -18,6 +22,13 @@ app = FastAPI(
 )
 
 # Add routers
+# Leds
+app.include_router(
+    router_leds.router,
+    prefix='/leds',
+    tags=['LEDs']
+)
+
 # Mock
 app.include_router(
     router_mock.router,
@@ -35,12 +46,17 @@ async def setup_service():
 
     config = settings.get()
     if not config.MOCK:
-        from physical.devices import (button, display, leds)
-        app.state.devices = {
-            "button": button.Button(config.BUTTON_GPIO_PIN),
-            "display": display.Display(),
-            "leds": leds.Leds(),
-        }
+        app.state.devices = Devices(
+            button=button.Button(config.BUTTON_GPIO_PIN),
+            display=display.Display(),
+            leds=leds.Leds(),
+        )
+    else:
+        app.state.devices = Devices(
+            button=None,
+            display=None,
+            leds=None,
+        )
 
 
 @app.on_event("shutdown")

@@ -3,10 +3,12 @@
 import asyncio
 import atexit
 from collections import namedtuple
-
-from rpi_ws281x import PixelStrip
+from enum import Enum
 
 from physical.helpers import settings
+
+if not settings.get().MOCK:
+    from rpi_ws281x import PixelStrip
 
 Color = namedtuple('Color', 'red green blue')
 BLACK = Color(0, 0, 0)
@@ -14,6 +16,14 @@ RED = Color(255, 0, 0)
 ORANGE = Color(255, 100, 0)
 YELLOW = Color(255, 255, 0)
 WARM_WHITE = Color(239, 197, 59)
+
+
+class PresetColorEnum(str, Enum):
+    BLACK = 'BLACK'
+    RED = 'RED'
+    ORANGE = 'ORANGE'
+    YELLOW = 'YELLOW'
+    WARM_WHITE = 'WARM_WHITE'
 
 
 class Leds:
@@ -65,6 +75,7 @@ class Leds:
     def set_rgb(self, red: int, green: int, blue: int, brightness: int = 100):
         """Set all leds to a RGB value and brightness (0 - 255)"""
         self._color = Color(red, green, blue)
+        self._brightness = brightness
         self.update()
 
     def set_black(self):

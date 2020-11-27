@@ -3,12 +3,15 @@
 import asyncio
 import atexit
 import logging
-from datetime import time, timedelta
+from datetime import timedelta
 
-import board
-import busio
-from adafruit_tsl2591 import TSL2591
-from rpi_backlight import Backlight
+from physical.helpers import settings
+
+if not settings.get().MOCK:
+    import board
+    import busio
+    from adafruit_tsl2591 import TSL2591
+    from rpi_backlight import Backlight
 
 MIN_LIGHT = 66000
 MAX_LIGHT = 1700000

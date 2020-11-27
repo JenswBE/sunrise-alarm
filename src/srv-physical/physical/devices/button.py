@@ -3,7 +3,10 @@
 import asyncio
 from datetime import datetime, timedelta
 
-from gpiozero import Button as GPIOButton
+from physical.helpers import settings
+
+if not settings.get().MOCK:
+    from gpiozero import Button as GPIOButton
 
 DEBOUNCE_DURATION = timedelta(seconds=0.2)
 LONG_PRESS_DURATION = timedelta(seconds=1)
