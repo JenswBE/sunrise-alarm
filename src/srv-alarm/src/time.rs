@@ -14,11 +14,29 @@ pub fn update_next_alarms(state: State, config: &AlarmConfig, radio: Radio) {
             .iter()
             .min_by_key(|&a| a.alarm_datetime)
             .map(NextAlarm::to_owned);
+        log::debug!(
+            r#"Next ring at {:?}"#,
+            state
+                .next_alarm_ring
+                .as_ref()
+                .and_then(|a| a.alarm_datetime)
+        );
         state.next_alarm_action = state
             .next_alarms
             .iter()
             .min_by_key(|&a| a.next_action_datetime)
             .map(NextAlarm::to_owned);
+        log::debug!(
+            r#"Next action "{:?}" at {:?}"#,
+            state
+                .next_alarm_action
+                .as_ref()
+                .and_then(|a| Some(&a.next_action)),
+            state
+                .next_alarm_action
+                .as_ref()
+                .and_then(|a| a.next_action_datetime)
+        )
     }
     radio.send(Action::UpdateSchedule).unwrap();
 }
