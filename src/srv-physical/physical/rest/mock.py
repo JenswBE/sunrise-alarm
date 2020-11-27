@@ -12,9 +12,11 @@ router = APIRouter()
 async def mock_button_pressed(mqtt: MQTT = Depends(mqtt_from_req)):
     """Mock press on the button"""
     mqtt.publish_button_pressed()
+    return {}
 
 
 @router.post("/button/long_pressed", summary="Mock long press on the button")
 async def mock_button_long_pressed(mqtt: MQTT = Depends(mqtt_from_req)):
     """Mock long press on the button"""
     mqtt.publish_button_long_pressed()
+    return {}
