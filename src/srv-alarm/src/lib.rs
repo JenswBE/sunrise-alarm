@@ -1,4 +1,5 @@
 #![deny(warnings)]
+#![deny(missing_debug_implementations)]
 
 use std::env;
 
@@ -28,33 +29,34 @@ pub async fn run(config: models::Config) {
         panic!("Sound should start after or together with light (duration light >= sound)")
     }
 
-    // Setup state
-    let state = models::LocalState::new();
-    {
-        let mut state = state.lock().unwrap();
-        state.alarms = reqwest::get("http://localhost:8001/alarms")
-            .await
-            .unwrap()
-            .json()
-            .await
-            .unwrap();
-    }
+    // Create context
+    let (radio, receiver) = manager::create_radios();
+    let ctx = models::Context::new(config, radio);
+
+    // Fetch alarms
+    let alarms = reqwest::get("http://localhost:8001/alarms")
+        .await
+        .unwrap()
+        .json()
+        .await
+        .unwrap();
+    ctx.set_alarms(alarms);
 
     // Setup manager
-    let radio = manager::start(state.clone(), config.clone());
+    manager::start(ctx.clone(), receiver);
 
     // Initial update of next alarms
-    time::update_next_alarms(state.clone(), &config.alarm, radio.clone());
+    time::update_next_alarms(ctx.clone());
 
     // Setup MQTT
-    let _mqtt_client = mqtt::get_client(&config, state.clone(), radio).await;
+    let _mqtt_client = mqtt::get_client(ctx.clone()).await;
 
     // Setup server
-    let api = api::alarms::filters(state);
+    let api = api::alarms::filters(ctx.clone());
     let routes = api.with(warp::log("alarm"));
 
     // Start the server
     warp::serve(routes)
-        .run(([0, 0, 0, 0], config.warp.port))
+        .run(([0, 0, 0, 0], ctx.config.warp.port))
         .await;
 }

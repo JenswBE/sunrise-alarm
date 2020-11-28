@@ -4,11 +4,12 @@ use tokio::select;
 use tokio::sync::mpsc;
 use tokio::time::{self, Duration, Instant};
 
-use crate::models::{Config, State, Status};
+use crate::models::{Context, Status};
 use crate::time::update_next_alarms;
 use sunrise_common::alarm::{Alarm, NextAction};
 
 pub type Radio = mpsc::UnboundedSender<Action>;
+pub type RadioReceiver = mpsc::UnboundedReceiver<Action>;
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub enum Action {
@@ -17,13 +18,14 @@ pub enum Action {
     ButtonLongPressed,
 }
 
-pub fn start(state: State, config: Config) -> Radio {
-    let (tx, mut rx) = mpsc::unbounded_channel::<Action>();
+pub fn create_radios() -> (Radio, RadioReceiver) {
+    mpsc::unbounded_channel::<Action>()
+}
 
-    let tx2 = tx.clone();
+pub fn start(ctx: Context, mut rx: RadioReceiver) {
     tokio::spawn(async move {
         let fallback = Duration::from_secs(1);
-        let duration = duration_until_next_action(state.clone()).unwrap_or(fallback);
+        let duration = duration_until_next_action(ctx.clone()).unwrap_or(fallback);
         let mut delay_next_action = time::delay_for(duration).fuse();
         log::debug!("Initial delay set to {:?}s", duration.as_secs());
 
@@ -35,29 +37,23 @@ pub fn start(state: State, config: Config) -> Radio {
                         break;
                     }
 
-                    let duration = handle_action(action.unwrap(), state.clone()).await;
+                    let duration = handle_action(ctx.clone(), action.unwrap()).await;
                     let delay = calculate_delay(duration);
                     delay_next_action = time::delay_until(delay).fuse();
                 }
 
                 _ = &mut delay_next_action => {
-                    handle_next_action(state.clone(), config.clone(), tx2.clone()).await;
+                    handle_next_action(ctx.clone()).await;
                     // Delay will be set by handle_action (through UpdateSchedule)
                 }
             }
         }
     });
-
-    return tx;
 }
 
 /// Calculate the duration until the next action
-fn duration_until_next_action(state: State) -> Result<Duration, String> {
-    let state = state.lock().unwrap();
-    let alarm = state
-        .next_alarm_action
-        .as_ref()
-        .ok_or("No next alarm action")?;
+fn duration_until_next_action(ctx: Context) -> Result<Duration, String> {
+    let alarm = ctx.get_next_alarm_action().ok_or("No next alarm action")?;
     let dt = alarm
         .next_action_datetime
         .expect("Next alarm action should have a datetime");
@@ -77,41 +73,33 @@ fn calculate_delay(duration: Option<Duration>) -> Instant {
     }
 }
 
-async fn handle_action(action: Action, state: State) -> Option<Duration> {
+async fn handle_action(ctx: Context, action: Action) -> Option<Duration> {
     log::debug!("Handle action: {:?}", action);
     match action {
-        Action::UpdateSchedule => handle_update_schedule(state.clone()),
+        Action::UpdateSchedule => handle_update_schedule(ctx),
         _ => None,
     }
 }
 
-fn handle_update_schedule(state: State) -> Option<Duration> {
-    {
-        // Lock state
-        let state = state.lock().unwrap();
+fn handle_update_schedule(ctx: Context) -> Option<Duration> {
+    // Skip update if not idle
+    // Will be updated after alarm is stopped
+    if ctx.get_status() != Status::Idle {
+        return None;
+    }
 
-        // Skip update if not idle
-        // Will be updated after alarm is stopped
-        if state.status != Status::Idle {
-            return None;
-        }
-
-        // Skip reschedule if no next alarm
-        if state.next_alarm_action.is_none() {
-            return None;
-        }
+    // Skip reschedule if no next alarm
+    if ctx.get_next_alarm_action().is_none() {
+        return None;
     }
 
     // Calculate duration
-    Some(duration_until_next_action(state).unwrap_or(Duration::from_secs(1)))
+    Some(duration_until_next_action(ctx).unwrap_or(Duration::from_secs(1)))
 }
 
-async fn handle_next_action(state: State, config: Config, radio: Radio) {
+async fn handle_next_action(ctx: Context) {
     // Fetch next alarm from state
-    let next_alarm = {
-        let state = state.lock().unwrap();
-        state.next_alarm_action.clone()
-    };
+    let next_alarm = ctx.get_next_alarm_action();
 
     // Check if alarm is ready
     let ready = next_alarm
@@ -122,21 +110,13 @@ async fn handle_next_action(state: State, config: Config, radio: Radio) {
     // Alarm is not set or not ready
     if ready.is_none() || Some(false) == ready {
         log::debug!("Handle next action: None");
-        update_next_alarms(state, &config.alarm, radio);
+        update_next_alarms(ctx);
         return;
     }
 
     // Alarm is ready => Fetch alarm from next_alarm
     let next_alarm = next_alarm.unwrap();
-    let alarm = {
-        let state = state.lock().unwrap();
-        state
-            .alarms
-            .iter()
-            .find(|&a| a.id == next_alarm.id)
-            .unwrap()
-            .clone()
-    };
+    let alarm = ctx.get_alarm(next_alarm.id).unwrap();
 
     // Perform action
     log::debug!("Handle next action: {:?}", next_alarm.next_action);

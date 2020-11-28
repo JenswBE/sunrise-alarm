@@ -1,60 +1,55 @@
 use chrono::prelude::*;
 
-use crate::manager::{Action, Radio};
-use crate::models::{AlarmConfig, State};
+use crate::manager::Action;
+use crate::models::Context;
 use sunrise_common::alarm::{Alarm, NextAction, NextAlarm};
 
 /// Update next alarms based on alarms in state
-pub fn update_next_alarms(state: State, config: &AlarmConfig, radio: Radio) {
-    {
-        let mut state = state.lock().unwrap();
-        state.next_alarms = calculate_next_alarms(&state.alarms, config);
-        state.next_alarm_ring = state
-            .next_alarms
-            .iter()
-            .min_by_key(|&a| a.alarm_datetime)
-            .map(NextAlarm::to_owned);
-        log::debug!(
-            r#"Next ring at {:?}"#,
-            state
-                .next_alarm_ring
-                .as_ref()
-                .and_then(|a| a.alarm_datetime)
-        );
-        state.next_alarm_action = state
-            .next_alarms
-            .iter()
-            .min_by_key(|&a| a.next_action_datetime)
-            .map(NextAlarm::to_owned);
-        log::debug!(
-            r#"Next action "{:?}" at {:?}"#,
-            state
-                .next_alarm_action
-                .as_ref()
-                .and_then(|a| Some(&a.next_action)),
-            state
-                .next_alarm_action
-                .as_ref()
-                .and_then(|a| a.next_action_datetime)
-        )
-    }
-    radio.send(Action::UpdateSchedule).unwrap();
+pub fn update_next_alarms(ctx: Context) {
+    // Calculate next alarms
+    let next_alarms = calculate_next_alarms(&ctx);
+
+    // Calculate next alarm to ring
+    let next_alarm_ring = next_alarms
+        .iter()
+        .min_by_key(|&a| a.alarm_datetime)
+        .map(NextAlarm::to_owned);
+    log::debug!(
+        r#"Next ring at {:?}"#,
+        next_alarm_ring.as_ref().and_then(|a| a.alarm_datetime)
+    );
+    ctx.set_next_alarm_ring(next_alarm_ring);
+
+    // Calculate next alarm with action
+    let next_alarm_action = next_alarms
+        .iter()
+        .min_by_key(|&a| a.next_action_datetime)
+        .map(NextAlarm::to_owned);
+    log::debug!(
+        r#"Next action "{:?}" at {:?}"#,
+        next_alarm_action
+            .as_ref()
+            .and_then(|a| Some(&a.next_action)),
+        next_alarm_action
+            .as_ref()
+            .and_then(|a| a.next_action_datetime)
+    );
+    ctx.set_next_alarm_action(next_alarm_action);
+
+    // Inform manager about updated next alarms
+    ctx.radio.send(Action::UpdateSchedule).unwrap();
 }
 
 /// Calculates the next alarms
-pub fn calculate_next_alarms(alarms: &Vec<Alarm>, config: &AlarmConfig) -> Vec<NextAlarm> {
-    alarms
-        .into_iter()
-        .filter_map(|a| calculate_next_alarm(a, &Local::now(), config))
+pub fn calculate_next_alarms(ctx: &Context) -> Vec<NextAlarm> {
+    ctx.get_alarms()
+        .iter()
+        .filter_map(|a| calculate_next_alarm(ctx.clone(), a, &Local::now()))
         .collect()
 }
 
 /// Calculates the next alarm for the alarm
-fn calculate_next_alarm(
-    alarm: &Alarm,
-    now: &DateTime<Local>,
-    config: &AlarmConfig,
-) -> Option<NextAlarm> {
+fn calculate_next_alarm(ctx: Context, alarm: &Alarm, now: &DateTime<Local>) -> Option<NextAlarm> {
     // Check enabled
     if !alarm.enabled {
         return None;
@@ -70,7 +65,7 @@ fn calculate_next_alarm(
             id: alarm.id.clone(),
             alarm_datetime: Some(next_alarm),
             next_action: NextAction::Ring,
-            next_action_datetime: Some(next_alarm - config.light_duration),
+            next_action_datetime: Some(next_alarm - ctx.config.alarm.light_duration),
         })
     } else {
         // Skip next alarm
@@ -154,6 +149,8 @@ mod tests {
     use uuid::Uuid;
 
     use super::*;
+    use crate::manager;
+    use crate::models::Config;
 
     fn alarm(hour: u8, minute: u8) -> Alarm {
         Alarm {
@@ -177,13 +174,15 @@ mod tests {
         Uuid::parse_str("51d2e380-3611-4857-8659-98f787858e98").unwrap()
     }
 
-    fn assert_alarm(alarm: Alarm, alarm_dt: &str, action: NextAction, action_dt: &str) {
-        let config = AlarmConfig {
-            light_duration: Duration::minutes(7),
-            ..Default::default()
-        };
+    fn context() -> Context {
+        let mut config = Config::from_env();
+        config.alarm.light_duration = Duration::minutes(7);
+        let (tx, _) = manager::create_radios();
+        Context::new(config, tx)
+    }
 
-        if let Some(next_alarm) = calculate_next_alarm(&alarm, &now(), &config) {
+    fn assert_alarm(alarm: Alarm, alarm_dt: &str, action: NextAction, action_dt: &str) {
+        if let Some(next_alarm) = calculate_next_alarm(context(), &alarm, &now()) {
             assert_eq!(uuid(), next_alarm.id);
             assert_eq!(action, next_alarm.next_action);
             assert_eq!(Some(parse_date(alarm_dt)), next_alarm.alarm_datetime);
@@ -201,7 +200,7 @@ mod tests {
     fn test_disabled() {
         let mut alarm = alarm(16, 0);
         alarm.enabled = false;
-        let result = calculate_next_alarm(&alarm, &now(), &AlarmConfig::default());
+        let result = calculate_next_alarm(context(), &alarm, &now());
         assert!(result.is_none(), "Disabled alarms should return None");
     }
 

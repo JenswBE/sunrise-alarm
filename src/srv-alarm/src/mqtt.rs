@@ -1,30 +1,22 @@
 use rumqttc::{AsyncClient, Event, MqttOptions, Packet, Publish};
 
-use crate::manager::Radio;
-use crate::models::{Config, State};
+use crate::models::Context;
 use crate::time;
 use sunrise_common::mqtt;
 
 const CLIENT_ID: &str = "srv-alarm";
 
-pub async fn get_client(config: &Config, state: State, radio: Radio) -> AsyncClient {
+pub async fn get_client(ctx: Context) -> AsyncClient {
     // Build client
-    let mut options = MqttOptions::new(CLIENT_ID, config.mqtt.host.clone(), config.mqtt.port);
+    let mut options = MqttOptions::new(CLIENT_ID, &ctx.config.mqtt.host, ctx.config.mqtt.port);
     options.set_keep_alive(5);
     let (mqtt_client, mut eventloop) = AsyncClient::new(options, 10);
 
     // Start client loop
-    let loop_config = config.clone();
     tokio::task::spawn(async move {
         loop {
             let notification = eventloop.poll().await.unwrap();
-            notification_handler(
-                notification,
-                state.clone(),
-                loop_config.clone(),
-                radio.clone(),
-            )
-            .await;
+            notification_handler(ctx.clone(), notification).await;
         }
     });
 
@@ -35,7 +27,7 @@ pub async fn get_client(config: &Config, state: State, radio: Radio) -> AsyncCli
     return mqtt_client;
 }
 
-async fn notification_handler(notification: Event, state: State, config: Config, radio: Radio) {
+async fn notification_handler(ctx: Context, notification: Event) {
     // Debug logging
     log::debug!("MQTT notification received: {:?}", notification);
 
@@ -43,19 +35,15 @@ async fn notification_handler(notification: Event, state: State, config: Config,
     if let Event::Incoming(event) = notification {
         if let Packet::Publish(packet) = event {
             match packet.topic.as_str() {
-                mqtt::TOPIC_ALARMS_CHANGED => {
-                    handle_alarms_changed(packet, state, config, radio).await
-                }
+                mqtt::TOPIC_ALARMS_CHANGED => handle_alarms_changed(ctx, packet).await,
                 _ => log::error!("Unhandled MQTT topic: {}", packet.topic),
             }
         }
     }
 }
 
-async fn handle_alarms_changed(packet: Publish, state: State, config: Config, radio: Radio) {
-    {
-        let mut state = state.lock().unwrap();
-        state.alarms = mqtt::parse_alarms_changed(packet).alarms;
-    }
-    time::update_next_alarms(state, &config.alarm, radio)
+async fn handle_alarms_changed(ctx: Context, packet: Publish) {
+    let alarms = mqtt::parse_alarms_changed(packet).alarms;
+    ctx.set_alarms(alarms);
+    time::update_next_alarms(ctx);
 }
