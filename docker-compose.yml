@@ -1,7 +1,9 @@
 version: "3.7"
 services:
   srv-alarm:
-    image: jenswbe/sunrise-alarm-srv-alarm
+    build:
+      context: src
+      dockerfile: srv-alarm.Dockerfile
     container_name: srv-alarm
     networks:
       - sunrise-alarm
@@ -12,7 +14,9 @@ services:
       - "RUST_BACKTRACE=1"
 
   srv-config:
-    image: jenswbe/sunrise-alarm-srv-config
+    build:
+      context: src
+      dockerfile: srv-config.Dockerfile
     container_name: srv-config
     networks:
       - sunrise-alarm
@@ -38,7 +42,9 @@ services:
       - "MQTT_CLIENT_ID=srv-physical-docker"
 
   srv-audio:
-    image: jenswbe/sunrise-alarm-srv-audio
+    build:
+      context: src
+      dockerfile: srv-audio.Dockerfile
     container_name: srv-audio
     volumes:
       - "/tmp/pa-sunrise-alarm.socket:/pulse/pulseaudio.socket"

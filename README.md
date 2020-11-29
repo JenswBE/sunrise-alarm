@@ -18,6 +18,13 @@ DIY alarm clock using microservices
 | gui-watchface | Web UI for touchscreen                              | [![DockerHub Repo](https://img.shields.io/badge/DockerHub-repo-blue?logo=docker)](https://hub.docker.com/r/jenswbe/sunrise-alarm-gui-watchface) |    8080    | Javascript |     Vue.js      |
 | mosquitto     | MQTT broker                                         |          [![DockerHub Repo](https://img.shields.io/badge/DockerHub-repo-blue?logo=docker)](https://hub.docker.com/_/eclipse-mosquitto)          | 1883, 9001 |    N/A     |       N/A       |
 
+## Development
+Start Docker Compose with following command:
+```bash
+COMPOSE_DOCKER_CLI_BUILD=1 DOCKER_BUILDKIT=1 docker-compose build --parallel
+docker-compose up -d
+```
+
 ## Setup
 
 ### PulseAudio
