@@ -28,10 +28,10 @@ pub struct AlarmsChanged {
 pub async fn publish_alarms_changed(client: AsyncClient, alarms: Vec<Alarm>) {
     let msg = AlarmsChanged { alarms };
     let json = serde_json::to_vec(&msg).unwrap();
-    client
-        .publish(TOPIC_ALARMS_CHANGED, QoS::AtLeastOnce, false, json)
-        .await
-        .unwrap();
+    let result = client.publish(TOPIC_ALARMS_CHANGED, QoS::AtLeastOnce, false, json);
+    if let Err(e) = result.await {
+        log::error!("Failed to publish to MQTT with error: {:?}", e)
+    }
 }
 
 pub fn parse_alarms_changed(packet: Publish) -> AlarmsChanged {
