@@ -32,6 +32,10 @@ RUN cp /usr/src/sunrise-alarm/target/${TARGET}/release/${SERVICE_NAME} /service
 # Build final image
 FROM scratch
 ENV WARP_PORT 8080
+ENV HOST_SRV_ALARM srv-alarm:8080
+ENV HOST_SRV_CONFIG srv-config:8080
+ENV HOST_SRV_PHYSICAL srv-physical:8080
+ENV HOST_SRV_AUDIO srv-audio:8080
 EXPOSE 8080
 
 COPY --from=builder /service service
