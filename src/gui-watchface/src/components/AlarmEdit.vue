@@ -192,6 +192,12 @@ export default {
     },
 
     async saveAlarm(alarm) {
+      // Restore unmananage data
+      const old_alarm = this.$store.getters.getAlarm(alarm.id);
+      alarm.enabled = old_alarm.enabled;
+      alarm.skip_next = old_alarm.skip_next;
+
+      // Call srv-config
       axios
         .put(`/alarms/${alarm.id}`, alarm)
         .then(() => {
