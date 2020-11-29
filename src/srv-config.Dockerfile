@@ -32,10 +32,10 @@ RUN cp /usr/src/sunrise-alarm/target/${TARGET}/release/${SERVICE_NAME} /service
 # Build final image
 FROM scratch
 ENV WARP_PORT 8080
-ENV HOST_SRV_ALARM srv-alarm:8080
-ENV HOST_SRV_CONFIG srv-config:8080
-ENV HOST_SRV_PHYSICAL srv-physical:8080
-ENV HOST_SRV_AUDIO srv-audio:8080
+ENV HOST_SRV_ALARM http://srv-alarm:8080
+ENV HOST_SRV_CONFIG http://srv-config:8080
+ENV HOST_SRV_PHYSICAL http://srv-physical:8080
+ENV HOST_SRV_AUDIO http://srv-audio:8080
 ENV DATA_DIR_PATH /data
 EXPOSE 8080
 VOLUME [ "/data" ]

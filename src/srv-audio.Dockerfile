@@ -38,10 +38,10 @@ RUN cp /usr/src/sunrise-alarm/target/${TARGET}/release/${SERVICE_NAME} /service
 FROM ${BASE_IMAGE}
 ARG SERVICE_NAME
 ENV WARP_PORT 8080
-ENV HOST_SRV_ALARM srv-alarm:8080
-ENV HOST_SRV_CONFIG srv-config:8080
-ENV HOST_SRV_PHYSICAL srv-physical:8080
-ENV HOST_SRV_AUDIO srv-audio:8080
+ENV HOST_SRV_ALARM http://srv-alarm:8080
+ENV HOST_SRV_CONFIG http://srv-config:8080
+ENV HOST_SRV_PHYSICAL http://srv-physical:8080
+ENV HOST_SRV_AUDIO http://srv-audio:8080
 ENV MUSIC_DIR_PATH /music
 EXPOSE 8080
 VOLUME [ "/music" ]

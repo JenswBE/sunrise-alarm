@@ -34,12 +34,8 @@ pub async fn run(config: models::Config) {
     let ctx = models::Context::new(config, radio);
 
     // Fetch alarms
-    let alarms = reqwest::get("http://localhost:8001/alarms")
-        .await
-        .unwrap()
-        .json()
-        .await
-        .unwrap();
+    let url = ctx.config.hosts.srv_config.join("alarms").unwrap();
+    let alarms = reqwest::get(url).await.unwrap().json().await.unwrap();
     ctx.set_alarms(alarms);
 
     // Setup manager

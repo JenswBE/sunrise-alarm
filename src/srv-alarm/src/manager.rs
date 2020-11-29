@@ -121,18 +121,23 @@ async fn handle_next_action(ctx: Context) {
     log::debug!("Handle next action: {:?}", next_alarm.next_action);
     match next_alarm.next_action {
         NextAction::Ring => handle_next_action_ring(alarm).await,
-        NextAction::Skip => handle_next_action_skip(alarm).await,
+        NextAction::Skip => handle_next_action_skip(ctx, alarm).await,
         _ => (),
     }
 }
 
 async fn handle_next_action_ring(_alarm: Alarm) {}
 
-async fn handle_next_action_skip(mut alarm: Alarm) {
+async fn handle_next_action_skip(ctx: Context, mut alarm: Alarm) {
     alarm.skip_next = false;
-    let url = format!("http://localhost:8001/alarms/{}", alarm.id);
+    let url = ctx
+        .config
+        .hosts
+        .srv_config
+        .join(&format!("alarms/{}", alarm.id))
+        .unwrap();
     reqwest::Client::new()
-        .put(&url)
+        .put(url)
         .json(&alarm)
         .send()
         .await

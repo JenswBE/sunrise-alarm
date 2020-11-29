@@ -5,7 +5,7 @@ use uuid::Uuid;
 
 use crate::manager::Radio;
 use sunrise_common::alarm::{Alarm, NextAlarm, NextAlarms};
-use sunrise_common::config::{MqttConfig, WarpConfig};
+use sunrise_common::config::{HostsConfig, MqttConfig, WarpConfig};
 
 #[derive(Debug, Clone)]
 pub struct Context {
@@ -76,17 +76,19 @@ impl Context {
 
 #[derive(Debug, Clone)]
 pub struct Config {
-    pub warp: WarpConfig,
     pub alarm: AlarmConfig,
+    pub hosts: HostsConfig,
     pub mqtt: MqttConfig,
+    pub warp: WarpConfig,
 }
 
 impl Config {
     pub fn from_env() -> Self {
         Config {
-            warp: WarpConfig::from_env(8000),
             alarm: AlarmConfig::default(),
+            hosts: HostsConfig::from_env(),
             mqtt: MqttConfig::from_env(),
+            warp: WarpConfig::from_env(8000),
         }
     }
 }

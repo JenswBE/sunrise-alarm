@@ -26,10 +26,10 @@ pub struct HostsConfig {
 impl HostsConfig {
     pub fn from_env() -> Self {
         HostsConfig {
-            srv_alarm: parse_url("HOST_SRV_ALARM", "localhost:8000"),
-            srv_config: parse_url("HOST_SRV_CONFIG", "localhost:8001"),
-            srv_physical: parse_url("HOST_SRV_PHYSICAL", "localhost:8002"),
-            srv_audio: parse_url("HOST_SRV_AUDIO", "localhost:8003"),
+            srv_alarm: parse_url("HOST_SRV_ALARM", "http://localhost:8000"),
+            srv_config: parse_url("HOST_SRV_CONFIG", "http://localhost:8001"),
+            srv_physical: parse_url("HOST_SRV_PHYSICAL", "http://localhost:8002"),
+            srv_audio: parse_url("HOST_SRV_AUDIO", "http://localhost:8003"),
         }
     }
 }
