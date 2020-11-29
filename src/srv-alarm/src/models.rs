@@ -4,7 +4,7 @@ use chrono::Duration;
 use uuid::Uuid;
 
 use crate::manager::Radio;
-use sunrise_common::alarm::{Alarm, NextAlarm};
+use sunrise_common::alarm::{Alarm, NextAlarm, NextAlarms};
 use sunrise_common::config::{MqttConfig, WarpConfig};
 
 #[derive(Debug, Clone)]
@@ -48,24 +48,29 @@ impl Context {
         state.alarms = alarms;
     }
 
-    pub fn get_next_alarm_ring(&self) -> Option<NextAlarm> {
+    pub fn get_next_alarms(&self) -> NextAlarms {
         let state = self.state.lock().unwrap();
-        state.next_alarm_ring.clone()
+        state.next_alarms.clone()
     }
 
-    pub fn set_next_alarm_ring(&self, next_alarm: Option<NextAlarm>) {
-        let mut state = self.state.lock().unwrap();
-        state.next_alarm_ring = next_alarm;
-    }
-
-    pub fn get_next_alarm_action(&self) -> Option<NextAlarm> {
+    pub fn get_next_alarms_ring(&self) -> Option<NextAlarm> {
         let state = self.state.lock().unwrap();
-        state.next_alarm_action.clone()
+        state.next_alarms.ring.clone()
     }
 
-    pub fn set_next_alarm_action(&self, next_alarm: Option<NextAlarm>) {
+    pub fn set_next_alarms_ring(&self, next_alarm: Option<NextAlarm>) {
         let mut state = self.state.lock().unwrap();
-        state.next_alarm_action = next_alarm;
+        state.next_alarms.ring = next_alarm;
+    }
+
+    pub fn get_next_alarms_action(&self) -> Option<NextAlarm> {
+        let state = self.state.lock().unwrap();
+        state.next_alarms.action.clone()
+    }
+
+    pub fn set_next_alarms_action(&self, next_alarm: Option<NextAlarm>) {
+        let mut state = self.state.lock().unwrap();
+        state.next_alarms.action = next_alarm;
     }
 }
 
@@ -105,8 +110,7 @@ impl Default for AlarmConfig {
 pub struct State {
     pub status: Status,
     pub alarms: Vec<Alarm>,
-    pub next_alarm_ring: Option<NextAlarm>,
-    pub next_alarm_action: Option<NextAlarm>,
+    pub next_alarms: NextAlarms,
 }
 
 #[derive(Debug, Clone, Eq, PartialEq)]

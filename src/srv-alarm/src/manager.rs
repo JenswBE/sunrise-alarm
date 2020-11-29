@@ -53,11 +53,10 @@ pub fn start(ctx: Context, mut rx: RadioReceiver) {
 
 /// Calculate the duration until the next action
 fn duration_until_next_action(ctx: Context) -> Result<Duration, String> {
-    let alarm = ctx.get_next_alarm_action().ok_or("No next alarm action")?;
-    let dt = alarm
+    let alarm = ctx.get_next_alarms_action().ok_or("No next alarm action")?;
+    alarm
         .next_action_datetime
-        .expect("Next alarm action should have a datetime");
-    dt.signed_duration_since(Local::now())
+        .signed_duration_since(Local::now())
         .to_std()
         .map_err(|_| "Next action already passed".to_string())
 }
@@ -89,7 +88,7 @@ fn handle_update_schedule(ctx: Context) -> Option<Duration> {
     }
 
     // Skip reschedule if no next alarm
-    if ctx.get_next_alarm_action().is_none() {
+    if ctx.get_next_alarms_action().is_none() {
         return None;
     }
 
@@ -99,12 +98,12 @@ fn handle_update_schedule(ctx: Context) -> Option<Duration> {
 
 async fn handle_next_action(ctx: Context) {
     // Fetch next alarm from state
-    let next_alarm = ctx.get_next_alarm_action();
+    let next_alarm = ctx.get_next_alarms_action();
 
     // Check if alarm is ready
     let ready = next_alarm
         .as_ref()
-        .and_then(|a| a.next_action_datetime)
+        .map(|a| a.next_action_datetime)
         .and_then(|d| Some(d <= Local::now()));
 
     // Alarm is not set or not ready

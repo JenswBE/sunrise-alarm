@@ -3,7 +3,6 @@ use std::convert::Infallible;
 use warp::Filter;
 
 use crate::models::Context;
-use sunrise_common::alarm::NextAlarm;
 
 /// Combination of all alarm related filters
 pub fn filters(
@@ -21,11 +20,7 @@ fn next(ctx: Context) -> impl Filter<Extract = impl warp::Reply, Error = warp::R
 }
 
 async fn get_next_alarm(ctx: Context) -> Result<impl warp::Reply, Infallible> {
-    if let Some(next_alarm) = ctx.get_next_alarm_ring() {
-        Ok(warp::reply::json(&next_alarm))
-    } else {
-        Ok(warp::reply::json(&NextAlarm::default()))
-    }
+    Ok(warp::reply::json(&ctx.get_next_alarms()))
 }
 
 fn with_state(

@@ -16,9 +16,9 @@ pub fn update_next_alarms(ctx: Context) {
         .map(NextAlarm::to_owned);
     log::debug!(
         r#"Next ring at {:?}"#,
-        next_alarm_ring.as_ref().and_then(|a| a.alarm_datetime)
+        next_alarm_ring.as_ref().map(|a| a.alarm_datetime)
     );
-    ctx.set_next_alarm_ring(next_alarm_ring);
+    ctx.set_next_alarms_ring(next_alarm_ring);
 
     // Calculate next alarm with action
     let next_alarm_action = next_alarms
@@ -30,11 +30,9 @@ pub fn update_next_alarms(ctx: Context) {
         next_alarm_action
             .as_ref()
             .and_then(|a| Some(&a.next_action)),
-        next_alarm_action
-            .as_ref()
-            .and_then(|a| a.next_action_datetime)
+        next_alarm_action.as_ref().map(|a| a.next_action_datetime)
     );
-    ctx.set_next_alarm_action(next_alarm_action);
+    ctx.set_next_alarms_action(next_alarm_action);
 
     // Inform manager about updated next alarms
     ctx.radio.send(Action::UpdateSchedule).unwrap();
@@ -63,17 +61,17 @@ fn calculate_next_alarm(ctx: Context, alarm: &Alarm, now: &DateTime<Local>) -> O
         // Shouldn't skip next alarm
         Some(NextAlarm {
             id: alarm.id.clone(),
-            alarm_datetime: Some(next_alarm),
+            alarm_datetime: next_alarm,
             next_action: NextAction::Ring,
-            next_action_datetime: Some(next_alarm - ctx.config.alarm.light_duration),
+            next_action_datetime: next_alarm - ctx.config.alarm.light_duration,
         })
     } else {
         // Skip next alarm
         Some(NextAlarm {
             id: alarm.id.clone(),
-            alarm_datetime: Some(calculate_next_datetime(alarm, &next_alarm)),
+            alarm_datetime: calculate_next_datetime(alarm, &next_alarm),
             next_action: NextAction::Skip,
-            next_action_datetime: Some(next_alarm),
+            next_action_datetime: next_alarm,
         })
     }
 }
@@ -185,8 +183,8 @@ mod tests {
         if let Some(next_alarm) = calculate_next_alarm(context(), &alarm, &now()) {
             assert_eq!(uuid(), next_alarm.id);
             assert_eq!(action, next_alarm.next_action);
-            assert_eq!(Some(parse_date(alarm_dt)), next_alarm.alarm_datetime);
-            assert_eq!(Some(parse_date(action_dt)), next_alarm.next_action_datetime);
+            assert_eq!(parse_date(alarm_dt), next_alarm.alarm_datetime);
+            assert_eq!(parse_date(action_dt), next_alarm.next_action_datetime);
         } else {
             let msg = format!(
                 "Alarm shouldn't be None. Expected: {:?} {:?} {:?}",

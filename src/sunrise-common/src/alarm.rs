@@ -14,6 +14,23 @@ pub struct Alarm {
     pub skip_next: bool,
 }
 
+#[derive(Debug, Serialize, Clone, Default)]
+pub struct NextAlarms {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub ring: Option<NextAlarm>,
+
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub action: Option<NextAlarm>,
+}
+
+#[derive(Debug, Serialize, Clone)]
+pub struct NextAlarm {
+    pub id: Uuid,
+    pub alarm_datetime: DateTime<Local>,
+    pub next_action: NextAction,
+    pub next_action_datetime: DateTime<Local>,
+}
+
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub enum NextAction {
     None,
@@ -21,31 +38,10 @@ pub enum NextAction {
     Skip,
 }
 
-impl NextAction {
-    fn is_none(&self) -> bool {
-        *self == NextAction::None
-    }
-}
-
 impl Default for NextAction {
     fn default() -> Self {
         NextAction::None
     }
-}
-
-#[derive(Debug, Serialize, Clone, Default)]
-pub struct NextAlarm {
-    #[serde(skip_serializing_if = "Uuid::is_nil")]
-    pub id: Uuid,
-
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub alarm_datetime: Option<DateTime<Local>>,
-
-    #[serde(skip_serializing_if = "NextAction::is_none")]
-    pub next_action: NextAction,
-
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub next_action_datetime: Option<DateTime<Local>>,
 }
 
 impl Serialize for NextAction {
