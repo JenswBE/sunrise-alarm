@@ -6,6 +6,7 @@ use std::env;
 use warp::Filter;
 
 pub mod api;
+pub mod http;
 pub mod manager;
 pub mod models;
 pub mod mqtt;
@@ -34,8 +35,7 @@ pub async fn run(config: models::Config) {
     let ctx = models::Context::new(config, radio);
 
     // Fetch alarms
-    let url = ctx.config.hosts.srv_config.join("alarms").unwrap();
-    let alarms = reqwest::get(url).await.unwrap().json().await.unwrap();
+    let alarms = http::get_alarms(ctx.clone()).await;
     ctx.set_alarms(alarms);
 
     // Setup manager

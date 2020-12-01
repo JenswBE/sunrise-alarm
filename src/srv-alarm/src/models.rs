@@ -1,6 +1,7 @@
 use std::sync::{Arc, Mutex};
 
 use chrono::Duration;
+use reqwest::Client;
 use uuid::Uuid;
 
 use crate::manager::Radio;
@@ -9,6 +10,7 @@ use sunrise_common::config::{HostsConfig, MqttConfig, WarpConfig};
 
 #[derive(Debug, Clone)]
 pub struct Context {
+    pub client: Client,
     pub config: Arc<Config>,
     pub radio: Radio,
     state: Arc<Mutex<State>>,
@@ -17,6 +19,7 @@ pub struct Context {
 impl Context {
     pub fn new(config: Config, radio: Radio) -> Self {
         Context {
+            client: reqwest::Client::new(),
             config: Arc::new(config),
             radio,
             state: Arc::new(Mutex::new(State::default())),

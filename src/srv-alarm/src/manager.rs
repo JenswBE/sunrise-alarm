@@ -4,6 +4,7 @@ use tokio::select;
 use tokio::sync::mpsc;
 use tokio::time::{self, Duration, Instant};
 
+use crate::http;
 use crate::models::{Context, Status};
 use crate::time::update_next_alarms;
 use sunrise_common::alarm::{Alarm, NextAction};
@@ -76,7 +77,8 @@ async fn handle_action(ctx: Context, action: Action) -> Option<Duration> {
     log::debug!("Handle action: {:?}", action);
     match action {
         Action::UpdateSchedule => handle_update_schedule(ctx),
-        _ => None,
+        Action::ButtonPressed => handle_button_pressed(ctx),
+        Action::ButtonLongPressed => handle_button_long_pressed(ctx),
     }
 }
 
@@ -94,6 +96,24 @@ fn handle_update_schedule(ctx: Context) -> Option<Duration> {
 
     // Calculate duration
     Some(duration_until_next_action(ctx).unwrap_or(Duration::from_secs(1)))
+}
+
+fn handle_button_pressed(ctx: Context) -> Option<Duration> {
+    if ctx.get_status() == Status::Idle {
+        // Handle night light
+    } else {
+        // Handle alarm
+    }
+    return None;
+}
+
+fn handle_button_long_pressed(ctx: Context) -> Option<Duration> {
+    if ctx.get_status() == Status::Idle {
+        // Handle night light
+    } else {
+        // Handle alarm
+    }
+    return None;
 }
 
 async fn handle_next_action(ctx: Context) {
@@ -130,16 +150,5 @@ async fn handle_next_action_ring(_alarm: Alarm) {}
 
 async fn handle_next_action_skip(ctx: Context, mut alarm: Alarm) {
     alarm.skip_next = false;
-    let url = ctx
-        .config
-        .hosts
-        .srv_config
-        .join(&format!("alarms/{}", alarm.id))
-        .unwrap();
-    reqwest::Client::new()
-        .put(url)
-        .json(&alarm)
-        .send()
-        .await
-        .unwrap();
+    http::update_alarm(ctx, alarm).await;
 }
