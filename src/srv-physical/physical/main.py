@@ -55,7 +55,7 @@ async def setup_service():
         app.state.devices = Devices(
             button=None,
             display=None,
-            leds=None,
+            leds=leds.Leds(),
         )
 
 
