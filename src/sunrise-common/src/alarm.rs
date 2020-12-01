@@ -1,5 +1,5 @@
 use chrono::{DateTime, Local};
-use serde::{Deserialize, Serialize, Serializer};
+use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
 #[derive(Debug, Deserialize, Serialize, Default, Clone, Eq, PartialEq)]
@@ -31,7 +31,7 @@ pub struct NextAlarm {
     pub next_action_datetime: DateTime<Local>,
 }
 
-#[derive(Debug, Clone, Eq, PartialEq)]
+#[derive(Debug, Clone, Eq, PartialEq, Serialize, Deserialize)]
 pub enum NextAction {
     None,
     Ring,
@@ -41,18 +41,5 @@ pub enum NextAction {
 impl Default for NextAction {
     fn default() -> Self {
         NextAction::None
-    }
-}
-
-impl Serialize for NextAction {
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: Serializer,
-    {
-        match *self {
-            NextAction::None => serializer.serialize_unit_variant("NextAction", 0, "None"),
-            NextAction::Ring => serializer.serialize_unit_variant("NextAction", 1, "Ring"),
-            NextAction::Skip => serializer.serialize_unit_variant("NextAction", 2, "Skip"),
-        }
     }
 }
