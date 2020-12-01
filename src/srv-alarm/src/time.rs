@@ -5,7 +5,7 @@ use crate::models::Context;
 use sunrise_common::alarm::{Alarm, NextAction, NextAlarm};
 
 /// Update next alarms based on alarms in state
-pub fn update_next_alarms(ctx: Context) {
+pub fn update_next_alarms(ctx: &Context) {
     // Calculate next alarms
     let next_alarms = calculate_next_alarms(&ctx);
 

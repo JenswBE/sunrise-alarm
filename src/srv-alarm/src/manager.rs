@@ -4,7 +4,7 @@ use tokio::select;
 use tokio::sync::mpsc;
 use tokio::time::{self, Duration, Instant};
 
-use crate::http;
+use crate::http::{self, Leds};
 use crate::models::{Context, Status};
 use crate::time::update_next_alarms;
 use sunrise_common::alarm::{Alarm, NextAction};
@@ -26,7 +26,7 @@ pub fn create_radios() -> (Radio, RadioReceiver) {
 pub fn start(ctx: Context, mut rx: RadioReceiver) {
     tokio::spawn(async move {
         let fallback = Duration::from_secs(1);
-        let duration = duration_until_next_action(ctx.clone()).unwrap_or(fallback);
+        let duration = duration_until_next_action(&ctx).unwrap_or(fallback);
         let mut delay_next_action = time::delay_for(duration).fuse();
         log::debug!("Initial delay set to {:?}s", duration.as_secs());
 
@@ -38,13 +38,13 @@ pub fn start(ctx: Context, mut rx: RadioReceiver) {
                         break;
                     }
 
-                    let duration = handle_action(ctx.clone(), action.unwrap()).await;
+                    let duration = handle_action(&ctx, action.unwrap()).await;
                     let delay = calculate_delay(duration);
                     delay_next_action = time::delay_until(delay).fuse();
                 }
 
                 _ = &mut delay_next_action => {
-                    handle_next_action(ctx.clone()).await;
+                    handle_next_action(&ctx).await;
                     // Delay will be set by handle_action (through UpdateSchedule)
                 }
             }
@@ -53,7 +53,7 @@ pub fn start(ctx: Context, mut rx: RadioReceiver) {
 }
 
 /// Calculate the duration until the next action
-fn duration_until_next_action(ctx: Context) -> Result<Duration, String> {
+fn duration_until_next_action(ctx: &Context) -> Result<Duration, String> {
     let alarm = ctx.get_next_alarms_action().ok_or("No next alarm action")?;
     alarm
         .next_action_datetime
@@ -73,16 +73,16 @@ fn calculate_delay(duration: Option<Duration>) -> Instant {
     }
 }
 
-async fn handle_action(ctx: Context, action: Action) -> Option<Duration> {
+async fn handle_action(ctx: &Context, action: Action) -> Option<Duration> {
     log::debug!("Handle action: {:?}", action);
     match action {
         Action::UpdateSchedule => handle_update_schedule(ctx),
-        Action::ButtonPressed => handle_button_pressed(ctx),
-        Action::ButtonLongPressed => handle_button_long_pressed(ctx),
+        Action::ButtonPressed => handle_button_pressed(ctx).await,
+        Action::ButtonLongPressed => handle_button_long_pressed(ctx).await,
     }
 }
 
-fn handle_update_schedule(ctx: Context) -> Option<Duration> {
+fn handle_update_schedule(ctx: &Context) -> Option<Duration> {
     // Skip update if not idle
     // Will be updated after alarm is stopped
     if ctx.get_status() != Status::Idle {
@@ -98,25 +98,39 @@ fn handle_update_schedule(ctx: Context) -> Option<Duration> {
     Some(duration_until_next_action(ctx).unwrap_or(Duration::from_secs(1)))
 }
 
-fn handle_button_pressed(ctx: Context) -> Option<Duration> {
+async fn handle_button_pressed(ctx: &Context) -> Option<Duration> {
     if ctx.get_status() == Status::Idle {
         // Handle night light
+        let leds = http::get_leds(ctx).await.unwrap_or_default();
+        if leds.is_off() {
+            let req = Leds::night_light();
+            http::set_leds(ctx, &req).await.ok();
+        } else {
+            http::set_leds_off(ctx).await.ok();
+        }
     } else {
         // Handle alarm
     }
     return None;
 }
 
-fn handle_button_long_pressed(ctx: Context) -> Option<Duration> {
+async fn handle_button_long_pressed(ctx: &Context) -> Option<Duration> {
     if ctx.get_status() == Status::Idle {
         // Handle night light
+        let leds = http::get_leds(ctx).await.unwrap_or_default();
+        if leds.is_off() {
+            let req = Leds::night_light_dark();
+            http::set_leds(ctx, &req).await.ok();
+        } else {
+            http::set_leds_off(ctx).await.ok();
+        }
     } else {
         // Handle alarm
     }
     return None;
 }
 
-async fn handle_next_action(ctx: Context) {
+async fn handle_next_action(ctx: &Context) {
     // Fetch next alarm from state
     let next_alarm = ctx.get_next_alarms_action();
 
@@ -148,7 +162,10 @@ async fn handle_next_action(ctx: Context) {
 
 async fn handle_next_action_ring(_alarm: Alarm) {}
 
-async fn handle_next_action_skip(ctx: Context, mut alarm: Alarm) {
+async fn handle_next_action_skip(ctx: &Context, mut alarm: Alarm) {
     alarm.skip_next = false;
-    http::update_alarm(ctx, alarm).await;
+    http::update_alarm(ctx, alarm)
+        .await
+        .map_err(|e| log::error!("Failed to update alarm: {}", e))
+        .ok();
 }

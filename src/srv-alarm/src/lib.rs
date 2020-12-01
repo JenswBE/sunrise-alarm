@@ -35,14 +35,17 @@ pub async fn run(config: models::Config) {
     let ctx = models::Context::new(config, radio);
 
     // Fetch alarms
-    let alarms = http::get_alarms(ctx.clone()).await;
+    let alarms = http::get_alarms(&ctx)
+        .await
+        .map_err(|_| std::process::exit(1))
+        .unwrap();
     ctx.set_alarms(alarms);
 
     // Setup manager
     manager::start(ctx.clone(), receiver);
 
     // Initial update of next alarms
-    time::update_next_alarms(ctx.clone());
+    time::update_next_alarms(&ctx);
 
     // Setup MQTT
     let _mqtt_client = mqtt::get_client(ctx.clone()).await;
