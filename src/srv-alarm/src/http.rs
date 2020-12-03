@@ -1,5 +1,4 @@
-use futures_util::TryFutureExt;
-use reqwest::Error;
+use reqwest::{Error, Response, Url};
 use serde::{Deserialize, Serialize};
 
 use crate::models::Context;
@@ -10,40 +9,37 @@ use sunrise_common::alarm::Alarm;
 // ==============================================
 
 /// srv-config: GET /alarms
-pub async fn get_alarms(ctx: &Context) -> Result<Vec<Alarm>, Error> {
+pub async fn get_alarms(ctx: &Context) -> Result<Vec<Alarm>, String> {
     let url = ctx.config.hosts.srv_config.join("alarms").unwrap();
-    let response = ctx.client.get(url).send().await;
-    if let Ok(response) = response {
-        response
-            .error_for_status()
-            .map_err(|e| {
-                log::error!("Failed to fetch alarms: {}", e);
-                return e;
-            })
-            .ok();
-    }
+    let response = ctx
+        .client
+        .get(url.clone())
+        .send()
+        .await
+        .map_err(format_error("Failed to GET alarms", url.clone()))?;
 
-    response.json().await.map_err(|e| {
-        log::error!("Failed to parse alarms: {}", e);
-        return e;
-    })
+    error_for_status(response, "Failed to GET alarms")
+        .await?
+        .json()
+        .await
+        .map_err(format_error("Failed to parse alarms after GET", url))
 }
 
 /// srv-config: PUT /alarms/{alarm_id}
-pub async fn update_alarm(ctx: &Context, alarm: Alarm) -> Result<(), Error> {
+pub async fn update_alarm(ctx: &Context, alarm: Alarm) -> Result<(), String> {
     let path = format!("alarms/{}", alarm.id);
     let url = ctx.config.hosts.srv_config.join(&path).unwrap();
-    ctx.client
-        .put(url)
+    let response = ctx
+        .client
+        .put(url.clone())
         .json(&alarm)
         .send()
         .await
-        .and_then(|r| r.error_for_status())
-        .map_err(|e| {
-            log::error!("Failed to fetch alarms: {}", e);
-            return e;
-        })
-        .map(|_| ()) // We don't care about response
+        .map_err(format_error("Failed to PUT alarm", url))?;
+
+    error_for_status(response, "Failed to PUT alarm")
+        .await
+        .map(|_| ()) // We don't care about response body
 }
 
 // ==============================================
@@ -53,6 +49,8 @@ pub async fn update_alarm(ctx: &Context, alarm: Alarm) -> Result<(), Error> {
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Leds {
     color: LedsColor,
+
+    #[serde(skip_serializing_if = "Option::is_none")]
     brightness: Option<u8>,
 }
 
@@ -108,46 +106,77 @@ pub enum LedsColor {
 }
 
 /// srv-physical: GET /leds
-pub async fn get_leds(ctx: &Context) -> Result<Leds, Error> {
+pub async fn get_leds(ctx: &Context) -> Result<Leds, String> {
     let url = ctx.config.hosts.srv_physical.join("leds").unwrap();
-    ctx.client
-        .get(url)
+    let response = ctx
+        .client
+        .get(url.clone())
         .send()
-        .and_then(|r| r.json())
         .await
-        .map_err(|e| {
-            log::error!("Failed to get leds: {}", e);
-            return e;
-        })
+        .map_err(format_error("Failed to GET leds", url.clone()))?;
+
+    error_for_status(response, "Failed to GET leds")
+        .await?
+        .json()
+        .await
+        .map_err(format_error("Failed to parse leds after GET", url))
 }
 
 /// srv-physical: PUT /leds
-pub async fn set_leds(ctx: &Context, req: &Leds) -> Result<(), Error> {
+pub async fn set_leds(ctx: &Context, req: &Leds) -> Result<(), String> {
     let url = ctx.config.hosts.srv_physical.join("leds").unwrap();
-    ctx.client
-        .put(url)
+    let response = ctx
+        .client
+        .put(url.clone())
         .json(req)
         .send()
         .await
-        .and_then(|r| r.error_for_status())
-        .map_err(|e| {
-            log::error!("Failed to set leds: {:?}", e);
-            return e;
-        })
-        .map(|_| ()) // We don't care about response
+        .map_err(format_error("Failed to PUT leds", url))?;
+
+    error_for_status(response, "Failed to PUT leds")
+        .await
+        .map(|_| ()) // We don't care about response body
 }
 
 /// srv-physical: DELETE /leds
-pub async fn set_leds_off(ctx: &Context) -> Result<(), Error> {
+pub async fn set_leds_off(ctx: &Context) -> Result<(), String> {
     let url = ctx.config.hosts.srv_physical.join("leds").unwrap();
-    ctx.client
-        .delete(url)
+    let response = ctx
+        .client
+        .delete(url.clone())
         .send()
         .await
-        .and_then(|r| r.error_for_status())
-        .map_err(|e| {
-            log::error!("Failed to set leds to off: {}", e);
-            return e;
-        })
-        .map(|_| ()) // We don't care about response
+        .map_err(format_error("Failed to DELETE leds", url))?;
+
+    error_for_status(response, "Failed to DELETE leds")
+        .await
+        .map(|_| ()) // We don't care about response body
+}
+
+// ==============================================
+// =                  HELPERS                   =
+// ==============================================
+fn format_error(message: &'static str, url: Url) -> Box<dyn Fn(Error) -> String> {
+    Box::new(move |error: Error| {
+        let msg = format!("{}: {} - {}", message, url, error);
+        log::error!("{}", msg);
+        msg
+    })
+}
+
+async fn error_for_status(response: Response, message: &'static str) -> Result<Response, String> {
+    let status = response.status();
+    let url = response.url().clone();
+    if status.is_client_error() || status.is_server_error() {
+        let err = format!(
+            "{}: {} {} - {:?}",
+            message,
+            url,
+            status,
+            response.text().await
+        );
+        log::error!("{}", err);
+        return Err(err);
+    }
+    Ok(response)
 }

@@ -62,7 +62,7 @@ fn handle_button_pressed(ctx: &Context) {
 
 fn handle_button_long_pressed(ctx: &Context) {
     ctx.radio
-        .send(Action::ButtonPressed)
+        .send(Action::ButtonLongPressed)
         .map_err(|e| log::error!("Failed to notify manager about button long pressed: {}", e))
         .ok();
 }
