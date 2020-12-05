@@ -47,7 +47,7 @@ async fn stop_music(remote: Remote) -> Result<impl warp::Reply, Infallible> {
 fn post_volume_increase(
     remote: Remote,
 ) -> impl Filter<Extract = impl warp::Reply, Error = warp::Rejection> + Clone {
-    warp::path!("music")
+    warp::path!("volume" / "increase")
         .and(warp::post())
         .and(with_remote(remote))
         .and_then(increase_volume)
