@@ -8,15 +8,17 @@ use crate::player::{Command, Remote};
 pub fn filters(
     remote: Remote,
 ) -> impl Filter<Extract = impl warp::Reply, Error = warp::Rejection> + Clone {
-    start(remote.clone()).or(stop(remote.clone()))
+    post_music(remote.clone())
+        .or(delete_music(remote.clone()))
+        .or(post_volume_increase(remote))
 }
 
-/// PUT /music
-fn start(
+/// POST /music
+fn post_music(
     remote: Remote,
 ) -> impl Filter<Extract = impl warp::Reply, Error = warp::Rejection> + Clone {
     warp::path!("music")
-        .and(warp::put())
+        .and(warp::post())
         .and(with_remote(remote))
         .and_then(start_music)
 }
@@ -27,7 +29,7 @@ async fn start_music(remote: Remote) -> Result<impl warp::Reply, Infallible> {
 }
 
 /// DELETE /music
-fn stop(
+fn delete_music(
     remote: Remote,
 ) -> impl Filter<Extract = impl warp::Reply, Error = warp::Rejection> + Clone {
     warp::path!("music")
@@ -40,6 +42,25 @@ async fn stop_music(remote: Remote) -> Result<impl warp::Reply, Infallible> {
     remote.send(Command::Stop).unwrap();
     Ok(warp::reply())
 }
+
+/// POST /volume/increase
+fn post_volume_increase(
+    remote: Remote,
+) -> impl Filter<Extract = impl warp::Reply, Error = warp::Rejection> + Clone {
+    warp::path!("music")
+        .and(warp::post())
+        .and(with_remote(remote))
+        .and_then(increase_volume)
+}
+
+async fn increase_volume(remote: Remote) -> Result<impl warp::Reply, Infallible> {
+    remote.send(Command::IncreaseVolume).unwrap();
+    Ok(warp::reply())
+}
+
+// ==============================================
+// =                   HELPERS                  =
+// ==============================================
 
 fn with_remote(
     remote: Remote,
