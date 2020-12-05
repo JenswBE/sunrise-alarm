@@ -10,6 +10,7 @@ pub mod http;
 pub mod manager;
 pub mod models;
 pub mod mqtt;
+pub mod ringer;
 pub mod time;
 
 /// Provides a RESTful web server for general management of Sunrise Alarm

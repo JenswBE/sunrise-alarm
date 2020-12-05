@@ -6,6 +6,7 @@ use tokio::time::{self, Duration, Instant};
 
 use crate::http::{self, Leds};
 use crate::models::{Context, Status};
+use crate::ringer::{self, Action as RingerAction, Ringer};
 use crate::time::update_next_alarms;
 use sunrise_common::alarm::{Alarm, NextAction};
 
@@ -25,11 +26,16 @@ pub fn create_radios() -> (Radio, RadioReceiver) {
 
 pub fn start(ctx: Context, mut rx: RadioReceiver) {
     tokio::spawn(async move {
+        // Setup initial delay
         let fallback = Duration::from_secs(1);
         let duration = duration_until_next_action(&ctx).unwrap_or(fallback);
         let mut delay_next_action = time::delay_for(duration).fuse();
         log::debug!("Initial delay set to {:?}s", duration.as_secs());
 
+        // Setup ringer
+        let ringer = ringer::start(ctx.clone());
+
+        // Start manager loop
         loop {
             select! {
                 action = rx.recv() => {
@@ -38,9 +44,11 @@ pub fn start(ctx: Context, mut rx: RadioReceiver) {
                         break;
                     }
 
-                    let duration = handle_action(&ctx, action.unwrap()).await;
-                    let delay = calculate_delay(duration);
-                    delay_next_action = time::delay_until(delay).fuse();
+                    let duration = handle_action(&ctx, &ringer, action.unwrap()).await;
+                    if let Some(duration) = duration {
+                        log::debug!("Reset delay to {:?}s", duration.as_secs());
+                        delay_next_action = time::delay_until(Instant::now() + duration).fuse();
+                    }
                 }
 
                 _ = &mut delay_next_action => {
@@ -62,23 +70,12 @@ fn duration_until_next_action(ctx: &Context) -> Result<Duration, String> {
         .map_err(|_| "Next action already passed".to_string())
 }
 
-/// Calculate next Instant until we have to sleep
-fn calculate_delay(duration: Option<Duration>) -> Instant {
-    if let Some(duration) = duration {
-        log::debug!("Reset delay to {:?}s", duration.as_secs());
-        return Instant::now() + duration;
-    } else {
-        log::debug!("No next action. Force check in 15 minutes");
-        return Instant::now() + Duration::from_secs(60 * 15);
-    }
-}
-
-async fn handle_action(ctx: &Context, action: Action) -> Option<Duration> {
+async fn handle_action(ctx: &Context, ringer: &Ringer, action: Action) -> Option<Duration> {
     log::debug!("Handle action: {:?}", action);
     match action {
         Action::UpdateSchedule => handle_update_schedule(ctx),
-        Action::ButtonPressed => handle_button_pressed(ctx).await,
-        Action::ButtonLongPressed => handle_button_long_pressed(ctx).await,
+        Action::ButtonPressed => handle_button_pressed(ctx, ringer).await,
+        Action::ButtonLongPressed => handle_button_long_pressed(ctx, ringer).await,
     }
 }
 
@@ -98,7 +95,7 @@ fn handle_update_schedule(ctx: &Context) -> Option<Duration> {
     Some(duration_until_next_action(ctx).unwrap_or(Duration::from_secs(1)))
 }
 
-async fn handle_button_pressed(ctx: &Context) -> Option<Duration> {
+async fn handle_button_pressed(ctx: &Context, ringer: &Ringer) -> Option<Duration> {
     if ctx.get_status() == Status::Idle {
         // Handle night light
         let leds = http::get_leds(ctx).await.unwrap_or_default();
@@ -109,12 +106,17 @@ async fn handle_button_pressed(ctx: &Context) -> Option<Duration> {
             http::set_leds_off(ctx).await.ok();
         }
     } else {
-        // Handle alarm
+        // Stop ringer
+        ctx.set_status(Status::Idle);
+        ringer
+            .send(RingerAction::Stop)
+            .map_err(|e| log::error!("Failed to stop ringer: {}", e))
+            .ok();
     }
     return None;
 }
 
-async fn handle_button_long_pressed(ctx: &Context) -> Option<Duration> {
+async fn handle_button_long_pressed(ctx: &Context, ringer: &Ringer) -> Option<Duration> {
     if ctx.get_status() == Status::Idle {
         // Handle night light
         let leds = http::get_leds(ctx).await.unwrap_or_default();
@@ -125,7 +127,12 @@ async fn handle_button_long_pressed(ctx: &Context) -> Option<Duration> {
             http::set_leds_off(ctx).await.ok();
         }
     } else {
-        // Handle alarm
+        // Stop ringer
+        ctx.set_status(Status::Idle);
+        ringer
+            .send(RingerAction::Stop)
+            .map_err(|e| log::error!("Failed to stop ringer: {}", e))
+            .ok();
     }
     return None;
 }
