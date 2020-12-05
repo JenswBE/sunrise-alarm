@@ -101,6 +101,7 @@ class Leds:
 
         # Set initial state
         self.set_color(PresetColor.RED, 1)
+        self._sunrise = True
 
         # Set timer to update sunrise
         config = settings.get()
