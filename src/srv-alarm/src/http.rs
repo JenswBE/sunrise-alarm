@@ -43,6 +43,55 @@ pub async fn update_alarm(ctx: &Context, alarm: Alarm) -> Result<(), String> {
 }
 
 // ==============================================
+// =                    MUSIC                   =
+// ==============================================
+
+/// srv-audio: POST /music
+pub async fn start_music(ctx: &Context) -> Result<(), String> {
+    let url = ctx.config.hosts.srv_audio.join("music").unwrap();
+    let response = ctx
+        .client
+        .post(url.clone())
+        .send()
+        .await
+        .map_err(format_error("Failed to POST music", url))?;
+
+    error_for_status(response, "Failed to POST music")
+        .await
+        .map(|_| ()) // We don't care about response body
+}
+
+/// srv-audio: DELETE /music
+pub async fn stop_music(ctx: &Context) -> Result<(), String> {
+    let url = ctx.config.hosts.srv_audio.join("music").unwrap();
+    let response = ctx
+        .client
+        .put(url.clone())
+        .send()
+        .await
+        .map_err(format_error("Failed to DELETE music", url))?;
+
+    error_for_status(response, "Failed to DELETE music")
+        .await
+        .map(|_| ()) // We don't care about response body
+}
+
+/// srv-audio: POST /volume/increase
+pub async fn increase_music_volume(ctx: &Context) -> Result<(), String> {
+    let url = ctx.config.hosts.srv_audio.join("volume/increase").unwrap();
+    let response = ctx
+        .client
+        .post(url.clone())
+        .send()
+        .await
+        .map_err(format_error("Failed to POST volume/increase", url))?;
+
+    error_for_status(response, "Failed to POST volume/increase")
+        .await
+        .map(|_| ()) // We don't care about response body
+}
+
+// ==============================================
 // =                    LEDS                    =
 // ==============================================
 
@@ -149,6 +198,36 @@ pub async fn set_leds_off(ctx: &Context) -> Result<(), String> {
         .map_err(format_error("Failed to DELETE leds", url))?;
 
     error_for_status(response, "Failed to DELETE leds")
+        .await
+        .map(|_| ()) // We don't care about response body
+}
+
+/// srv-physical: POST /leds/sunrise
+pub async fn start_sunrise(ctx: &Context) -> Result<(), String> {
+    let url = ctx.config.hosts.srv_physical.join("leds/sunrise").unwrap();
+    let response = ctx
+        .client
+        .post(url.clone())
+        .send()
+        .await
+        .map_err(format_error("Failed to POST leds/sunrise", url))?;
+
+    error_for_status(response, "Failed to POST leds/sunrise")
+        .await
+        .map(|_| ()) // We don't care about response body
+}
+
+/// srv-physical: DELETE leds/sunrise
+pub async fn stop_sunrise(ctx: &Context) -> Result<(), String> {
+    let url = ctx.config.hosts.srv_physical.join("leds/sunrise").unwrap();
+    let response = ctx
+        .client
+        .delete(url.clone())
+        .send()
+        .await
+        .map_err(format_error("Failed to DELETE leds/sunrise", url))?;
+
+    error_for_status(response, "Failed to DELETE leds/sunrise")
         .await
         .map(|_| ()) // We don't care about response body
 }

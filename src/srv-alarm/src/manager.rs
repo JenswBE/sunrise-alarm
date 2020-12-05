@@ -52,7 +52,7 @@ pub fn start(ctx: Context, mut rx: RadioReceiver) {
                 }
 
                 _ = &mut delay_next_action => {
-                    handle_next_action(&ctx).await;
+                    handle_next_action(&ctx, &ringer).await;
                     // Delay will be set by handle_action (through UpdateSchedule)
                 }
             }
@@ -137,7 +137,7 @@ async fn handle_button_long_pressed(ctx: &Context, ringer: &Ringer) -> Option<Du
     return None;
 }
 
-async fn handle_next_action(ctx: &Context) {
+async fn handle_next_action(ctx: &Context, ringer: &Ringer) {
     // Fetch next alarm from state
     let next_alarm = ctx.get_next_alarms_action();
 
@@ -161,13 +161,20 @@ async fn handle_next_action(ctx: &Context) {
     // Perform action
     log::debug!("Handle next action: {:?}", next_alarm.next_action);
     match next_alarm.next_action {
-        NextAction::Ring => handle_next_action_ring(alarm).await,
+        NextAction::Ring => handle_next_action_ring(ctx, ringer, alarm).await,
         NextAction::Skip => handle_next_action_skip(ctx, alarm).await,
         _ => (),
     }
 }
 
-async fn handle_next_action_ring(_alarm: Alarm) {}
+async fn handle_next_action_ring(ctx: &Context, ringer: &Ringer, alarm: Alarm) {
+    log::debug!("Starting alarm {} ({})", alarm.id, alarm.name);
+    ctx.set_status(Status::Ring);
+    ringer
+        .send(RingerAction::Start)
+        .map_err(|e| log::error!("Failed to start ringer: {}", e))
+        .ok();
+}
 
 async fn handle_next_action_skip(ctx: &Context, mut alarm: Alarm) {
     alarm.skip_next = false;

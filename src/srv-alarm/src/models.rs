@@ -121,8 +121,7 @@ pub struct State {
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub enum Status {
     Idle,
-    RingLight,
-    RingSound,
+    Ring,
 }
 
 impl Default for Status {
