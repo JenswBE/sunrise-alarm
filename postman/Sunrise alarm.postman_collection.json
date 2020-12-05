@@ -184,6 +184,141 @@
 			"name": "srv-physical",
 			"item": [
 				{
+					"name": "Get LEDs",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"color\": \"WARM_WHITE\",\n  \"brightness\": 100\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{srv-physical-base-url}}/leds",
+							"host": [
+								"{{srv-physical-base-url}}"
+							],
+							"path": [
+								"leds"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Set LEDs",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"color\": \"WARM_WHITE\",\n  \"brightness\": 100\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{srv-physical-base-url}}/leds",
+							"host": [
+								"{{srv-physical-base-url}}"
+							],
+							"path": [
+								"leds"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Set LEDs off",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"color\": \"WARM_WHITE\",\n  \"brightness\": 100\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{srv-physical-base-url}}/leds",
+							"host": [
+								"{{srv-physical-base-url}}"
+							],
+							"path": [
+								"leds"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Start sunrise",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"color\": \"WARM_WHITE\",\n  \"brightness\": 100\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{srv-physical-base-url}}/leds/sunrise",
+							"host": [
+								"{{srv-physical-base-url}}"
+							],
+							"path": [
+								"leds",
+								"sunrise"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Stop sunrise",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"color\": \"WARM_WHITE\",\n  \"brightness\": 100\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{srv-physical-base-url}}/leds/sunrise",
+							"host": [
+								"{{srv-physical-base-url}}"
+							],
+							"path": [
+								"leds",
+								"sunrise"
+							]
+						}
+					},
+					"response": []
+				},
+				{
 					"name": "Mock: Button pressed",
 					"request": {
 						"method": "POST",
@@ -242,7 +377,7 @@
 						}
 					],
 					"request": {
-						"method": "PUT",
+						"method": "POST",
 						"header": [],
 						"url": {
 							"raw": "{{srv-audio-base-url}}/music",
@@ -268,6 +403,36 @@
 							],
 							"path": [
 								"music"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Increase volume",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "4c3eb103-cc35-4f8c-a9b3-f368f391b9b8",
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{srv-audio-base-url}}/volume/increase",
+							"host": [
+								"{{srv-audio-base-url}}"
+							],
+							"path": [
+								"volume",
+								"increase"
 							]
 						}
 					},
