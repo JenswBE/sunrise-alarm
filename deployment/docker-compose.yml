@@ -22,6 +22,17 @@ services:
       - "TZ=${TIMEZONE}"
       - "MQTT_BROKER_HOST=mosquitto"
 
+  srv-physical:
+    image: jenswbe/sunrise-alarm-srv-physical
+    container_name: srv-physical
+    restart: always
+    networks:
+      - sunrise-alarm
+    environment:
+      - "MOCK=True"
+      - "MQTT_BROKER_HOST=mosquitto"
+      - "MQTT_CLIENT_ID=srv-physical-docker"
+
   srv-audio:
     image: jenswbe/sunrise-alarm-srv-audio
     container_name: srv-audio
@@ -35,6 +46,26 @@ services:
       - "TZ=${TIMEZONE}"
       - "MQTT_BROKER_HOST=mosquitto"
 
+  api-watchface:
+    image: devopsfaith/krakend
+    container_name: api-watchface
+    restart: always
+    networks:
+      - sunrise-alarm
+    volumes:
+      - "../src/api-watchface:/etc/krakend:ro"
+    cap_add:
+      - NET_BIND_SERVICE
+
+  gui-watchface:
+    image: jenswbe/sunrise-alarm-gui-watchface
+    container_name: gui-watchface
+    restart: always
+    networks:
+      - sunrise-alarm
+    ports:
+      - "8080:8080"
+
   mosquitto:
     image: eclipse-mosquitto:latest
     container_name: mosquitto
@@ -45,6 +76,12 @@ services:
       - "mosquitto-log:/mosquitto/log"
     environment:
       - "TZ=${TIMEZONE}"
+
+volumes:
+  srv-config-data:
+  srv-audio-music:
+  mosquitto-data:
+  mosquitto-log:
 
 networks:
   sunrise-alarm:
