@@ -39,7 +39,7 @@ pub async fn update_alarm(ctx: &Context, alarm: Alarm) -> Result<(), String> {
 
     error_for_status(response, "Failed to PUT alarm")
         .await
-        .map(|_| ()) // We don't care about response body
+        .map(drop)
 }
 
 // ==============================================
@@ -58,7 +58,7 @@ pub async fn start_music(ctx: &Context) -> Result<(), String> {
 
     error_for_status(response, "Failed to POST music")
         .await
-        .map(|_| ()) // We don't care about response body
+        .map(drop)
 }
 
 /// srv-audio: DELETE /music
@@ -73,7 +73,7 @@ pub async fn stop_music(ctx: &Context) -> Result<(), String> {
 
     error_for_status(response, "Failed to DELETE music")
         .await
-        .map(|_| ()) // We don't care about response body
+        .map(drop)
 }
 
 /// srv-audio: POST /volume/increase
@@ -88,7 +88,7 @@ pub async fn increase_music_volume(ctx: &Context) -> Result<(), String> {
 
     error_for_status(response, "Failed to POST volume/increase")
         .await
-        .map(|_| ()) // We don't care about response body
+        .map(drop)
 }
 
 // ==============================================
@@ -184,7 +184,7 @@ pub async fn set_leds(ctx: &Context, req: &Leds) -> Result<(), String> {
 
     error_for_status(response, "Failed to PUT leds")
         .await
-        .map(|_| ()) // We don't care about response body
+        .map(drop)
 }
 
 /// srv-physical: DELETE /leds
@@ -199,7 +199,7 @@ pub async fn set_leds_off(ctx: &Context) -> Result<(), String> {
 
     error_for_status(response, "Failed to DELETE leds")
         .await
-        .map(|_| ()) // We don't care about response body
+        .map(drop)
 }
 
 /// srv-physical: POST /leds/sunrise
@@ -214,7 +214,7 @@ pub async fn start_sunrise(ctx: &Context) -> Result<(), String> {
 
     error_for_status(response, "Failed to POST leds/sunrise")
         .await
-        .map(|_| ()) // We don't care about response body
+        .map(drop)
 }
 
 /// srv-physical: DELETE leds/sunrise
@@ -229,7 +229,7 @@ pub async fn stop_sunrise(ctx: &Context) -> Result<(), String> {
 
     error_for_status(response, "Failed to DELETE leds/sunrise")
         .await
-        .map(|_| ()) // We don't care about response body
+        .map(drop)
 }
 
 // ==============================================
