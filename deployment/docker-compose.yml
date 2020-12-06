@@ -6,6 +6,8 @@ services:
     restart: always
     networks:
       - sunrise-alarm
+    ports:
+      - "127.0.0.1:8000:8080"
     environment:
       - "TZ=${TIMEZONE}"
       - "MQTT_BROKER_HOST=mosquitto"
@@ -16,6 +18,8 @@ services:
     restart: always
     networks:
       - sunrise-alarm
+    ports:
+      - "127.0.0.1:8001:8080"
     volumes:
       - "srv-config-data:/data"
     environment:
@@ -28,6 +32,8 @@ services:
     restart: always
     networks:
       - sunrise-alarm
+    ports:
+      - "127.0.0.1:8002:8080"
     environment:
       - "MOCK=True"
       - "MQTT_BROKER_HOST=mosquitto"
@@ -39,6 +45,8 @@ services:
     restart: always
     networks:
       - sunrise-alarm
+    ports:
+      - "127.0.0.1:8003:8080"
     volumes:
       - "srv-audio-music:/music"
       - "/tmp/pa-sunrise-alarm.socket:/pulse/pulseaudio.socket"
@@ -52,6 +60,8 @@ services:
     restart: always
     networks:
       - sunrise-alarm
+    ports:
+      - "127.0.0.1:8004:8080"
     volumes:
       - "../src/api-watchface:/etc/krakend:ro"
     cap_add:
