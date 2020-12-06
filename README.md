@@ -19,7 +19,9 @@ DIY alarm clock using microservices
 | mosquitto     | MQTT broker                                         |          [![DockerHub Repo](https://img.shields.io/badge/DockerHub-repo-blue?logo=docker)](https://hub.docker.com/_/eclipse-mosquitto)          | 1883, 9001 |    N/A     |       N/A       |
 
 ## Development
+
 Start Docker Compose with following command:
+
 ```bash
 COMPOSE_DOCKER_CLI_BUILD=1 DOCKER_BUILDKIT=1 docker-compose build --parallel
 docker-compose up -d
@@ -27,12 +29,37 @@ docker-compose up -d
 
 ## Setup
 
-### PulseAudio
-
-Based on [Arch wiki](https://wiki.archlinux.org/index.php/PulseAudio/Examples#Allowing_multiple_users_to_use_PulseAudio_at_the_same_time)
-and [Ubuntu man pages](http://manpages.ubuntu.com/manpages/xenial/man5/default.pa.5.html)
-
 ```bash
+# Enable SSH access
+sudo raspi-config
+
+# Give GPU 256MB of memory
+sudo raspi-config nonint do_memory_split 256
+
+# Set hostname
+sudo hostnamectl set-hostname sunrise
+
+# Upgrade system
+sudo apt update
+sudo apt dist-upgrade -y
+
+# Install dependencies
+# Based on:
+#   - https://howtoraspberrypi.com/raspberry-pi-virtual-keyboard/
+sudo apt install -y midori firefox-esr florence at-spi2-core
+
+# Install docker
+curl -fsSL https://get.docker.com -o get-docker.sh
+sudo sh get-docker.sh
+sudo usermod -aG docker pi
+
+# Install docker-compose
+sudo pip3 install docker-compose
+
+# Configure PulseAudio
+# Based on:
+#   - http://manpages.ubuntu.com/manpages/xenial/man5/default.pa.5.html
+#   - https://wiki.archlinux.org/index.php/PulseAudio/Examples#Allowing_multiple_users_to_use_PulseAudio_at_the_same_time
 tee ~/.config/pulse/default.pa <<EOF
 #!/usr/bin/pulseaudio -nF
 
@@ -41,4 +68,15 @@ tee ~/.config/pulse/default.pa <<EOF
 # Sunrise alarm
 load-module module-native-protocol-unix auth-anonymous=1 socket=/tmp/pa-sunrise-alarm.socket
 EOF
+
+# Reboot
+sudo reboot
+
+# Clone this repo
+git clone https://github.com/JenswBE/sunrise-alarm
+
+# Start alarm
+cd sunrise-alarm/deployment
+docker-compose up -d
+xdg-open "http://localhost:8080"
 ```
