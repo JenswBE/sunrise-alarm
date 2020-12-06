@@ -104,6 +104,7 @@ services:
   mosquitto:
     image: eclipse-mosquitto:latest
     container_name: mosquitto
+    restart: always
     networks:
       - sunrise-alarm
     volumes:
