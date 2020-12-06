@@ -52,7 +52,7 @@ class Button:
             self._first_press_timestamp = datetime.now()
 
         # Schedule a check for the press length
-        loop = asyncio.get_running_loop()
+        loop = asyncio.get_event_loop()
         loop.call_later(0.1, self.check_press_length)
 
     def check_press_length(self):
@@ -60,7 +60,7 @@ class Button:
         # Check if button is still pressed
         if self._button.is_pressed:
             # Schedule a new check
-            loop = asyncio.get_running_loop()
+            loop = asyncio.get_event_loop()
             loop.call_later(0.1, self.check_press_length)
 
             # Handle edge case due to multiple clicks

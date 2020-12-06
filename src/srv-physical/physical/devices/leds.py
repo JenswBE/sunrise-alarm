@@ -106,7 +106,7 @@ class Leds:
 
         # Set timer to update sunrise
         config = settings.get()
-        loop = asyncio.get_running_loop()
+        loop = asyncio.get_event_loop()
         self._update_sunrise_event = loop.call_later(
             callback=self.update_sunrise_simulation,
             delay=config.LIGHT_INCREASE_DURATION.seconds / 100,
@@ -135,7 +135,7 @@ class Leds:
 
         # Reschedule
         config = settings.get()
-        loop = asyncio.get_running_loop()
+        loop = asyncio.get_event_loop()
         self._update_sunrise_event = loop.call_later(
             callback=self.update_sunrise_simulation,
             delay=config.LIGHT_INCREASE_DURATION.seconds / 100,
