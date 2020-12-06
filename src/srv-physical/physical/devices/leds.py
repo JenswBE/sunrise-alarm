@@ -2,6 +2,7 @@
 
 import asyncio
 import atexit
+import logging
 from collections import namedtuple
 from enum import Enum
 
@@ -27,7 +28,7 @@ class PresetColor(str, Enum):
 
 
 def _color_from_preset(preset: PresetColor) -> Color:
-    globals()[preset.value]
+    return globals()[preset.value]
 
 
 class Leds:
