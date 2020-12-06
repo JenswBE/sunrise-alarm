@@ -1,11 +1,20 @@
 ARG SERVICE_NAME=srv-physical
 
-FROM python:3.8-slim
+# Setup builder
+FROM --platform=${TARGETPLATFORM} python:3.8-slim AS base
 ARG SERVICE_NAME
-
-# Install dependencies
 COPY ${SERVICE_NAME}/requirements.txt .
+
+# Install OS dependencies
+FROM base AS base-amd64
+RUN apt-get update && apt-get -qq install build-essential
+
+FROM base AS base-arm
 RUN apt-get update && apt-get -qq install build-essential python3-rpi.gpio
+
+# Install python dependencies
+FROM builder-${TARGETARCH}
+ARG SERVICE_NAME
 RUN pip install --no-cache-dir -U pip wheel && \
     pip install --no-cache-dir gunicorn uvicorn uvloop httptools
 RUN pip install --no-cache-dir -r requirements.txt
