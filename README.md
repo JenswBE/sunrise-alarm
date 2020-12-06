@@ -36,6 +36,9 @@ sudo raspi-config
 # Give GPU 256MB of memory
 sudo raspi-config nonint do_memory_split 256
 
+# Enable I2C (0 = enabled, 1 = disabled)
+sudo raspi-config nonint do_i2c 0
+
 # Set hostname
 sudo hostnamectl set-hostname sunrise
 
