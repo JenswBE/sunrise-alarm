@@ -47,7 +47,7 @@ services:
       - "127.0.0.1:8002:8080"
     environment:
       - "MQTT_BROKER_HOST=mosquitto"
-      - "MQTT_CLIENT_ID=srv-physical-docker"
+      - "MQTT_CLIENT_ID=srv-physical"
 
   srv-audio:
     image: jenswbe/sunrise-alarm-srv-audio

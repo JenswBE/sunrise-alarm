@@ -45,7 +45,7 @@ services:
       - "DEBUG=True"
       - "MOCK=True"
       - "MQTT_BROKER_HOST=mosquitto"
-      - "MQTT_CLIENT_ID=srv-physical-docker"
+      - "MQTT_CLIENT_ID=srv-physical"
 
   srv-audio:
     build:

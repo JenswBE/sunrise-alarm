@@ -1,5 +1,7 @@
 """This module handles publishing and receiving of MQTT messages."""
 
+import random
+
 from gmqtt import Client
 from gmqtt.mqtt.constants import MQTTv311
 from starlette.requests import Request
@@ -37,7 +39,9 @@ async def get() -> MQTT:
 
     # Build new client from settings
     config = settings.get()
-    client = Client(config.MQTT_CLIENT_ID)
+    client_id = "{}-{:08x}".format(config.MQTT_CLIENT_ID,
+                                   random.randrange(2**32))
+    client = Client(client_id)
     await client.connect(config.MQTT_BROKER_HOST, config.MQTT_BROKER_PORT, keepalive=60, version=MQTTv311)
     mqtt = MQTT(client)
     return mqtt
