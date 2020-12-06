@@ -39,6 +39,14 @@ sudo raspi-config nonint do_memory_split 256
 # Set hostname
 sudo hostnamectl set-hostname sunrise
 
+# Disable swap
+# Based on https://raspberrypi.stackexchange.com/questions/84390/how-to-permanently-disable-swap-on-raspbian-stretch-lite
+sudo dphys-swapfile swapoff
+sudo dphys-swapfile uninstall
+sudo systemctl disable dphys-swapfile
+sudo update-rc.d dphys-swapfile remove
+sudo apt purge dphys-swapfile
+
 # Upgrade system
 sudo apt update
 sudo apt dist-upgrade -y
