@@ -11,7 +11,7 @@ FROM base AS base-arm
 RUN apt-get update && apt-get -qq install build-essential python3-rpi.gpio
 
 # Install python dependencies
-FROM builder-${TARGETARCH}
+FROM base-${TARGETARCH}
 ARG SERVICE_NAME
 COPY ${SERVICE_NAME}/requirements.txt .
 RUN pip install --no-cache-dir -U pip wheel && \
