@@ -38,6 +38,7 @@ services:
     image: jenswbe/sunrise-alarm-srv-physical
     container_name: srv-physical
     restart: always
+    privileged: true
     depends_on:
       - mosquitto
     networks:
