@@ -5,7 +5,7 @@ ARG SERVICE_NAME
 
 # Install dependencies
 COPY ${SERVICE_NAME}/requirements.txt .
-RUN apt-get update && apt-get -qq install build-essential
+RUN apt-get update && apt-get -qq install build-essential python3-rpi.gpio
 RUN pip install --no-cache-dir -U pip wheel && \
     pip install --no-cache-dir gunicorn uvicorn uvloop httptools
 RUN pip install --no-cache-dir -r requirements.txt
