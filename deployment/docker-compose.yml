@@ -45,7 +45,6 @@ services:
     ports:
       - "127.0.0.1:8002:8080"
     environment:
-      - "MOCK=True"
       - "MQTT_BROKER_HOST=mosquitto"
       - "MQTT_CLIENT_ID=srv-physical-docker"
 
