@@ -23,11 +23,9 @@ class Button:
     def __init__(self, gpio_pin: int):
         # Setup button
         self._button = GPIOButton(pin=gpio_pin, pull_up=False)
-        self._button.when_pressed = self.handle_press
-
-        # Setup other variables
-        self._first_press_timestamp = None
-        self._is_long_press = False
+        self._button.when_held = self.handle_held
+        self._button.when_released = self.handle_release
+        self._was_held = False
 
     def set_short_press_callback(self, callback):
         """Sets the callback for a short press"""
@@ -37,52 +35,12 @@ class Button:
         """Sets the callback for a long press"""
         self._long_press_callback = callback
 
-    def handle_press(self):
-        """Handle the button press callback"""
-        # Ignore if we are in a long press
-        if self._is_long_press:
-            return
+    def handle_held(self):
+        self._was_held = True
+        if self._long_press_callback is not None:
+            self._long_press_callback()
 
-        # Debounce button
-        if self._first_press_timestamp is not None and datetime.now() - self._first_press_timestamp < DEBOUNCE_DURATION:
-            return
-
-        # Save timestamp of first press
-        if not self._first_press_timestamp:
-            self._first_press_timestamp = datetime.now()
-
-        # Schedule a check for the press length
-        loop = asyncio.get_event_loop()
-        loop.call_later(0.1, self.check_press_length)
-
-    def check_press_length(self):
-        """Check if it's a short or long press"""
-        # Check if button is still pressed
-        if self._button.is_pressed:
-            # Schedule a new check
-            loop = asyncio.get_event_loop()
-            loop.call_later(0.1, self.check_press_length)
-
-            # Handle edge case due to multiple clicks
-            if self._first_press_timestamp is None:
-                return
-
-            # Check if we reached a long press
-            diff = datetime.now() - self._first_press_timestamp
-            if not self._is_long_press and diff > LONG_PRESS_DURATION:
-                # Long press reached
-                self._is_long_press = True
-                if self._long_press_callback is not None:
-                    self._long_press_callback()
-
-            # Long press handled
-            return
-
-        # Handle short press
-        if not self._is_long_press:
-            if self._short_press_callback is not None:
-                self._short_press_callback()
-
-        # Clean state on button released
-        self._first_press_timestamp = None
-        self._is_long_press = False
+    def handle_release(self):
+        if not self._was_held and self._short_press_callback is not None:
+            self._short_press_callback()
+        self._was_held = False

@@ -46,8 +46,13 @@ async def setup_service():
 
     config = settings.get()
     if not config.MOCK:
+        top_button = button.Button(config.BUTTON_GPIO_PIN)
+        top_button.set_short_press_callback(
+            app.state.mqtt.publish_button_pressed())
+        top_button.set_long_press_callback(
+            app.state.mqtt.publish_button_long_pressed())
         app.state.devices = Devices(
-            button=button.Button(config.BUTTON_GPIO_PIN),
+            button=top_button,
             display=display.Display(),
             leds=leds.Leds(),
         )
