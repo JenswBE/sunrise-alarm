@@ -82,6 +82,7 @@ services:
       - "--providers.docker.network=traefik"
       - "--providers.docker.exposedbydefault=false"
       - "--entrypoints.web.address=:8080"
+      - "--entrypoints.web.http.middlewares=cors"
       - "--entrypoints.api.address=:8081"
       - "--api=true"
     labels:
@@ -89,6 +90,9 @@ services:
       - "traefik.http.routers.api.entrypoints=api"
       - "traefik.http.routers.api.rule=PathPrefix(`/`)"
       - "traefik.http.routers.api.service=api@internal"
+      - "traefik.http.middlewares.cors.headers.accesscontrolallowmethods=GET,OPTIONS,POST,PUT,DELETE"
+      - "traefik.http.middlewares.cors.headers.accesscontrolalloworigin=*"
+      - "traefik.http.middlewares.cors.headers.addvaryheader=true"
 
   gui-watchface:
     image: jenswbe/sunrise-alarm-gui-watchface
