@@ -90,7 +90,8 @@ services:
       - "traefik.http.routers.api.entrypoints=api"
       - "traefik.http.routers.api.rule=PathPrefix(`/`)"
       - "traefik.http.routers.api.service=api@internal"
-      - "traefik.http.middlewares.cors.headers.accesscontrolallowmethods=GET,OPTIONS,POST,PUT,DELETE"
+      - "traefik.http.middlewares.cors.headers.accesscontrolallowheaders=*"
+      - "traefik.http.middlewares.cors.headers.accesscontrolallowmethods=*"
       - "traefik.http.middlewares.cors.headers.accesscontrolalloworigin=*"
       - "traefik.http.middlewares.cors.headers.addvaryheader=true"
 
