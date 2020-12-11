@@ -55,9 +55,7 @@ sudo apt update
 sudo apt dist-upgrade -y
 
 # Install dependencies
-# Based on:
-#   - https://howtoraspberrypi.com/raspberry-pi-virtual-keyboard/
-sudo apt install -y midori firefox-esr florence at-spi2-core
+sudo apt install -y firefox-esr onboard
 
 # Install docker
 curl -fsSL https://get.docker.com -o get-docker.sh

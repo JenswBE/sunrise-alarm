@@ -56,6 +56,9 @@ async def setup_service():
             display=display.Display(),
             leds=leds.Leds(),
         )
+
+        # Use DPMS instead of custom sleep for time being
+        app.state.devices.display.enable_keep_awake()
     else:
         app.state.devices = Devices(
             button=None,
