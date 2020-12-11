@@ -14,6 +14,7 @@ services:
     environment:
       - "MQTT_BROKER_HOST=mosquitto"
       - "RUST_BACKTRACE=1"
+      - "RUST_LOG=srv_alarm=debug,srv_alarm::mqtt=info,info"
 
   srv-config:
     build:
@@ -29,6 +30,10 @@ services:
     environment:
       - "MQTT_BROKER_HOST=mosquitto"
       - "RUST_BACKTRACE=1"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.srv-config.entrypoints=web"
+      - "traefik.http.routers.srv-config.rule=PathPrefix(`/alarms`)"
 
   srv-physical:
     build:
@@ -79,6 +84,7 @@ services:
       - "--providers.docker.network=traefik"
       - "--providers.docker.exposedbydefault=false"
       - "--entrypoints.web.address=:8080"
+      - "--entrypoints.web.http.middlewares=cors"
       - "--entrypoints.api.address=:8081"
       - "--api=true"
     labels:
@@ -86,6 +92,10 @@ services:
       - "traefik.http.routers.api.entrypoints=api"
       - "traefik.http.routers.api.rule=PathPrefix(`/`)"
       - "traefik.http.routers.api.service=api@internal"
+      - "traefik.http.middlewares.cors.headers.accesscontrolallowheaders=*"
+      - "traefik.http.middlewares.cors.headers.accesscontrolallowmethods=*"
+      - "traefik.http.middlewares.cors.headers.accesscontrolalloworigin=*"
+      - "traefik.http.middlewares.cors.headers.addvaryheader=true"
 
   gui-watchface:
     build:

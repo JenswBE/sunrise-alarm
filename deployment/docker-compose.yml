@@ -13,6 +13,7 @@ services:
     environment:
       - "TZ=${TIMEZONE}"
       - "MQTT_BROKER_HOST=mosquitto"
+      - "RUST_LOG=srv_alarm=debug,srv_alarm::mqtt=info,info"
 
   srv-config:
     image: jenswbe/sunrise-alarm-srv-config
