@@ -5,6 +5,7 @@ import cloneDeep from "lodash.clonedeep";
 
 Vue.use(Vuex);
 axios.defaults.baseURL = `http://${window.location.hostname}:8004`;
+axios.defaults.baseURL = `http://sunrise.jensw.lan:8004`;
 
 export default new Vuex.Store({
   state: {
@@ -24,7 +25,7 @@ export default new Vuex.Store({
   mutations: {
     setAlarms(state, data) {
       console.debug("mut setAlarms - Input", data);
-      state.alarms = data.alarms.reduce((result, item) => {
+      state.alarms = data.reduce((result, item) => {
         result[item.id] = item;
         return result;
       }, {});
