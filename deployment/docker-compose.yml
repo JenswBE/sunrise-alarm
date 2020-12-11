@@ -73,8 +73,8 @@ services:
     networks:
       - sunrise-alarm
     ports:
-      - "127.0.0.1:8004:8080"
-      - "127.0.0.1:8084:8081"
+      - "8004:8080"
+      - "8084:8081"
     volumes:
       - "/var/run/docker.sock:/var/run/docker.sock:ro"
     command:
