@@ -1,6 +1,7 @@
 """This module handles publishing and receiving of MQTT messages."""
 
 import asyncio
+import functools
 import random
 
 from gmqtt import Client
@@ -24,11 +25,9 @@ class MQTT:
         await self.client.disconnect()
 
     def _publish(self, topic):
-        self.loop.call_soon_threadsafe(
-            self.client.publish,
-            self._topic_prefix + topic,
-            qos=1,
-        )
+        full_topic = self._topic_prefix + topic
+        publish = functools.partial(self.client.publish, full_topic, qos=1)
+        self.loop.call_soon_threadsafe(publish)
 
     def publish_button_pressed(self):
         self._publish("button_pressed")
