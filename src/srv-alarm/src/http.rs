@@ -66,7 +66,7 @@ pub async fn stop_music(ctx: &Context) -> Result<(), String> {
     let url = ctx.config.hosts.srv_audio.join("music").unwrap();
     let response = ctx
         .client
-        .put(url.clone())
+        .delete(url.clone())
         .send()
         .await
         .map_err(format_error("Failed to DELETE music", url))?;
