@@ -5,7 +5,6 @@ import cloneDeep from "lodash.clonedeep";
 
 Vue.use(Vuex);
 axios.defaults.baseURL = `http://${window.location.hostname}:8004`;
-axios.defaults.baseURL = `http://sunrise.jensw.lan:8004`;
 
 export default new Vuex.Store({
   state: {
