@@ -40,6 +40,6 @@ pub enum NextAction {
 
 impl Default for NextAction {
     fn default() -> Self {
-        NextAction::None
+        Self::None
     }
 }

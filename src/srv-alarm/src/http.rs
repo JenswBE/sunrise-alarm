@@ -113,22 +113,22 @@ impl Leds {
     }
 
     // Presets
-    pub fn black() -> Leds {
-        Leds {
+    pub fn black() -> Self {
+        Self {
             color: LedsColor::Black,
             brightness: None,
         }
     }
 
-    pub fn night_light() -> Leds {
-        Leds {
+    pub fn night_light() -> Self {
+        Self {
             color: LedsColor::WarmWhite,
             brightness: None,
         }
     }
 
-    pub fn night_light_dark() -> Leds {
-        Leds {
+    pub fn night_light_dark() -> Self {
+        Self {
             color: LedsColor::Orange,
             brightness: Some(2),
         }
@@ -137,7 +137,7 @@ impl Leds {
 
 impl Default for Leds {
     fn default() -> Self {
-        Leds {
+        Self {
             color: LedsColor::Black,
             brightness: None,
         }

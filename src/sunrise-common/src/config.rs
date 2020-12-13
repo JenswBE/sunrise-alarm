@@ -9,7 +9,7 @@ pub struct WarpConfig {
 
 impl WarpConfig {
     pub fn from_env(default_port: u16) -> Self {
-        WarpConfig {
+        Self {
             port: parse_port("WARP_PORT", default_port),
         }
     }
@@ -25,7 +25,7 @@ pub struct HostsConfig {
 
 impl HostsConfig {
     pub fn from_env() -> Self {
-        HostsConfig {
+        Self {
             srv_alarm: parse_url("HOST_SRV_ALARM", "http://localhost:8000"),
             srv_config: parse_url("HOST_SRV_CONFIG", "http://localhost:8001"),
             srv_physical: parse_url("HOST_SRV_PHYSICAL", "http://localhost:8002"),
@@ -42,7 +42,7 @@ pub struct MqttConfig {
 
 impl MqttConfig {
     pub fn from_env() -> Self {
-        MqttConfig {
+        Self {
             host: parse_string("MQTT_BROKER_HOST", "localhost"),
             port: parse_port("MQTT_BROKER_PORT", 1883),
         }

@@ -16,7 +16,7 @@ pub struct Config {
 
 impl Config {
     pub fn from_env() -> Self {
-        Config {
+        Self {
             data_dir: parse_path("DATA_DIR_PATH", "../../data"),
             warp: WarpConfig::from_env(8001),
             mqtt: MqttConfig::from_env(),

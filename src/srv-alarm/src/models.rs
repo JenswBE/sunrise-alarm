@@ -18,7 +18,7 @@ pub struct Context {
 
 impl Context {
     pub fn new(config: Config, radio: Radio) -> Self {
-        Context {
+        Self {
             client: reqwest::Client::new(),
             config: Arc::new(config),
             radio,
@@ -87,7 +87,7 @@ pub struct Config {
 
 impl Config {
     pub fn from_env() -> Self {
-        Config {
+        Self {
             alarm: AlarmConfig::default(),
             hosts: HostsConfig::from_env(),
             mqtt: MqttConfig::from_env(),
@@ -104,7 +104,7 @@ pub struct AlarmConfig {
 
 impl Default for AlarmConfig {
     fn default() -> Self {
-        AlarmConfig {
+        Self {
             light_duration: Duration::minutes(10),
             sound_duration: Duration::minutes(5),
         }
@@ -126,6 +126,6 @@ pub enum Status {
 
 impl Default for Status {
     fn default() -> Self {
-        Status::Idle
+        Self::Idle
     }
 }
