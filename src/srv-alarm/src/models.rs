@@ -121,7 +121,7 @@ pub struct State {
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub enum Status {
     Idle,
-    Ring,
+    Ring(Uuid),
 }
 
 impl Default for Status {

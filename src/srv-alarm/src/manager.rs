@@ -106,12 +106,8 @@ async fn handle_button_pressed(ctx: &Context, ringer: &Ringer) -> Option<Duratio
             http::set_leds_off(ctx).await.ok();
         }
     } else {
-        // Stop ringer
-        ctx.set_status(Status::Idle);
-        ringer
-            .send(RingerAction::Stop)
-            .map_err(|e| log::error!("Failed to stop ringer: {}", e))
-            .ok();
+        // Stop alarm
+        stop_alarm(ctx, ringer).await;
     }
     return None;
 }
@@ -127,14 +123,41 @@ async fn handle_button_long_pressed(ctx: &Context, ringer: &Ringer) -> Option<Du
             http::set_leds_off(ctx).await.ok();
         }
     } else {
-        // Stop ringer
-        ctx.set_status(Status::Idle);
-        ringer
-            .send(RingerAction::Stop)
-            .map_err(|e| log::error!("Failed to stop ringer: {}", e))
-            .ok();
+        // Stop alarm
+        stop_alarm(ctx, ringer).await;
     }
     return None;
+}
+
+async fn stop_alarm(ctx: &Context, ringer: &Ringer) {
+    // Get ringing alarm id
+    let alarm_id = match ctx.get_status() {
+        Status::Ring(id) => id,
+        status => {
+            return log::error!(
+                "stop_alarm should only be called during status Ring. Current status: {:?}",
+                status
+            );
+        }
+    };
+
+    // Reset status
+    ctx.set_status(Status::Idle);
+
+    // Stop ringer
+    ringer
+        .send(RingerAction::Stop)
+        .map_err(|e| log::error!("Failed to stop ringer: {}", e))
+        .ok();
+
+    // Disable alarm if not repeated
+    let alarm = http::get_alarm(ctx, alarm_id).await.ok();
+    if let Some(mut alarm) = alarm {
+        if alarm.days.len() == 0 {
+            alarm.enabled = false;
+            http::update_alarm(ctx, alarm).await.ok();
+        }
+    }
 }
 
 async fn handle_next_action(ctx: &Context, ringer: &Ringer) {
@@ -169,7 +192,7 @@ async fn handle_next_action(ctx: &Context, ringer: &Ringer) {
 
 async fn handle_next_action_ring(ctx: &Context, ringer: &Ringer, alarm: Alarm) {
     log::debug!("Starting alarm {} ({})", alarm.id, alarm.name);
-    ctx.set_status(Status::Ring);
+    ctx.set_status(Status::Ring(alarm.id));
     ringer
         .send(RingerAction::Start)
         .map_err(|e| log::error!("Failed to start ringer: {}", e))

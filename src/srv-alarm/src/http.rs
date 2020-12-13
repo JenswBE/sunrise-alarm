@@ -1,5 +1,6 @@
 use reqwest::{Error, Response, Url};
 use serde::{Deserialize, Serialize};
+use uuid::Uuid;
 
 use crate::models::Context;
 use sunrise_common::alarm::Alarm;
@@ -16,13 +17,31 @@ pub async fn get_alarms(ctx: &Context) -> Result<Vec<Alarm>, String> {
         .get(url.clone())
         .send()
         .await
-        .map_err(format_error("Failed to GET alarms", url.clone()))?;
+        .map_err(format_error("Failed to GET alarms list", url.clone()))?;
 
-    error_for_status(response, "Failed to GET alarms")
+    error_for_status(response, "Failed to GET alarms list")
         .await?
         .json()
         .await
-        .map_err(format_error("Failed to parse alarms after GET", url))
+        .map_err(format_error("Failed to parse alarms after GET list", url))
+}
+
+/// srv-config: GET /alarms/{alarm_id}
+pub async fn get_alarm(ctx: &Context, alarm_id: Uuid) -> Result<Alarm, String> {
+    let path = format!("alarms/{}", alarm_id);
+    let url = ctx.config.hosts.srv_config.join(&path).unwrap();
+    let response = ctx
+        .client
+        .get(url.clone())
+        .send()
+        .await
+        .map_err(format_error("Failed to GET single alarm", url.clone()))?;
+
+    error_for_status(response, "Failed to GET single alarm")
+        .await?
+        .json()
+        .await
+        .map_err(format_error("Failed to parse alarm after GET single", url))
 }
 
 /// srv-config: PUT /alarms/{alarm_id}
