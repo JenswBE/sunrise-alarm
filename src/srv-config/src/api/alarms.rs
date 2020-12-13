@@ -16,6 +16,7 @@ pub fn filters(
     mqtt_client: AsyncClient,
 ) -> impl Filter<Extract = impl warp::Reply, Error = warp::Rejection> + Clone {
     list(db.clone())
+        .or(get(db.clone()))
         .or(create(db.clone(), mqtt_client.clone()))
         .or(update(db.clone(), mqtt_client.clone()))
         .or(delete(db, mqtt_client))
@@ -41,6 +42,44 @@ fn get_alarms(db: Db) -> Vec<Alarm> {
     })
     .expect("Error while listing alarms");
     return alarms;
+}
+
+/// GET /alarms/:id
+fn get(db: Db) -> impl Filter<Extract = impl warp::Reply, Error = warp::Rejection> + Clone {
+    warp::path!("alarms" / Uuid)
+        .and(warp::get())
+        .and(with_db(db))
+        .and_then(get_alarm)
+}
+
+pub async fn get_alarm(id: Uuid, db: Db) -> Result<impl warp::Reply, Infallible> {
+    log::debug!("get_alarm: id={}", id);
+
+    // Get alarm from database
+    let mut alarm = None;
+    db.read(|db| {
+        alarm = db.alarms.get(&id).cloned();
+    })
+    .expect("Error while fetching alarm");
+
+    // Return result
+    if let Some(alarm) = alarm {
+        // Get alarm success
+        return Ok(warp::reply::with_status(
+            warp::reply::json(&alarm),
+            StatusCode::OK,
+        ));
+    } else {
+        // Alarm not found
+        log::warn!("    -> alarm id not found!");
+        let error = Error {
+            code: ERROR_ALARM_NOT_FOUND,
+        };
+        return Ok(warp::reply::with_status(
+            warp::reply::json(&error),
+            StatusCode::NOT_FOUND,
+        ));
+    }
 }
 
 /// POST /alarms with JSON body
