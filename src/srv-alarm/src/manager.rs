@@ -18,6 +18,7 @@ pub enum Action {
     UpdateSchedule,
     ButtonPressed,
     ButtonLongPressed,
+    AbortAlarm,
 }
 
 pub fn create_radios() -> (Radio, RadioReceiver) {
@@ -76,6 +77,7 @@ async fn handle_action(ctx: &Context, ringer: &Ringer, action: Action) -> Option
         Action::UpdateSchedule => handle_update_schedule(ctx),
         Action::ButtonPressed => handle_button_pressed(ctx, ringer).await,
         Action::ButtonLongPressed => handle_button_long_pressed(ctx, ringer).await,
+        Action::AbortAlarm => handle_abort_alarm(ctx, ringer).await,
     }
 }
 
@@ -125,6 +127,18 @@ async fn handle_button_long_pressed(ctx: &Context, ringer: &Ringer) -> Option<Du
     } else {
         // Stop alarm
         stop_alarm(ctx, ringer).await;
+    }
+    return None;
+}
+
+async fn handle_abort_alarm(ctx: &Context, ringer: &Ringer) -> Option<Duration> {
+    if ctx.get_status() != Status::Idle {
+        stop_alarm(ctx, ringer).await;
+    } else {
+        log::error!(
+            "Action AbortAlarm called, but status is {:?}",
+            ctx.get_status()
+        );
     }
     return None;
 }

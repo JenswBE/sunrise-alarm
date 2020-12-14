@@ -4,6 +4,7 @@ use tokio::time::{self, Duration, Instant};
 use tokio::{join, select};
 
 use crate::http;
+use crate::manager::Action as MgrAction;
 use crate::models::{Context, Status};
 
 pub type Ringer = mpsc::UnboundedSender<Action>;
@@ -84,13 +85,25 @@ async fn handle_stop(ctx: &Context) -> Option<Duration> {
 }
 
 async fn handle_next_step(ctx: &Context, minute: u8) {
+    let abort_delay = ctx.config.alarm.light_duration.num_minutes() + 10;
     let sound_delay = ctx.config.alarm.light_duration - ctx.config.alarm.sound_duration;
     let delay_minutes = sound_delay.num_minutes();
-    if minute as i64 == delay_minutes {
-        log::debug!("Starting alarm music");
-        http::start_music(ctx).await.ok();
-    } else if minute as i64 > delay_minutes {
-        log::debug!("Increasing alarm volume");
-        http::increase_music_volume(ctx).await.ok();
+    match minute as i64 {
+        m if m == delay_minutes => {
+            log::debug!("Starting alarm music");
+            http::start_music(ctx).await.ok();
+        }
+        m if m > abort_delay => {
+            log::warn!("Alarm reached abort limit. Requesting manager to abort alarm.");
+            ctx.radio
+                .send(MgrAction::AbortAlarm)
+                .map_err(|e| log::error!("Failed to send action AbortAlarm to manager: {}", e))
+                .ok();
+        }
+        m if m > delay_minutes => {
+            log::debug!("Increasing alarm volume");
+            http::increase_music_volume(ctx).await.ok();
+        }
+        _ => log::debug!("No action required. Skipping next alarm step."),
     }
 }
