@@ -47,6 +47,7 @@ services:
     ports:
       - "127.0.0.1:8002:8080"
     environment:
+      - "TZ=${TIMEZONE}"
       - "MQTT_BROKER_HOST=mosquitto"
       - "MQTT_CLIENT_ID=srv-physical"
 
@@ -86,6 +87,8 @@ services:
       - "--entrypoints.web.http.middlewares=cors"
       - "--entrypoints.api.address=:8081"
       - "--api=true"
+    environment:
+      - "TZ=${TIMEZONE}"
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.api.entrypoints=api"
@@ -107,6 +110,8 @@ services:
       - sunrise-alarm
     ports:
       - "8080:8080"
+    environment:
+      - "TZ=${TIMEZONE}"
 
   mosquitto:
     image: eclipse-mosquitto:latest

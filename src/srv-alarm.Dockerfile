@@ -21,9 +21,9 @@ RUN apt-get update && \
 FROM builder-${TARGETARCH} AS builder
 ARG SERVICE_NAME
 WORKDIR /usr/src/sunrise-alarm
-COPY . .
-
 RUN rustup target add ${TARGET}
+
+COPY . .
 WORKDIR /usr/src/sunrise-alarm/${SERVICE_NAME}
 RUN cargo test
 RUN cargo build --target ${TARGET} --release 
@@ -38,5 +38,6 @@ ENV HOST_SRV_PHYSICAL http://srv-physical:8080
 ENV HOST_SRV_AUDIO http://srv-audio:8080
 EXPOSE 8080
 
+COPY --from=builder /usr/share/zoneinfo /usr/share/zoneinfo
 COPY --from=builder /service service
 CMD ["./service"]
