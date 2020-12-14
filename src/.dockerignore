@@ -1,3 +1,4 @@
 *.Dockerfile
 /target/
-env/
+**/env/
+**/node_modules/
