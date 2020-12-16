@@ -10,8 +10,8 @@ pub mod http;
 pub mod manager;
 pub mod models;
 pub mod mqtt;
+pub mod planner;
 pub mod ringer;
-pub mod time;
 
 /// Provides a RESTful web server for general management of Sunrise Alarm
 ///
@@ -46,7 +46,7 @@ pub async fn run(config: models::Config) {
     manager::start(ctx.clone(), receiver);
 
     // Initial update of next alarms
-    time::update_next_alarms(&ctx);
+    planner::update_next_alarms(&ctx);
 
     // Setup MQTT
     let _mqtt_client = mqtt::get_client(ctx.clone()).await;

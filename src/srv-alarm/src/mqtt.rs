@@ -2,7 +2,7 @@ use rumqttc::{AsyncClient, Event, MqttOptions, Packet, Publish};
 
 use crate::manager::Action;
 use crate::models::Context;
-use crate::time;
+use crate::planner;
 use sunrise_common::mqtt;
 
 const CLIENT_ID: &str = "srv-alarm";
@@ -50,7 +50,7 @@ async fn notification_handler(ctx: &Context, notification: Event) {
 async fn handle_alarms_changed(ctx: &Context, packet: Publish) {
     let alarms = mqtt::parse_alarms_changed(packet).alarms;
     ctx.set_alarms(alarms);
-    time::update_next_alarms(ctx);
+    planner::update_next_alarms(ctx);
 }
 
 fn handle_button_pressed(ctx: &Context) {

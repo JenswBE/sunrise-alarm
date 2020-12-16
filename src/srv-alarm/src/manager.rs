@@ -6,8 +6,8 @@ use tokio::time::{self, Duration, Instant};
 
 use crate::http::{self, Leds};
 use crate::models::{Context, Status};
+use crate::planner;
 use crate::ringer::{self, Action as RingerAction, Ringer};
-use crate::time::update_next_alarms;
 use sunrise_common::alarm::{Alarm, NextAction};
 
 pub type Radio = mpsc::UnboundedSender<Action>;
@@ -172,6 +172,9 @@ async fn stop_alarm(ctx: &Context, ringer: &Ringer) {
             http::update_alarm(ctx, alarm).await.ok();
         }
     }
+
+    // Force update of next alarms
+    planner::update_next_alarms(ctx);
 }
 
 async fn handle_next_action(ctx: &Context, ringer: &Ringer) {
@@ -187,7 +190,7 @@ async fn handle_next_action(ctx: &Context, ringer: &Ringer) {
     // Alarm is not set or not ready
     if ready.is_none() || Some(false) == ready {
         log::debug!("Handle next action: None");
-        update_next_alarms(ctx);
+        planner::update_next_alarms(ctx);
         return;
     }
 
