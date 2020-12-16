@@ -65,6 +65,21 @@ sudo usermod -aG docker pi
 # Install docker-compose
 sudo pip3 install docker-compose
 
+# Configure screen timeout
+sudo tee /etc/systemd/system/screen-timeout.service <<EOF
+[Unit]
+Description=Set screen timeout
+
+[Service]
+Environment=DISPLAY=:0
+Environment=XAUTHORITY=/home/pi/.Xauthority
+ExecStart=/usr/bin/xset dpms 60 60 60
+
+[Install]
+WantedBy=graphical.target
+EOF
+sudo systemctl enable --now screen-timeout
+
 # Configure PulseAudio
 # Based on:
 #   - http://manpages.ubuntu.com/manpages/xenial/man5/default.pa.5.html
