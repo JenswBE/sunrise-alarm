@@ -14,6 +14,10 @@ services:
       - "MQTT_BROKER_HOST=mosquitto"
       - "RUST_BACKTRACE=1"
       - "RUST_LOG=srv_alarm=debug,srv_alarm::mqtt=info,info"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.srv-alarm.entrypoints=web"
+      - "traefik.http.routers.srv-alarm.rule=Path(`/alarms/next`)"
 
   srv-config:
     build:
@@ -116,8 +120,11 @@ services:
       - sunrise-alarm
     ports:
       - "1883:1883"
+      - "9001:9001"
     environment:
       - "TZ=Europe/Brussels"
+    volumes:
+      - "./src/mosquitto/mosquitto.conf:/mosquitto/config/mosquitto.conf:ro"
 
 networks:
   sunrise-alarm:

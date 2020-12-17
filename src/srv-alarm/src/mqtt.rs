@@ -12,6 +12,7 @@ pub async fn get_client(ctx: Context) -> AsyncClient {
     let mut options = MqttOptions::new(CLIENT_ID, &ctx.config.mqtt.host, ctx.config.mqtt.port);
     options.set_keep_alive(5);
     let (mqtt_client, mut eventloop) = AsyncClient::new(options, 10);
+    ctx.set_mqtt_client(mqtt_client.clone());
 
     // Start client loop
     tokio::task::spawn(async move {
@@ -50,7 +51,7 @@ async fn notification_handler(ctx: &Context, notification: Event) {
 async fn handle_alarms_changed(ctx: &Context, packet: Publish) {
     let alarms = mqtt::parse_alarms_changed(packet).alarms;
     ctx.set_alarms(alarms);
-    planner::update_next_alarms(ctx);
+    planner::update_next_alarms(ctx).await;
 }
 
 fn handle_button_pressed(ctx: &Context) {

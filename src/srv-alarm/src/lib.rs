@@ -45,11 +45,11 @@ pub async fn run(config: models::Config) {
     // Setup manager
     manager::start(ctx.clone(), receiver);
 
-    // Initial update of next alarms
-    planner::update_next_alarms(&ctx);
-
     // Setup MQTT
     let _mqtt_client = mqtt::get_client(ctx.clone()).await;
+
+    // Initial update of next alarms
+    planner::update_next_alarms(&ctx).await;
 
     // Setup server
     let api = api::alarms::filters(ctx.clone());

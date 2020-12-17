@@ -10,6 +10,7 @@ export default new Vuex.Store({
   state: {
     alarms: {},
     alert: {},
+    nextAlarm: "",
   },
 
   getters: {
@@ -28,19 +29,32 @@ export default new Vuex.Store({
         result[item.id] = item;
         return result;
       }, {});
-      console.debug("mut setAlarms - Output", state.alarms);
+      console.debug("mut setAlarms - Output alarms", state.alarms);
+    },
+
+    setNextAlarms(state, data) {
+      console.debug("mut setNextAlarms - Input", data);
+      if (
+        data["ring"] == undefined ||
+        data["ring"]["alarm_datetime"] == undefined
+      ) {
+        state.nextAlarm = "";
+      } else {
+        state.nextAlarm = data["ring"]["alarm_datetime"];
+      }
+      console.debug("mut setNextAlarms - Output nextAlarm", state.nextAlarm);
     },
 
     upsertAlarm(state, alarm) {
       console.debug("mut upsertAlarm - Input", alarm);
       Vue.set(state.alarms, alarm.id, cloneDeep(alarm));
-      console.debug("mut upsertAlarm - Output", state.alarms);
+      console.debug("mut upsertAlarm - Output alarms", state.alarms);
     },
 
     deleteAlarm(state, alarmID) {
       console.debug("mut deleteAlarm - Input", alarmID);
       Vue.delete(state.alarms, alarmID);
-      console.debug("mut deleteAlarm - Output", state.alarms);
+      console.debug("mut deleteAlarm - Output alarms", state.alarms);
     },
 
     setAlert(state, alert) {
@@ -53,6 +67,15 @@ export default new Vuex.Store({
   },
 
   actions: {
+    handleMQTTMessage(context, { topic, payload }) {
+      console.debug("action handleMQTTMessage - Input", { topic, payload });
+      switch (topic) {
+        case "sunrise_alarm/next_alarms_updated":
+          context.commit("setNextAlarms", payload);
+          break;
+      }
+    },
+
     async getAlarms(context) {
       axios
         .get(`/alarms`)
@@ -61,6 +84,18 @@ export default new Vuex.Store({
         })
         .catch((e) => {
           const msg = `Unable to fetch alarms: ${e.message}`;
+          context.commit("setAlert", { type: "error", message: msg });
+        });
+    },
+
+    async getNextAlarms(context) {
+      axios
+        .get(`/alarms/next`)
+        .then(({ data }) => {
+          context.commit("setNextAlarms", data);
+        })
+        .catch((e) => {
+          const msg = `Unable to fetch next alarms: ${e.message}`;
           context.commit("setAlert", { type: "error", message: msg });
         });
     },

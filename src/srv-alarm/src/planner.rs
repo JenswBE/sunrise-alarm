@@ -3,9 +3,10 @@ use chrono::prelude::*;
 use crate::manager::Action;
 use crate::models::Context;
 use sunrise_common::alarm::{Alarm, NextAction, NextAlarm};
+use sunrise_common::mqtt;
 
 /// Update next alarms based on alarms in state
-pub fn update_next_alarms(ctx: &Context) {
+pub async fn update_next_alarms(ctx: &Context) {
     // Calculate next alarms
     let next_alarms = calculate_next_alarms(&ctx);
 
@@ -34,8 +35,9 @@ pub fn update_next_alarms(ctx: &Context) {
     );
     ctx.set_next_alarms_action(next_alarm_action);
 
-    // Inform manager about updated next alarms
+    // Inform manager and MQTT broker about updated next alarms
     ctx.radio.send(Action::UpdateSchedule).unwrap();
+    mqtt::publish_next_alarms_updated(ctx.get_mqtt_client(), ctx.get_next_alarms()).await;
 }
 
 /// Calculates the next alarms

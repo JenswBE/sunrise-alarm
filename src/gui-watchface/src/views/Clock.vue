@@ -11,7 +11,7 @@
         <p class="text-h4">{{ date }}</p>
       </v-col>
       <v-col align-self="end" cols="12" class="text-center">
-        <p class="text-subtitle-1">Next alarm: Tomorrow at 00:00</p>
+        <p class="text-subtitle-1">{{ nextAlarmText }}</p>
       </v-col>
     </v-row>
   </v-container>
@@ -19,6 +19,8 @@
 
 <script>
 import helpers from "../helpers";
+import { mapState } from "vuex";
+import { DateTime } from "luxon";
 
 export default {
   name: "Clock",
@@ -29,6 +31,36 @@ export default {
     sep: ":",
     date: "",
   }),
+
+  computed: {
+    ...mapState(["nextAlarm"]),
+
+    nextAlarmText() {
+      // Check if set
+      if (this.nextAlarm === "") {
+        return "";
+      }
+
+      // Setup variables
+      let day = "";
+      const nextAlarmDate = DateTime.fromISO(this.nextAlarm);
+      const now = DateTime.local();
+      const tomorrow = DateTime.local().plus({ days: 1 });
+
+      // Check if alarm is today
+      if (nextAlarmDate.weekday == now.weekday) {
+        day = "Today";
+      } else if (nextAlarmDate.weekday == tomorrow.weekday) {
+        day = "Tomorrow";
+      } else {
+        day = nextAlarmDate.toFormat("cccc");
+      }
+
+      // Format and set text
+      const alarm_time = nextAlarmDate.toFormat("HH:mm");
+      return `Next alarm: ${day} at ${alarm_time}`;
+    },
+  },
 
   methods: {
     updateDateTime() {

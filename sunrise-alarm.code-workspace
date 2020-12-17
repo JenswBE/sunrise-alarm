@@ -27,6 +27,9 @@
     {
       "name": "gui-watchface",
       "path": "src/gui-watchface"
+    },
+    {
+      "path": "src/mosquitto"
     }
   ],
   "settings": {}

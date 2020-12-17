@@ -3,6 +3,7 @@ use std::sync::{Arc, Mutex};
 
 use chrono::{DateTime, Duration, Local};
 use reqwest::Client;
+use rumqttc::AsyncClient;
 use uuid::Uuid;
 
 use crate::manager::Radio;
@@ -12,6 +13,7 @@ use sunrise_common::config::{HostsConfig, MqttConfig, WarpConfig};
 #[derive(Debug, Clone)]
 pub struct Context {
     pub client: Client,
+    pub mqtt_client: Arc<Mutex<Option<AsyncClient>>>,
     pub config: Arc<Config>,
     pub radio: Radio,
     state: Arc<Mutex<State>>,
@@ -21,10 +23,21 @@ impl Context {
     pub fn new(config: Config, radio: Radio) -> Self {
         Self {
             client: reqwest::Client::new(),
+            mqtt_client: Arc::new(Mutex::new(None)),
             config: Arc::new(config),
             radio,
             state: Arc::new(Mutex::new(State::default())),
         }
+    }
+
+    pub fn get_mqtt_client(&self) -> AsyncClient {
+        let client = self.mqtt_client.lock().unwrap();
+        client.clone().unwrap()
+    }
+
+    pub fn set_mqtt_client(&self, new_client: AsyncClient) {
+        let mut client = self.mqtt_client.lock().unwrap();
+        *client = Some(new_client);
     }
 
     pub fn get_status(&self) -> Status {

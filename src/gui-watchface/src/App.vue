@@ -28,6 +28,7 @@
 </template>
 
 <script>
+import mqtt from "mqtt";
 import { mapState } from "vuex";
 
 export default {
@@ -57,6 +58,43 @@ export default {
         }
       }
     },
+
+    generateClientID() {
+      const clientSuffixNumber = Math.floor(
+        Math.random() * Math.floor(2 ** 32)
+      );
+      const clientSuffix = clientSuffixNumber.toString(16).padStart(8, "0");
+      return "gui-watchface-" + clientSuffix;
+    },
+
+    connectToMQTT() {
+      const connectUrl = `mqtt://${window.location.hostname}:9001`;
+      const clientId = this.generateClientID();
+      try {
+        this.client = mqtt.connect(connectUrl, { clientId });
+      } catch (e) {
+        const msg = `Unable to connect to MQTT: ${e.message}`;
+        this.$store.commit("setAlert", { type: "error", message: msg });
+      }
+      this.client.on("connect", () => {
+        const msg = `Connected to MQTT broker`;
+        this.$store.commit("setAlert", { type: "success", message: msg });
+      });
+      this.client.on("error", (e) => {
+        const msg = `Connection to MQTT broker failed: ${e.message}`;
+        this.$store.commit("setAlert", { type: "error", message: msg });
+      });
+      this.client.on("message", (topic, message) => {
+        this.$store.commit("handleMQTTMessage", { topic, payload: message });
+      });
+    },
+  },
+
+  mounted() {
+    this.$nextTick(function () {
+      this.$store.dispatch("getNextAlarms");
+      this.connectToMQTT();
+    });
   },
 };
 </script>

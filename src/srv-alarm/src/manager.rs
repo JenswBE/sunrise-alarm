@@ -174,7 +174,7 @@ async fn stop_alarm(ctx: &Context, ringer: &Ringer) {
     }
 
     // Force update of next alarms
-    planner::update_next_alarms(ctx);
+    planner::update_next_alarms(ctx).await;
 }
 
 async fn handle_next_action(ctx: &Context, ringer: &Ringer) {
@@ -190,7 +190,7 @@ async fn handle_next_action(ctx: &Context, ringer: &Ringer) {
     // Alarm is not set or not ready
     if ready.is_none() || Some(false) == ready {
         log::debug!("Handle next action: None");
-        planner::update_next_alarms(ctx);
+        planner::update_next_alarms(ctx).await;
         return;
     }
 
