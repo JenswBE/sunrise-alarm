@@ -54,11 +54,20 @@ fn calculate_next_alarm(ctx: Context, alarm: &Alarm, now: &DateTime<Local>) -> O
     }
 
     // Calculate next alarm
-    let next_alarm = calculate_next_datetime(alarm, now);
+    let mut next_alarm = calculate_next_datetime(alarm, now);
 
     // Check if we need to skip
     if !alarm.skip_next {
         // Shouldn't skip next alarm
+        // Check if we already ringed for this alarm
+        if let Some(last_ring) = ctx.get_last_ring(alarm.id) {
+            if last_ring == next_alarm {
+                // Alarm already ringed => Skip one iteration
+                next_alarm = calculate_next_datetime(alarm, &next_alarm);
+            }
+        }
+
+        // Alarm not yet ringed => Keep original next_alarm datetime
         Some(NextAlarm {
             id: alarm.id.clone(),
             alarm_datetime: next_alarm,
@@ -179,8 +188,14 @@ mod tests {
         Context::new(config, tx)
     }
 
-    fn assert_alarm(alarm: Alarm, alarm_dt: &str, action: NextAction, action_dt: &str) {
-        if let Some(next_alarm) = calculate_next_alarm(context(), &alarm, &now()) {
+    fn assert_alarm(
+        ctx: Context,
+        alarm: Alarm,
+        alarm_dt: &str,
+        action: NextAction,
+        action_dt: &str,
+    ) {
+        if let Some(next_alarm) = calculate_next_alarm(ctx, &alarm, &now()) {
             assert_eq!(uuid(), next_alarm.id);
             assert_eq!(action, next_alarm.next_action);
             assert_eq!(parse_date(alarm_dt), next_alarm.alarm_datetime);
@@ -206,6 +221,7 @@ mod tests {
     fn test_still_today() {
         let alarm = alarm(16, 0);
         assert_alarm(
+            context(),
             alarm,
             "2020-09-19 16:00",
             NextAction::Ring,
@@ -217,6 +233,7 @@ mod tests {
     fn test_for_tomorrow() {
         let alarm = alarm(14, 0);
         assert_alarm(
+            context(),
             alarm,
             "2020-09-20 14:00",
             NextAction::Ring,
@@ -229,6 +246,7 @@ mod tests {
         let mut alarm = alarm(16, 0);
         alarm.skip_next = true;
         assert_alarm(
+            context(),
             alarm,
             "2020-09-20 16:00",
             NextAction::Skip,
@@ -241,6 +259,7 @@ mod tests {
         let mut alarm = alarm(14, 0);
         alarm.skip_next = true;
         assert_alarm(
+            context(),
             alarm,
             "2020-09-21 14:00",
             NextAction::Skip,
@@ -253,6 +272,7 @@ mod tests {
         let mut alarm = alarm(16, 0);
         alarm.days = vec![5];
         assert_alarm(
+            context(),
             alarm,
             "2020-09-19 16:00",
             NextAction::Ring,
@@ -261,10 +281,26 @@ mod tests {
     }
 
     #[test]
+    fn test_repeated_and_for_today_but_already_ringed() {
+        let mut alarm = alarm(16, 0);
+        alarm.days = vec![5];
+        let ctx = context();
+        ctx.set_last_ring(alarm.id, parse_date("2020-09-19 16:00"));
+        assert_alarm(
+            ctx,
+            alarm,
+            "2020-09-26 16:00",
+            NextAction::Ring,
+            "2020-09-26 15:53",
+        )
+    }
+
+    #[test]
     fn test_repeated_but_not_for_today() {
         let mut alarm = alarm(14, 0);
         alarm.days = vec![5];
         assert_alarm(
+            context(),
             alarm,
             "2020-09-26 14:00",
             NextAction::Ring,
@@ -277,6 +313,7 @@ mod tests {
         let mut alarm = alarm(16, 0);
         alarm.days = vec![0, 1, 2, 3, 4];
         assert_alarm(
+            context(),
             alarm,
             "2020-09-21 16:00",
             NextAction::Ring,
@@ -289,6 +326,7 @@ mod tests {
         let mut alarm = alarm(14, 0);
         alarm.days = vec![0, 1, 2, 3, 4];
         assert_alarm(
+            context(),
             alarm,
             "2020-09-21 14:00",
             NextAction::Ring,
@@ -302,6 +340,7 @@ mod tests {
         alarm.days = vec![5];
         alarm.skip_next = true;
         assert_alarm(
+            context(),
             alarm,
             "2020-09-26 16:00",
             NextAction::Skip,
@@ -315,6 +354,7 @@ mod tests {
         alarm.days = vec![5];
         alarm.skip_next = true;
         assert_alarm(
+            context(),
             alarm,
             "2020-10-03 14:00",
             NextAction::Skip,
@@ -328,6 +368,7 @@ mod tests {
         alarm.days = vec![0, 1, 2, 3, 4];
         alarm.skip_next = true;
         assert_alarm(
+            context(),
             alarm,
             "2020-09-22 16:00",
             NextAction::Skip,
@@ -341,6 +382,7 @@ mod tests {
         alarm.days = vec![0, 1, 2, 3, 4];
         alarm.skip_next = true;
         assert_alarm(
+            context(),
             alarm,
             "2020-09-22 14:00",
             NextAction::Skip,

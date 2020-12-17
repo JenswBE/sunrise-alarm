@@ -1,6 +1,7 @@
+use std::collections::HashMap;
 use std::sync::{Arc, Mutex};
 
-use chrono::Duration;
+use chrono::{DateTime, Duration, Local};
 use reqwest::Client;
 use uuid::Uuid;
 
@@ -75,6 +76,16 @@ impl Context {
         let mut state = self.state.lock().unwrap();
         state.next_alarms.action = next_alarm;
     }
+
+    pub fn get_last_ring(&self, alarm_id: Uuid) -> Option<DateTime<Local>> {
+        let state = self.state.lock().unwrap();
+        state.last_rings.get(&alarm_id).cloned()
+    }
+
+    pub fn set_last_ring(&self, alarm_id: Uuid, last_ring: DateTime<Local>) {
+        let mut state = self.state.lock().unwrap();
+        state.last_rings.insert(alarm_id, last_ring);
+    }
 }
 
 #[derive(Debug, Clone)]
@@ -116,6 +127,7 @@ pub struct State {
     pub status: Status,
     pub alarms: Vec<Alarm>,
     pub next_alarms: NextAlarms,
+    pub last_rings: HashMap<Uuid, DateTime<Local>>,
 }
 
 #[derive(Debug, Clone, Eq, PartialEq)]

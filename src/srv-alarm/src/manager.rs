@@ -201,8 +201,11 @@ async fn handle_next_action(ctx: &Context, ringer: &Ringer) {
     // Perform action
     log::debug!("Handle next action: {:?}", next_alarm.next_action);
     match next_alarm.next_action {
-        NextAction::Ring => handle_next_action_ring(ctx, ringer, alarm).await,
         NextAction::Skip => handle_next_action_skip(ctx, alarm).await,
+        NextAction::Ring => {
+            ctx.set_last_ring(next_alarm.id, next_alarm.alarm_datetime);
+            handle_next_action_ring(ctx, ringer, alarm).await;
+        }
         _ => (),
     }
 }
