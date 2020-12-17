@@ -18,6 +18,9 @@ services:
       - "traefik.enable=true"
       - "traefik.http.routers.srv-alarm.entrypoints=web"
       - "traefik.http.routers.srv-alarm.rule=Path(`/alarms/next`)"
+      - "traefik.http.routers.srv-alarm.priority=100"
+    # hosts:
+    #   - "localhost:host-gateway"
 
   srv-config:
     image: jenswbe/sunrise-alarm-srv-config
