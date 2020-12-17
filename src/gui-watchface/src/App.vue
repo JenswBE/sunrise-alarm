@@ -68,8 +68,12 @@ export default {
     },
 
     connectToMQTT() {
+      // Settings
       const connectUrl = `mqtt://${window.location.hostname}:9001`;
       const clientId = this.generateClientID();
+      const topics = ["sunrise_alarm/next_alarms_updated"];
+
+      // Connect to MQTT
       try {
         this.client = mqtt.connect(connectUrl, { clientId });
       } catch (e) {
@@ -85,8 +89,23 @@ export default {
         this.$store.commit("setAlert", { type: "error", message: msg });
       });
       this.client.on("message", (topic, message) => {
-        this.$store.commit("handleMQTTMessage", { topic, payload: message });
+        this.$store.dispatch("handleMQTTMessage", {
+          topic,
+          payload: JSON.parse(message.toString()),
+        });
       });
+
+      // Subscribe to topics
+      for (const topic of topics) {
+        this.client.subscribe(topic, { qos: 1 }, (error, result) => {
+          if (error) {
+            const msg = `Failed to subscribe to topic "${topic}": ${error.message}`;
+            this.$store.commit("setAlert", { type: "error", message: msg });
+          } else {
+            console.debug("Currently subscribed to MQTT topics", result);
+          }
+        });
+      }
     },
   },
 
