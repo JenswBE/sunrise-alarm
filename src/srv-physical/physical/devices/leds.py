@@ -36,14 +36,9 @@ class Leds:
 
     def __init__(self):
         # Create led strip
-        self.config = settings.get()
-        if not self.config.MOCK:
-            self.strip = PixelStrip(
-                num=self.config.LED_COUNT,
-                pin=self.config.LED_GPIO_PIN,
-                strip_type=self.config.LED_STRIP_TYPE
-            )
-            self.strip.begin()
+        self._loop = asyncio.get_event_loop()
+        self._mock = settings.get().MOCK
+        self._strip = self._new_pixel_strip()
 
         # Set initial color and brightness
         self._color = PresetColor.BLACK
@@ -65,18 +60,29 @@ class Leds:
     def brightness(self) -> int:
         return self._brightness
 
+    def _new_pixel_strip(self):
+        if not self._mock:
+            config = settings.get()
+            strip = PixelStrip(
+                num=config.LED_COUNT,
+                pin=config.LED_GPIO_PIN,
+                strip_type=config.LED_STRIP_TYPE
+            )
+            strip.begin()
+            return strip
+
     def update(self):
         """Set all leds to the current color"""
         # Skip if mocked
-        if self.config.MOCK:
+        if self._mock:
             return
 
         # Update leds
         color = _color_from_preset(self._color)
-        for led_index in range(self.strip.numPixels()):
-            self.strip.setPixelColorRGB(led_index, *color)
-        self.strip.setBrightness(self._brightness)
-        self.strip.show()
+        for led_index in range(self._strip.numPixels()):
+            self._strip.setPixelColorRGB(led_index, *color)
+        self._strip.setBrightness(self._brightness)
+        self._strip.show()
 
     def cleanup(self):
         """Cleanup on exit"""
@@ -112,8 +118,7 @@ class Leds:
 
         # Set timer to update sunrise
         config = settings.get()
-        loop = asyncio.get_event_loop()
-        self._update_sunrise_event = loop.call_later(
+        self._update_sunrise_event = self._loop.call_later(
             callback=self.update_sunrise_simulation,
             delay=config.LIGHT_INCREASE_DURATION.seconds / 100,
         )
@@ -143,8 +148,7 @@ class Leds:
 
         # Reschedule
         config = settings.get()
-        loop = asyncio.get_event_loop()
-        self._update_sunrise_event = loop.call_later(
+        self._update_sunrise_event = self._loop.call_later(
             callback=self.update_sunrise_simulation,
             delay=config.LIGHT_INCREASE_DURATION.seconds / 100,
         )

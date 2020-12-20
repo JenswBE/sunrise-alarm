@@ -4,6 +4,7 @@ import asyncio
 import atexit
 import logging
 from datetime import timedelta
+from typing import Optional
 
 from physical.helpers import settings
 
@@ -24,16 +25,13 @@ class Display:
     """Helper class to work with the display backlight"""
 
     def __init__(self):
-        # Init light sensor
-        i2c = busio.I2C(board.SCL, board.SDA)
-        self._sensor = TSL2591(i2c)
-
-        # Init backlight
-        self._backlight = Backlight()
-        self._backlight.fade_duration = 0.25
+        # Init devices
+        self._mock = settings.get().MOCK
+        self._sensor = self._new_sensor()
+        self._backlight = self._new_backlight()
 
         # Init sleep timeout
-        self._backlight.power = True
+        self._set_backlight_power(True)
         self._loop = asyncio.get_event_loop()
         self._sleep_event = self._loop.call_later(
             callback=self.sleep,
@@ -68,9 +66,9 @@ class Display:
             return
 
         # Update brightness
-        current_light = self._sensor.visible
+        current_light = self._get_sensor_brightness()
         new_brightness = self.calculate_brightness(current_light)
-        self._backlight.brightness = new_brightness
+        self._set_backlight_brightness(new_brightness)
 
         # Reschedule call
         self._loop.call_later(1, self.update_brightness)
@@ -99,7 +97,7 @@ class Display:
         """Put screen into sleep"""
         # Disable screen
         logging.info("Display: Put display into sleep")
-        self._backlight.power = False
+        self._set_backlight_power(False)
 
         # Call callback if set
         if self._sleep_callback is not None:
@@ -112,7 +110,7 @@ class Display:
     def wake(self):
         """Wakes the screen"""
         # Check if screen is in keep_awake
-        if self._backlight.power and self._sleep_event is None:
+        if self._get_backlight_power() and self._sleep_event is None:
             return
 
         # (Re)set timeout
@@ -125,7 +123,7 @@ class Display:
 
         # Enable backlight
         logging.info("Display: Awake display")
-        self._backlight.power = True
+        self._set_backlight_power(True)
 
     def enable_keep_awake(self):
         """Keep screen awake until next sleep"""
@@ -136,12 +134,12 @@ class Display:
 
         # Enable backlight
         logging.info("Display: Keep display awake")
-        self._backlight.power = True
+        self._set_backlight_power(True)
 
     def disable_keep_awake(self):
         """Allow screen to go to sleep again"""
         # Ignore call if screen is already sleeping
-        if not self._backlight.power:
+        if not self._get_backlight_power():
             return
 
         # Log action
@@ -154,3 +152,54 @@ class Display:
             callback=self.sleep,
             delay=SLEEP_TIMEOUT.seconds,
         )
+
+    def _new_sensor(self) -> Optional["TSL2591"]:
+        # Skip if mocked
+        if self._mock:
+            return
+
+        # Build new sensor
+        i2c = busio.I2C(board.SCL, board.SDA)
+        return TSL2591(i2c)
+
+    def _get_sensor_brightness(self) -> int:
+        # Skip if mocked
+        if self._mock:
+            return True
+
+        # Get sensor brightness
+        return self._sensor.visible
+
+    def _new_backlight(self) -> Optional["Backlight"]:
+        # Skip if mocked
+        if self._mock:
+            return
+
+        # Build new backlight
+        backlight = Backlight()
+        backlight.fade_duration = 0.25
+        return backlight
+
+    def _get_backlight_power(self) -> bool:
+        # Skip if mocked
+        if self._mock:
+            return True
+
+        # Get backlight power
+        return self._backlight.power
+
+    def _set_backlight_power(self, power: bool):
+        # Skip if mocked
+        if self._mock:
+            return
+
+        # Set backlight power
+        self._backlight.power = power
+
+    def _set_backlight_brightness(self, brightness: int):
+        # Skip if mocked
+        if self._mock:
+            return
+
+        # Set backlight brightness
+        self._backlight.brightness = brightness

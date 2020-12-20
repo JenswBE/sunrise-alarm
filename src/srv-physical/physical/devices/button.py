@@ -23,8 +23,9 @@ class Button:
 
     def __init__(self, gpio_pin: int):
         # Setup button
-        self._button = GPIOButton(pin=gpio_pin, pull_up=False)
-        self._button.when_pressed = self.handle_press
+        if not settings.get().MOCK:
+            self._button = GPIOButton(pin=gpio_pin, pull_up=False)
+            self._button.when_pressed = self.handle_press
 
         # Setup other variables
         self._loop = asyncio.get_running_loop()

@@ -21,7 +21,8 @@ class Buzzer:
     """Helper class to work with a buzzer"""
 
     def __init__(self, gpio_pin: int):
-        self._buzzer = GPIOBuzzer(pin=gpio_pin)
+        self._mock = settings.get().MOCK
+        self._buzzer = self._new_gpiozero(gpio_pin)
         self._loop = asyncio.get_running_loop()
         self._enabled = False
 
@@ -48,12 +49,26 @@ class Buzzer:
 
             # Update buzzer
             if self._beep_step % 2:
-                self._buzzer.on()
+                self._buzzer_on()
             else:
-                self._buzzer.off()
+                self._buzzer_off()
 
             # Schedule new buzzer beep
             self._beep_step_event = self._loop.call_later(
                 callback=self.handle_buzzer_step,
                 delay=BEEP[self._beep_step].seconds,
             )
+
+    def _new_gpiozero(self, gpio_pin: int):
+        if not self._mock:
+            return GPIOBuzzer(pin=gpio_pin)
+
+    def _buzzer_on(self):
+        """Turn buzzer on"""
+        if not self._mock:
+            self._buzzer.on()
+
+    def _buzzer_off(self):
+        """Turn buzzer off"""
+        if not self._mock:
+            self._buzzer.off()

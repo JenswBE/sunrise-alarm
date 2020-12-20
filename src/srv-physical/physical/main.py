@@ -56,33 +56,27 @@ app.include_router(
 @app.on_event('startup')
 async def setup_service():
     """Setup srv-physical"""
+    # Setup MQTT
     logging.info("MQTT client: Setting up ...")
     app.state.mqtt = await mqtt.get()
     logging.info("MQTT client: Setup finished")
 
+    # Setup devices
     config = settings.get()
-    if not config.MOCK:
-        top_button = button.Button(config.BUTTON_GPIO_PIN)
-        top_button.set_short_press_callback(
-            app.state.mqtt.publish_button_pressed)
-        top_button.set_long_press_callback(
-            app.state.mqtt.publish_button_long_pressed)
-        app.state.devices = Devices(
-            button=top_button,
-            buzzer=buzzer.Buzzer(config.BUZZER_GPIO_PIN),
-            display=display.Display(),
-            leds=leds.Leds(),
-        )
+    top_button = button.Button(config.BUTTON_GPIO_PIN)
+    top_button.set_short_press_callback(
+        app.state.mqtt.publish_button_pressed)
+    top_button.set_long_press_callback(
+        app.state.mqtt.publish_button_long_pressed)
+    app.state.devices = Devices(
+        button=top_button,
+        buzzer=buzzer.Buzzer(config.BUZZER_GPIO_PIN),
+        display=display.Display(),
+        leds=leds.Leds(),
+    )
 
-        # Use DPMS instead of custom sleep for time being
-        app.state.devices.display.enable_keep_awake()
-    else:
-        app.state.devices = Devices(
-            button=None,
-            buzzer=None,
-            display=None,
-            leds=leds.Leds(),
-        )
+    # Use DPMS instead of custom sleep for time being
+    app.state.devices.display.enable_keep_awake()
 
 
 @app.on_event("shutdown")
