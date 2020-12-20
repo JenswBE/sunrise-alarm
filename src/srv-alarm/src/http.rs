@@ -62,6 +62,40 @@ pub async fn update_alarm(ctx: &Context, alarm: Alarm) -> Result<(), String> {
 }
 
 // ==============================================
+// =                   BUZZER                   =
+// ==============================================
+
+/// srv-physical: PUT /buzzer
+pub async fn start_buzzer(ctx: &Context) -> Result<(), String> {
+    let url = ctx.config.hosts.srv_physical.join("buzzer").unwrap();
+    let response = ctx
+        .client
+        .put(url.clone())
+        .send()
+        .await
+        .map_err(format_error("Failed to PUT buzzer", url))?;
+
+    error_for_status(response, "Failed to PUT buzzer")
+        .await
+        .map(drop)
+}
+
+/// srv-physical: DELETE /buzzer
+pub async fn stop_buzzer(ctx: &Context) -> Result<(), String> {
+    let url = ctx.config.hosts.srv_physical.join("buzzer").unwrap();
+    let response = ctx
+        .client
+        .delete(url.clone())
+        .send()
+        .await
+        .map_err(format_error("Failed to DELETE buzzer", url))?;
+
+    error_for_status(response, "Failed to DELETE buzzer")
+        .await
+        .map(drop)
+}
+
+// ==============================================
 // =                    MUSIC                   =
 // ==============================================
 

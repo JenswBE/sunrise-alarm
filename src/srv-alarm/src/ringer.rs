@@ -34,7 +34,7 @@ pub fn start(ctx: Context) -> Ringer {
                     let duration = handle_action(&ctx, action.unwrap()).await;
                     if let Some(duration) = duration {
                         minute = 0;
-                        log::debug!("Reset delay to {:?}s", duration.as_secs());
+                        log::info!("Reset delay to {:?}s", duration.as_secs());
                         delay_next_step = time::delay_until(Instant::now() + duration).fuse();
                     }
                 }
@@ -43,12 +43,12 @@ pub fn start(ctx: Context) -> Ringer {
                     // Skip if alarm is idle
                     minute += 1;
                     if ctx.get_status() != Status::Idle {
-                        log::debug!("Handle next step");
+                        log::info!("Handle next step");
                         handle_next_step(&ctx, minute).await;
-                        log::debug!("Reset delay to {}s", TICK_DURATION.as_secs());
+                        log::info!("Reset delay to {}s", TICK_DURATION.as_secs());
                         delay_next_step = time::delay_until(Instant::now() + TICK_DURATION).fuse();
                     } else {
-                        log::debug!("Next step skipped since status is idle")
+                        log::info!("Next step skipped since status is idle")
                     }
                 }
             }
@@ -58,7 +58,7 @@ pub fn start(ctx: Context) -> Ringer {
 }
 
 async fn handle_action(ctx: &Context, action: Action) -> Option<Duration> {
-    log::debug!("Handle action: {:?}", action);
+    log::info!("Handle action: {:?}", action);
     match action {
         Action::Start => handle_start(ctx).await,
         Action::Stop => handle_stop(ctx).await,
@@ -67,15 +67,15 @@ async fn handle_action(ctx: &Context, action: Action) -> Option<Duration> {
 
 async fn handle_start(ctx: &Context) -> Option<Duration> {
     // Start light
-    log::debug!("Starting sunrise");
+    log::info!("Starting sunrise");
     http::start_sunrise(ctx).await.ok();
     Some(TICK_DURATION)
 }
 
 async fn handle_stop(ctx: &Context) -> Option<Duration> {
     // Stop light and sound
-    log::debug!("Stopping sunrise");
-    log::debug!("Stopping alarm music");
+    log::info!("Stopping sunrise");
+    log::info!("Stopping alarm music");
     let (leds, music) = join!(http::stop_sunrise(ctx), http::stop_music(ctx));
     leds.ok();
     music.ok();
@@ -85,25 +85,35 @@ async fn handle_stop(ctx: &Context) -> Option<Duration> {
 }
 
 async fn handle_next_step(ctx: &Context, minute: u8) {
-    let abort_delay = ctx.config.alarm.light_duration.num_minutes() + 10;
+    // General
+    let minute = minute as i64;
+    log::info!("Handle next alarm step at minute: {}", minute);
+
+    // Check for abort
+    let light_duration = ctx.config.alarm.light_duration.num_minutes();
+    let abort_delay = light_duration + 10;
+    if minute > abort_delay {
+        log::warn!("Alarm reached abort limit. Requesting manager to abort alarm.");
+        ctx.radio
+            .send(MgrAction::AbortAlarm)
+            .map_err(|e| log::error!("Failed to send action AbortAlarm to manager: {}", e))
+            .ok();
+        return;
+    }
+
+    // Check for buzzer
+    if minute >= light_duration {
+        log::info!("Starting buzzer");
+        http::start_buzzer(ctx).await.ok();
+    }
+
+    // Check for music
     let sound_delay = ctx.config.alarm.light_duration - ctx.config.alarm.sound_duration;
-    let delay_minutes = sound_delay.num_minutes();
-    match minute as i64 {
-        m if m == delay_minutes => {
-            log::debug!("Starting alarm music");
-            http::start_music(ctx).await.ok();
-        }
-        m if m > abort_delay => {
-            log::warn!("Alarm reached abort limit. Requesting manager to abort alarm.");
-            ctx.radio
-                .send(MgrAction::AbortAlarm)
-                .map_err(|e| log::error!("Failed to send action AbortAlarm to manager: {}", e))
-                .ok();
-        }
-        m if m > delay_minutes => {
-            log::debug!("Increasing alarm volume");
-            http::increase_music_volume(ctx).await.ok();
-        }
-        _ => log::debug!("No action required. Skipping next alarm step."),
+    if minute == sound_delay.num_minutes() {
+        log::info!("Starting alarm music");
+        http::start_music(ctx).await.ok();
+    } else if minute > sound_delay.num_minutes() {
+        log::info!("Increasing alarm volume");
+        http::increase_music_volume(ctx).await.ok();
     }
 }
