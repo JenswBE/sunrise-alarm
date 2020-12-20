@@ -2,7 +2,6 @@
 
 from fastapi import APIRouter, Depends
 
-from physical.devices import buzzer
 from physical.devices.common import Devices, dev_from_req
 
 

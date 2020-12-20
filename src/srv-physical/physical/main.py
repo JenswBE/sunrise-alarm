@@ -11,6 +11,7 @@ from physical.devices import button, buzzer, display, leds
 from physical.devices.common import Devices
 from physical.helpers import mqtt, settings
 from physical.rest import (
+    backlight as router_backlight,
     buzzer as router_buzzer,
     leds as router_leds,
     mock as router_mock,
@@ -23,6 +24,13 @@ app = FastAPI(
 )
 
 # Add routers
+# Backlight
+app.include_router(
+    router_backlight.router,
+    prefix='/backlight',
+    tags=['Backlight']
+)
+
 # Buzzer
 app.include_router(
     router_buzzer.router,
