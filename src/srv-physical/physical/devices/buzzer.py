@@ -26,7 +26,7 @@ class Buzzer:
         self._loop = asyncio.get_running_loop()
         self._enabled = False
 
-    def start(self, callback):
+    def start(self):
         """Starts the buzzer"""
         self._enabled = True
         self._beep_step = 0
@@ -35,7 +35,7 @@ class Buzzer:
             delay=BEEP[self._beep_step].seconds,
         )
 
-    def stop(self, callback):
+    def stop(self):
         """Stops the buzzer"""
         self._enabled = False
 
