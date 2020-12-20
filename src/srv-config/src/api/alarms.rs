@@ -53,7 +53,7 @@ fn get(db: Db) -> impl Filter<Extract = impl warp::Reply, Error = warp::Rejectio
 }
 
 pub async fn get_alarm(id: Uuid, db: Db) -> Result<impl warp::Reply, Infallible> {
-    log::debug!("get_alarm: id={}", id);
+    log::info!("get_alarm: id={}", id);
 
     // Get alarm from database
     let mut alarm = None;
@@ -198,7 +198,7 @@ pub async fn delete_alarm(
     db: Db,
     mqtt_client: AsyncClient,
 ) -> Result<impl warp::Reply, Infallible> {
-    log::debug!("delete_alarm: id={}", id);
+    log::info!("delete_alarm: id={}", id);
 
     // Delete alarm from database
     let mut found: bool = false;

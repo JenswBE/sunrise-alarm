@@ -15,7 +15,7 @@ pub async fn update_next_alarms(ctx: &Context) {
         .iter()
         .min_by_key(|&a| a.alarm_datetime)
         .map(NextAlarm::to_owned);
-    log::debug!(
+    log::info!(
         r#"Next ring at {:?}"#,
         next_alarm_ring.as_ref().map(|a| a.alarm_datetime)
     );
@@ -26,7 +26,7 @@ pub async fn update_next_alarms(ctx: &Context) {
         .iter()
         .min_by_key(|&a| a.next_action_datetime)
         .map(NextAlarm::to_owned);
-    log::debug!(
+    log::info!(
         r#"Next action "{:?}" at {:?}"#,
         next_alarm_action
             .as_ref()

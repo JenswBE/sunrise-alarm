@@ -31,7 +31,7 @@ pub fn start(ctx: Context, mut rx: RadioReceiver) {
         let fallback = Duration::from_secs(1);
         let duration = duration_until_next_action(&ctx).unwrap_or(fallback);
         let mut delay_next_action = time::delay_for(duration).fuse();
-        log::debug!("Initial delay set to {:?}s", duration.as_secs());
+        log::info!("Initial delay set to {:?}s", duration.as_secs());
 
         // Setup ringer
         let ringer = ringer::start(ctx.clone());
@@ -47,7 +47,7 @@ pub fn start(ctx: Context, mut rx: RadioReceiver) {
 
                     let duration = handle_action(&ctx, &ringer, action.unwrap()).await;
                     if let Some(duration) = duration {
-                        log::debug!("Reset delay to {:?}s", duration.as_secs());
+                        log::info!("Reset delay to {:?}s", duration.as_secs());
                         delay_next_action = time::delay_until(Instant::now() + duration).fuse();
                     }
                 }
@@ -72,7 +72,7 @@ fn duration_until_next_action(ctx: &Context) -> Result<Duration, String> {
 }
 
 async fn handle_action(ctx: &Context, ringer: &Ringer, action: Action) -> Option<Duration> {
-    log::debug!("Handle action: {:?}", action);
+    log::info!("Handle action: {:?}", action);
     match action {
         Action::UpdateSchedule => handle_update_schedule(ctx),
         Action::ButtonPressed => handle_button_pressed(ctx, ringer).await,
@@ -189,7 +189,7 @@ async fn handle_next_action(ctx: &Context, ringer: &Ringer) {
 
     // Alarm is not set or not ready
     if ready.is_none() || Some(false) == ready {
-        log::debug!("Handle next action: None");
+        log::info!("Handle next action: None");
         planner::update_next_alarms(ctx).await;
         return;
     }
@@ -199,7 +199,7 @@ async fn handle_next_action(ctx: &Context, ringer: &Ringer) {
     let alarm = ctx.get_alarm(next_alarm.id).unwrap();
 
     // Perform action
-    log::debug!("Handle next action: {:?}", next_alarm.next_action);
+    log::info!("Handle next action: {:?}", next_alarm.next_action);
     match next_alarm.next_action {
         NextAction::Skip => handle_next_action_skip(ctx, alarm).await,
         NextAction::Ring => {
@@ -211,7 +211,7 @@ async fn handle_next_action(ctx: &Context, ringer: &Ringer) {
 }
 
 async fn handle_next_action_ring(ctx: &Context, ringer: &Ringer, alarm: Alarm) {
-    log::debug!("Starting alarm {} ({})", alarm.id, alarm.name);
+    log::info!("Starting alarm {} ({})", alarm.id, alarm.name);
     ctx.set_status(Status::Ring(alarm.id));
     ringer
         .send(RingerAction::Start)
