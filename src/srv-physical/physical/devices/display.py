@@ -34,8 +34,8 @@ class Display:
 
         # Init sleep timeout
         self._backlight.power = True
-        loop = asyncio.get_event_loop()
-        self._sleep_event = loop.call_later(
+        self._loop = asyncio.get_event_loop()
+        self._sleep_event = self._loop.call_later(
             callback=self.sleep,
             delay=SLEEP_TIMEOUT.seconds,
         )
@@ -46,7 +46,7 @@ class Display:
         self._sleep_callback = None
 
         # Start updating brightness
-        loop.call_later(1, self.update_brightness)
+        self._loop.call_later(1, self.update_brightness)
 
     def lock_brightness(self):
         """Lock the backlight brightness"""
@@ -55,8 +55,7 @@ class Display:
     def unlock_brightness(self):
         """Unlock the backlight brightness"""
         # Delay unlock as sensor caches readings
-        loop = asyncio.get_event_loop()
-        loop.call_later(1, self._unlock_brightness)
+        self._loop.call_later(1, self._unlock_brightness)
 
     def _unlock_brightness(self):
         """Unlock the backlight brightness (really this time)"""
@@ -74,8 +73,7 @@ class Display:
         self._backlight.brightness = new_brightness
 
         # Reschedule call
-        loop = asyncio.get_event_loop()
-        loop.call_later(1, self.update_brightness)
+        self._loop.call_later(1, self.update_brightness)
 
     def calculate_brightness(self, current_light):
         """Calculates the current brightness for the display"""
@@ -120,8 +118,7 @@ class Display:
         # (Re)set timeout
         if self._sleep_event is not None:
             self._sleep_event.cancel()
-        loop = asyncio.get_event_loop()
-        self._sleep_event = loop.call_later(
+        self._sleep_event = self._loop.call_later(
             callback=self.sleep,
             delay=SLEEP_TIMEOUT.seconds,
         )
@@ -153,8 +150,7 @@ class Display:
         # (Re)set timeout
         if self._sleep_event is not None:
             self._sleep_event.cancel()
-        loop = asyncio.get_event_loop()
-        self._sleep_event = loop.call_later(
+        self._sleep_event = self._loop.call_later(
             callback=self.sleep,
             delay=SLEEP_TIMEOUT.seconds,
         )
