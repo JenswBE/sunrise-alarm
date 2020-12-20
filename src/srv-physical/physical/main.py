@@ -7,10 +7,11 @@ from fastapi import FastAPI
 from starlette.responses import RedirectResponse
 from starlette.middleware.cors import CORSMiddleware
 
-from physical.devices import button, display, leds
+from physical.devices import button, buzzer, display, leds
 from physical.devices.common import Devices
 from physical.helpers import mqtt, settings
 from physical.rest import (
+    buzzer as router_buzzer,
     leds as router_leds,
     mock as router_mock,
 )
@@ -22,6 +23,13 @@ app = FastAPI(
 )
 
 # Add routers
+# Buzzer
+app.include_router(
+    router_buzzer.router,
+    prefix='/buzzer',
+    tags=['Buzzer']
+)
+
 # Leds
 app.include_router(
     router_leds.router,
@@ -53,6 +61,7 @@ async def setup_service():
             app.state.mqtt.publish_button_long_pressed)
         app.state.devices = Devices(
             button=top_button,
+            buzzer=buzzer.Buzzer(config.BUZZER_GPIO_PIN),
             display=display.Display(),
             leds=leds.Leds(),
         )
@@ -62,6 +71,7 @@ async def setup_service():
     else:
         app.state.devices = Devices(
             button=None,
+            buzzer=None,
             display=None,
             leds=leds.Leds(),
         )

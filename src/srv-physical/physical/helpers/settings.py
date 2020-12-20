@@ -21,6 +21,9 @@ class Settings(BaseSettings):
     # BUTTON
     BUTTON_GPIO_PIN: int = 23
 
+    # BUZZER
+    BUZZER_GPIO_PIN: int = 18
+
     # LEDS
     # See https://github.com/rpi-ws281x/rpi-ws281x-python
     LED_STRIP_TYPE: int = ws.WS2811_STRIP_GRB

@@ -9,11 +9,6 @@ from physical.devices.common import Devices, dev_from_req
 
 router = APIRouter()
 
-RESPONSES = {
-    200: {"description": "Success"},
-    202: {"description": "Action was mocked"},
-}
-
 
 class Leds(BaseModel):
     color: leds.PresetColor
