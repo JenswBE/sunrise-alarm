@@ -49,7 +49,6 @@ services:
       - "8002:8080"
     environment:
       - "TZ=Europe/Brussels"
-      - "DEBUG=True"
       - "MOCK=True"
       - "MQTT_BROKER_HOST=mosquitto"
       - "MQTT_CLIENT_ID=srv-physical"

@@ -26,4 +26,4 @@ COPY ${SERVICE_NAME} .
 
 # Limiting workers is required for MQTT to work correctly
 EXPOSE 8080
-CMD [ "gunicorn", "physical.main:app", "-w", "1", "-k", "uvicorn.workers.UvicornWorker", "-b", "0.0.0.0:8080" ]
+CMD [ "gunicorn", "physical.main:app", "-w", "1", "-k", "uvicorn.workers.UvicornWorker", "-b", "0.0.0.0:8080", "--log-config", "logging.conf" ]

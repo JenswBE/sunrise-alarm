@@ -5,7 +5,10 @@ autopep8
 
 # FastAPI
 fastapi
+httptools
+uvloop
 uvicorn
+gunicorn
 
 # MQTT
 gmqtt

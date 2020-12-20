@@ -1,6 +1,7 @@
 """This module contains helpers for physical buttons"""
 
 import asyncio
+import logging
 from datetime import datetime, timedelta
 
 from physical.helpers import settings
@@ -80,6 +81,7 @@ class Button:
                 # Long press reached
                 self._is_long_press = True
                 if self._long_press_callback is not None:
+                    logging.info("Long button press, call callback")
                     self._loop.call_soon_threadsafe(self._long_press_callback)
 
             # Long press handled
@@ -88,6 +90,7 @@ class Button:
         # Handle short press
         if not self._is_long_press:
             if self._short_press_callback is not None:
+                logging.info("Short button press, call callback")
                 self._loop.call_soon_threadsafe(self._short_press_callback)
 
         # Clean state on button released

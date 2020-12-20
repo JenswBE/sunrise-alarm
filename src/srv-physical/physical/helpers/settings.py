@@ -11,7 +11,6 @@ from rpi_ws281x import ws
 class Settings(BaseSettings):
     """Handles ENV and file based settings"""
     # General
-    DEBUG: bool = False
     MOCK: bool = False
 
     # MQTT
@@ -33,9 +32,4 @@ class Settings(BaseSettings):
 @lru_cache(maxsize=None)
 def get():
     """Returns cached settings object"""
-    settings = Settings()
-
-    if settings.DEBUG:
-        logging.getLogger().setLevel(logging.DEBUG)
-
-    return settings
+    return Settings()
