@@ -167,5 +167,6 @@ class Leds:
             self._update_sunrise_event.cancel()
             self._update_sunrise_event = None
 
-        # Turn light off
+        # Reset state
         self.set_black()
+        self._sunrise = False
