@@ -84,20 +84,26 @@ class Leds:
 
     def set_color(self, color: PresetColor, brightness: int = 100):
         """Set all leds to a specific color and brightness (0 - 255)"""
+        logging.info("Set leds to color %s with brightness %d",
+                     color, brightness)
         self._color = color
         self._brightness = brightness
         self.update()
 
     def set_black(self):
         """Turn off all leds"""
+        logging.info("Turn leds off")
         self._color = PresetColor.BLACK
         self._brightness = 0
         self.update()
 
     def start_sunrise_simulation(self):
         """Start simulating a sunrise"""
+        logging.info("Start sunrise simulation")
+
         # Check if already in sunrise
         if self._sunrise:
+            logging.info("We are already in a sunrise, ignore start sunrise")
             return
 
         # Set initial state
@@ -114,6 +120,8 @@ class Leds:
 
     def update_sunrise_simulation(self):
         """Update the sunrise simulation"""
+        logging.info("Update sunrise simulation")
+
         # Derive color from brightness
         brightness = self._brightness + 1
         if brightness > 90:
@@ -143,8 +151,11 @@ class Leds:
 
     def stop_sunrise_simulation(self):
         """Stop simulating a sunrise"""
+        logging.info("Stop sunrise simulation")
+
         # Check if we are in a sunrise
         if not self._sunrise:
+            logging.info("We are not in a sunrise, ignore stop sunrise")
             return
 
         # Cancel sunrise update if still runnning

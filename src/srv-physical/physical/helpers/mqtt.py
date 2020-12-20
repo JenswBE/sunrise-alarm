@@ -2,6 +2,7 @@
 
 import asyncio
 import functools
+import logging
 import random
 
 from gmqtt import Client
@@ -24,7 +25,9 @@ class MQTT:
         await self.client.disconnect()
 
     def _publish(self, topic):
-        self.client.publish(self._topic_prefix + topic, qos=1)
+        full_topic = self._topic_prefix + topic
+        logging.info("Publish event to MQTT topic: %s", full_topic)
+        self.client.publish(full_topic, qos=1)
 
     def publish_button_pressed(self):
         self._publish("button_pressed")
