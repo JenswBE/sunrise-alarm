@@ -62,6 +62,50 @@ pub async fn update_alarm(ctx: &Context, alarm: Alarm) -> Result<(), String> {
 }
 
 // ==============================================
+// =                  BACKLIGHT                 =
+// ==============================================
+
+/// srv-physical: PUT /backlight/lock
+pub async fn lock_backlight(ctx: &Context) -> Result<(), String> {
+    let url = ctx
+        .config
+        .hosts
+        .srv_physical
+        .join("backlight/lock")
+        .unwrap();
+    let response = ctx
+        .client
+        .put(url.clone())
+        .send()
+        .await
+        .map_err(format_error("Failed to PUT backlight/lock", url))?;
+
+    error_for_status(response, "Failed to PUT backlight/lock")
+        .await
+        .map(drop)
+}
+
+/// srv-physical: DELETE /backlight/lock
+pub async fn unlock_backlight(ctx: &Context) -> Result<(), String> {
+    let url = ctx
+        .config
+        .hosts
+        .srv_physical
+        .join("backlight/lock")
+        .unwrap();
+    let response = ctx
+        .client
+        .delete(url.clone())
+        .send()
+        .await
+        .map_err(format_error("Failed to DELETE backlight/lock", url))?;
+
+    error_for_status(response, "Failed to DELETE backlight/lock")
+        .await
+        .map(drop)
+}
+
+// ==============================================
 // =                   BUZZER                   =
 // ==============================================
 

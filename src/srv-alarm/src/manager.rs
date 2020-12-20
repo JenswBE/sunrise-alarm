@@ -105,6 +105,7 @@ async fn handle_button_pressed(ctx: &Context, ringer: &Ringer) -> Option<Duratio
             let req = Leds::night_light();
             http::set_leds(ctx, &req).await.ok();
         } else {
+            http::unlock_backlight(ctx).await.ok();
             http::set_leds_off(ctx).await.ok();
         }
     } else {
@@ -119,9 +120,11 @@ async fn handle_button_long_pressed(ctx: &Context, ringer: &Ringer) -> Option<Du
         // Handle night light
         let leds = http::get_leds(ctx).await.unwrap_or_default();
         if leds.is_off() {
+            http::lock_backlight(ctx).await.ok();
             let req = Leds::night_light_dark();
             http::set_leds(ctx, &req).await.ok();
         } else {
+            http::unlock_backlight(ctx).await.ok();
             http::set_leds_off(ctx).await.ok();
         }
     } else {
