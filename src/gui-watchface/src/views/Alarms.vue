@@ -1,7 +1,7 @@
 <template>
   <v-container fluid>
     <v-row>
-      <v-col cols="6">
+      <v-col cols="6" class="make-scrollable">
         <alarm-list
           v-model="selectedAlarm"
           @add-alarm="addAlarm"
@@ -9,7 +9,7 @@
           @skip-alarm="skipAlarm"
         />
       </v-col>
-      <v-col cols="6">
+      <v-col cols="6" class="make-scrollable">
         <alarm-edit :value="selectedAlarm" @delete-alarm="deleteAlarm" />
       </v-col>
     </v-row>
@@ -88,3 +88,10 @@ export default {
   },
 };
 </script>
+
+<style>
+.make-scrollable {
+  overflow-y: auto;
+  max-height: 80vh;
+}
+</style>
