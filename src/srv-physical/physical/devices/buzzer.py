@@ -54,7 +54,7 @@ class Buzzer:
                 self._beep_step = 0
 
             # Update buzzer
-            if self._beep_step % 2:
+            if self._beep_step % 2 == 0:
                 self._buzzer_on()
             else:
                 self._buzzer_off()
@@ -71,10 +71,12 @@ class Buzzer:
 
     def _buzzer_on(self):
         """Turn buzzer on"""
+        logging.warn("Buzzer on")
         if self._is_real:
             self._buzzer.on()
 
     def _buzzer_off(self):
         """Turn buzzer off"""
+        logging.warn("Buzzer off")
         if self._is_real:
             self._buzzer.off()
