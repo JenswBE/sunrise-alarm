@@ -2,7 +2,7 @@
 
 import asyncio
 import logging
-from datetime import datetime, timedelta
+from datetime import timedelta
 
 from physical.helpers import settings
 
@@ -25,18 +25,21 @@ class Buzzer:
         self._buzzer = self._new_buzzer(gpio_pin)
         self._loop = asyncio.get_running_loop()
         self._enabled = False
+        self._beep_step_event = None
 
     def start(self):
         """Starts the buzzer"""
+        logging.info("Start buzzer")
         self._enabled = True
         self._beep_step = 0
         self._beep_step_event = self._loop.call_later(
             callback=self._handle_buzzer_step,
-            delay=BEEP[self._beep_step].seconds,
+            delay=BEEP[self._beep_step].total_seconds(),
         )
 
     def stop(self):
         """Stops the buzzer"""
+        logging.info("Stop buzzer")
         self._enabled = False
         if self._beep_step_event is not None:
             self._beep_step_event.cancel()
@@ -59,7 +62,7 @@ class Buzzer:
             # Schedule new buzzer beep
             self._beep_step_event = self._loop.call_later(
                 callback=self._handle_buzzer_step,
-                delay=BEEP[self._beep_step].seconds,
+                delay=BEEP[self._beep_step].total_seconds(),
             )
 
     def _new_buzzer(self, gpio_pin: int):
