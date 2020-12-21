@@ -33,7 +33,7 @@ pub async fn get_client(ctx: Context) -> AsyncClient {
 
 async fn notification_handler(ctx: &Context, notification: Event) {
     // Debug logging
-    log::info!("MQTT notification received: {:?}", notification);
+    log::debug!("MQTT notification received: {:?}", notification);
 
     // Only handle incoming publish notifications
     if let Event::Incoming(event) = notification {
