@@ -71,12 +71,10 @@ class Buzzer:
 
     def _buzzer_on(self):
         """Turn buzzer on"""
-        logging.warn("Buzzer on")
         if self._is_real:
             self._buzzer.on()
 
     def _buzzer_off(self):
         """Turn buzzer off"""
-        logging.warn("Buzzer off")
         if self._is_real:
             self._buzzer.off()
