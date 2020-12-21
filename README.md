@@ -98,3 +98,13 @@ cd sunrise-alarm/deployment
 docker-compose up -d
 xdg-open "http://localhost:8080"
 ```
+
+## Firefox Add-ons:
+
+### ScrollAnywhere
+
+- General: Enable `Left button`
+- General: Enable `Scroll on text` + `Double click`
+- General: Set scroll style `Grab and Drag`
+- Scrollbars: Set look `Thin`
+- Scrollbars: Set background to black and slider to dark grey
