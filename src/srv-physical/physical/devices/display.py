@@ -48,15 +48,18 @@ class Display:
 
     def lock_brightness(self):
         """Lock the backlight brightness"""
+        logging.info("Lock brightness")
         self._brightness_locked = True
 
     def unlock_brightness(self):
         """Unlock the backlight brightness"""
         # Delay unlock as sensor caches readings
+        logging.info("Unlock brightness in 1 second")
         self._loop.call_later(1, self._unlock_brightness)
 
     def _unlock_brightness(self):
         """Unlock the backlight brightness (really this time)"""
+        logging.info("Unlock brightness for real")
         self._brightness_locked = False
 
     def update_brightness(self):
@@ -133,7 +136,7 @@ class Display:
             self._sleep_event = None
 
         # Enable backlight
-        logging.info("Display: Keep display awake")
+        logging.info("Keep display awake")
         self._set_backlight_power(True)
 
     def disable_keep_awake(self):
@@ -143,7 +146,7 @@ class Display:
             return
 
         # Log action
-        logging.info("Display: Allow display to go to sleep")
+        logging.info("Allow display to go to sleep")
 
         # (Re)set timeout
         if self._sleep_event is not None:
