@@ -64,6 +64,9 @@ class Display:
 
     def update_brightness(self):
         """Update the current backlight brightness"""
+        # Reschedule call
+        self._loop.call_later(1, self.update_brightness)
+
         # Check if brightness is locked
         if self._brightness_locked:
             return
@@ -72,9 +75,6 @@ class Display:
         current_light = self._get_sensor_brightness()
         new_brightness = self.calculate_brightness(current_light)
         self._set_backlight_brightness(new_brightness)
-
-        # Reschedule call
-        self._loop.call_later(1, self.update_brightness)
 
     def calculate_brightness(self, current_light):
         """Calculates the current brightness for the display"""
