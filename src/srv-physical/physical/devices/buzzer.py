@@ -31,15 +31,18 @@ class Buzzer:
         self._enabled = True
         self._beep_step = 0
         self._beep_step_event = self._loop.call_later(
-            callback=self.handle_buzzer_step,
+            callback=self._handle_buzzer_step,
             delay=BEEP[self._beep_step].seconds,
         )
 
     def stop(self):
         """Stops the buzzer"""
         self._enabled = False
+        if self._beep_step_event is not None:
+            self._beep_step_event.cancel()
+        self._buzzer_off()
 
-    def handle_buzzer_step(self):
+    def _handle_buzzer_step(self):
         """Handle a step in the buzzer sequence"""
         if self._enabled:
             # Update buzzer step
@@ -55,7 +58,7 @@ class Buzzer:
 
             # Schedule new buzzer beep
             self._beep_step_event = self._loop.call_later(
-                callback=self.handle_buzzer_step,
+                callback=self._handle_buzzer_step,
                 delay=BEEP[self._beep_step].seconds,
             )
 
