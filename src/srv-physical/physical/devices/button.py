@@ -24,7 +24,7 @@ class Button:
 
     def __init__(self, gpio_pin: int):
         self._is_real = not settings.get().MOCK
-        self._button = self._new_button()
+        self._button = self._new_button(gpio_pin)
         self._loop = asyncio.get_running_loop()
         self._first_press_timestamp = None
         self._is_long_press = False
