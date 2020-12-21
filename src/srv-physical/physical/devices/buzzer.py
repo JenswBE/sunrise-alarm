@@ -21,8 +21,8 @@ class Buzzer:
     """Helper class to work with a buzzer"""
 
     def __init__(self, gpio_pin: int):
-        self._mock = settings.get().MOCK
-        self._buzzer = self._new_gpiozero(gpio_pin)
+        self._is_real = not settings.get().MOCK
+        self._buzzer = self._new_buzzer(gpio_pin)
         self._loop = asyncio.get_running_loop()
         self._enabled = False
 
@@ -59,16 +59,16 @@ class Buzzer:
                 delay=BEEP[self._beep_step].seconds,
             )
 
-    def _new_gpiozero(self, gpio_pin: int):
-        if not self._mock:
+    def _new_buzzer(self, gpio_pin: int):
+        if self._is_real:
             return GPIOBuzzer(pin=gpio_pin)
 
     def _buzzer_on(self):
         """Turn buzzer on"""
-        if not self._mock:
+        if self._is_real:
             self._buzzer.on()
 
     def _buzzer_off(self):
         """Turn buzzer off"""
-        if not self._mock:
+        if self._is_real:
             self._buzzer.off()

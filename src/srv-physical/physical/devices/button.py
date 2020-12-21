@@ -3,6 +3,7 @@
 import asyncio
 import logging
 from datetime import datetime, timedelta
+from typing import Optional
 
 from physical.helpers import settings
 
@@ -22,12 +23,8 @@ class Button:
     """
 
     def __init__(self, gpio_pin: int):
-        # Setup button
-        if not settings.get().MOCK:
-            self._button = GPIOButton(pin=gpio_pin, pull_up=False)
-            self._button.when_pressed = self.handle_press
-
-        # Setup other variables
+        self._is_real = not settings.get().MOCK
+        self._button = self._new_button()
         self._loop = asyncio.get_running_loop()
         self._first_press_timestamp = None
         self._is_long_press = False
@@ -97,3 +94,9 @@ class Button:
         # Clean state on button released
         self._first_press_timestamp = None
         self._is_long_press = False
+
+    def _new_button(self, gpio_pin: int) -> Optional["GPIOButton"]:
+        if self._is_real:
+            button = GPIOButton(pin=gpio_pin, pull_up=False)
+            button.when_pressed = self.handle_press
+            return button

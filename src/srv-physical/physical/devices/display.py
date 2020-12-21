@@ -26,7 +26,7 @@ class Display:
 
     def __init__(self):
         # Init devices
-        self._mock = settings.get().MOCK
+        self._is_real = not settings.get().MOCK
         self._sensor = self._new_sensor()
         self._backlight = self._new_backlight()
 
@@ -154,52 +154,32 @@ class Display:
         )
 
     def _new_sensor(self) -> Optional["TSL2591"]:
-        # Skip if mocked
-        if self._mock:
-            return
-
-        # Build new sensor
-        i2c = busio.I2C(board.SCL, board.SDA)
-        return TSL2591(i2c)
+        if self._is_real:
+            i2c = busio.I2C(board.SCL, board.SDA)
+            return TSL2591(i2c)
 
     def _get_sensor_brightness(self) -> int:
-        # Skip if mocked
-        if self._mock:
-            return True
-
-        # Get sensor brightness
-        return self._sensor.visible
+        if self._is_real:
+            return self._sensor.visible
+        else:
+            return 100
 
     def _new_backlight(self) -> Optional["Backlight"]:
-        # Skip if mocked
-        if self._mock:
-            return
-
-        # Build new backlight
-        backlight = Backlight()
-        backlight.fade_duration = 0.25
-        return backlight
+        if self._is_real:
+            backlight = Backlight()
+            backlight.fade_duration = 0.25
+            return backlight
 
     def _get_backlight_power(self) -> bool:
-        # Skip if mocked
-        if self._mock:
+        if self._is_real:
+            return self._backlight.power
+        else:
             return True
 
-        # Get backlight power
-        return self._backlight.power
-
     def _set_backlight_power(self, power: bool):
-        # Skip if mocked
-        if self._mock:
-            return
-
-        # Set backlight power
-        self._backlight.power = power
+        if self._is_real:
+            self._backlight.power = power
 
     def _set_backlight_brightness(self, brightness: int):
-        # Skip if mocked
-        if self._mock:
-            return
-
-        # Set backlight brightness
-        self._backlight.brightness = brightness
+        if self._is_real:
+            self._backlight.brightness = brightness

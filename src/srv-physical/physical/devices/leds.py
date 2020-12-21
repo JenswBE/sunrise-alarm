@@ -36,9 +36,9 @@ class Leds:
 
     def __init__(self):
         # Create led strip
-        self._loop = asyncio.get_event_loop()
-        self._mock = settings.get().MOCK
+        self._is_real = not settings.get().MOCK
         self._strip = self._new_pixel_strip()
+        self._loop = asyncio.get_event_loop()
 
         # Set initial color and brightness
         self._color = PresetColor.BLACK
@@ -61,7 +61,7 @@ class Leds:
         return self._brightness
 
     def _new_pixel_strip(self):
-        if not self._mock:
+        if self._is_real:
             config = settings.get()
             strip = PixelStrip(
                 num=config.LED_COUNT,
@@ -73,16 +73,12 @@ class Leds:
 
     def update(self):
         """Set all leds to the current color"""
-        # Skip if mocked
-        if self._mock:
-            return
-
-        # Update leds
-        color = _color_from_preset(self._color)
-        for led_index in range(self._strip.numPixels()):
-            self._strip.setPixelColorRGB(led_index, *color)
-        self._strip.setBrightness(self._brightness)
-        self._strip.show()
+        if self._is_real:
+            color = _color_from_preset(self._color)
+            for led_index in range(self._strip.numPixels()):
+                self._strip.setPixelColorRGB(led_index, *color)
+            self._strip.setBrightness(self._brightness)
+            self._strip.show()
 
     def cleanup(self):
         """Cleanup on exit"""
