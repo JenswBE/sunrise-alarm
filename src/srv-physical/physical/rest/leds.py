@@ -35,7 +35,7 @@ async def clear_leds(devs: Devices = Depends(dev_from_req)):
     return {}
 
 
-@router.post("/sunrise", summary="Start sunrise simulation")
+@router.put("/sunrise", summary="Start sunrise simulation")
 async def start_sunrise(devs: Devices = Depends(dev_from_req)):
     devs.leds.start_sunrise_simulation()
     return {}

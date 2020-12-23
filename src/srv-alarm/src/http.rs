@@ -299,17 +299,17 @@ pub async fn set_leds_off(ctx: &Context) -> Result<(), String> {
         .map(drop)
 }
 
-/// srv-physical: POST /leds/sunrise
+/// srv-physical: PUT /leds/sunrise
 pub async fn start_sunrise(ctx: &Context) -> Result<(), String> {
     let url = ctx.config.hosts.srv_physical.join("leds/sunrise").unwrap();
     let response = ctx
         .client
-        .post(url.clone())
+        .put(url.clone())
         .send()
         .await
-        .map_err(format_error("Failed to POST leds/sunrise", url))?;
+        .map_err(format_error("Failed to PUT leds/sunrise", url))?;
 
-    error_for_status(response, "Failed to POST leds/sunrise")
+    error_for_status(response, "Failed to PUT leds/sunrise")
         .await
         .map(drop)
 }
