@@ -76,9 +76,15 @@ async fn handle_stop(ctx: &Context) -> Option<Duration> {
     // Stop light and sound
     log::info!("Stopping sunrise");
     log::info!("Stopping alarm music");
-    let (leds, music) = join!(http::stop_sunrise(ctx), http::stop_music(ctx));
+    log::info!("Stopping buzzer");
+    let (leds, music, buzzer) = join!(
+        http::stop_sunrise(ctx),
+        http::stop_music(ctx),
+        http::stop_buzzer(ctx)
+    );
     leds.ok();
     music.ok();
+    buzzer.ok();
 
     // Don't set next step
     None
