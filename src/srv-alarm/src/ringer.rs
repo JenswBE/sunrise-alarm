@@ -20,7 +20,7 @@ const TICK_DURATION: Duration = Duration::from_secs(60);
 pub fn start(ctx: Context) -> Ringer {
     let (tx, mut rx) = mpsc::unbounded_channel::<Action>();
     tokio::spawn(async move {
-        let mut delay_next_step = time::delay_until(Instant::now()).fuse();
+        let mut delay_next_step = Box::pin(time::sleep_until(Instant::now()).fuse());
         let mut minute = 0;
 
         loop {
@@ -35,7 +35,7 @@ pub fn start(ctx: Context) -> Ringer {
                     if let Some(duration) = duration {
                         minute = 0;
                         log::info!("Reset delay to {:?}s", duration.as_secs());
-                        delay_next_step = time::delay_until(Instant::now() + duration).fuse();
+                        delay_next_step = Box::pin(time::sleep_until(Instant::now() + duration).fuse());
                     }
                 }
 
@@ -46,7 +46,7 @@ pub fn start(ctx: Context) -> Ringer {
                         log::info!("Handle next step");
                         handle_next_step(&ctx, minute).await;
                         log::info!("Reset delay to {}s", TICK_DURATION.as_secs());
-                        delay_next_step = time::delay_until(Instant::now() + TICK_DURATION).fuse();
+                        delay_next_step = Box::pin(time::sleep_until(Instant::now() + TICK_DURATION).fuse());
                     } else {
                         log::info!("Next step skipped since status is idle")
                     }

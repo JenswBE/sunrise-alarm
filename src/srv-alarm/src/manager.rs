@@ -30,7 +30,7 @@ pub fn start(ctx: Context, mut rx: RadioReceiver) {
         // Setup initial delay
         let fallback = Duration::from_secs(1);
         let duration = duration_until_next_action(&ctx).unwrap_or(fallback);
-        let mut delay_next_action = time::delay_for(duration).fuse();
+        let mut delay_next_action = Box::pin(time::sleep(duration).fuse());
         log::info!("Initial delay set to {:?}s", duration.as_secs());
 
         // Setup ringer
@@ -48,7 +48,7 @@ pub fn start(ctx: Context, mut rx: RadioReceiver) {
                     let duration = handle_action(&ctx, &ringer, action.unwrap()).await;
                     if let Some(duration) = duration {
                         log::info!("Reset delay to {:?}s", duration.as_secs());
-                        delay_next_action = time::delay_until(Instant::now() + duration).fuse();
+                        delay_next_action = Box::pin(time::sleep_until(Instant::now() + duration).fuse());
                     }
                 }
 
