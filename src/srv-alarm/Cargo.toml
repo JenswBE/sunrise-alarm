@@ -28,6 +28,6 @@ default-features = false
 features = ["json"]
 
 [dependencies.warp]
-version = "0.2"
+git = "https://github.com/seanmonstar/warp"
 default-features = false
 features = ["multipart"]
