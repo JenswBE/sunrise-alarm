@@ -4,7 +4,13 @@
       <router-view @toggle-fullscreen="toggleFullscreen" />
     </v-main>
 
-    <v-snackbar v-model="showAlert" :color="alert.type" top absolute>
+    <v-snackbar
+      v-model="showAlert"
+      :color="alert.type"
+      timeout="1500"
+      top
+      absolute
+    >
       {{ alert.message }}
     </v-snackbar>
 

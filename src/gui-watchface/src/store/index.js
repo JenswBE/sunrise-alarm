@@ -58,10 +58,12 @@ export default new Vuex.Store({
     },
 
     setAlert(state, alert) {
+      console.debug("mut setAlert - Input", alert);
       state.alert = alert;
     },
 
     clearAlert(state) {
+      console.debug("mut clearAlert");
       state.alert = {};
     },
   },
