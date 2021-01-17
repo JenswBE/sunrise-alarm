@@ -117,3 +117,10 @@ export default {
   },
 };
 </script>
+
+<style>
+html,
+div {
+  scrollbar-width: none;
+}
+</style>
