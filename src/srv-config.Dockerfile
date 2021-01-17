@@ -8,14 +8,16 @@ ENV TARGET=x86_64-unknown-linux-musl
 RUN apt-get update && \
     apt-get install -qq \
     build-essential \
-    musl-tools
+    musl-tools \
+    mosquitto
 
 FROM builder-base AS builder-arm
 ENV TARGET=armv7-unknown-linux-musleabihf
 ENV CC_armv7_unknown_linux_musleabihf=arm-linux-gnueabihf-gcc
 RUN apt-get update && \
     apt-get install -qq \
-    crossbuild-essential-armhf
+    crossbuild-essential-armhf \
+    mosquitto
 
 # Build service
 FROM builder-${TARGETARCH} AS builder

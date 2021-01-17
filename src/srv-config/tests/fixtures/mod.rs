@@ -1,8 +1,6 @@
 use std::collections::HashMap;
 use std::sync::Arc;
-use std::time::Duration;
 
-use mqttest;
 use rustbreak::PathDatabase;
 use tempfile::NamedTempFile;
 use uuid::Uuid;
@@ -38,18 +36,11 @@ pub fn fixture_database() -> database::Db {
     Arc::new(db)
 }
 
-pub async fn fixture_mqtt_client() -> (rumqttc::AsyncClient, mqttest::Mqttest) {
-    let srv_conf = mqttest::Conf::new()
-        .max_connect(1)
-        .max_time(vec![Duration::from_millis(500)])
-        .strict(true);
-    let srv = mqttest::Mqttest::start(srv_conf)
-        .await
-        .expect("Failed to start MQTT test server");
+pub async fn fixture_mqtt_client() -> rumqttc::AsyncClient {
     let config = MqttConfig {
         host: "localhost".to_string(),
-        port: srv.port,
+        port: 1883,
     };
     let client = mqtt::get_client(config).await;
-    return (client, srv);
+    return client;
 }

@@ -10,7 +10,7 @@ use fixtures::*;
 async fn test_delete_alarm_success() {
     // Setup test data
     let db = fixture_database();
-    let (mqtt_client, mqtt_server) = fixture_mqtt_client().await;
+    let mqtt_client = fixture_mqtt_client().await;
     let alarm = fixture_alarm();
     db.write(|db| db.alarms.insert(alarm.id, alarm.clone()))
         .unwrap();
@@ -27,17 +27,13 @@ async fn test_delete_alarm_success() {
 
     // Assert results
     assert_eq!(StatusCode::NO_CONTENT, resp.status());
-
-    // Assert MQTT server
-    let stats = mqtt_server.fut.await.unwrap();
-    assert_eq!(1, stats.len());
 }
 
 #[tokio::test]
 async fn test_delete_alarm_not_found() {
     // Setup test data
     let db = fixture_database();
-    let (mqtt_client, mqtt_server) = fixture_mqtt_client().await;
+    let mqtt_client = fixture_mqtt_client().await;
     let api = api::alarms::filters(db, mqtt_client);
 
     // Call service
@@ -50,8 +46,4 @@ async fn test_delete_alarm_not_found() {
 
     // Assert results
     assert_eq!(StatusCode::NOT_FOUND, resp.status());
-
-    // Assert MQTT server
-    let stats = mqtt_server.fut.await.unwrap();
-    assert_eq!(1, stats.len());
 }
