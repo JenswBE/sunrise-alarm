@@ -2,14 +2,14 @@
 
 import asyncio
 import logging
-from adafruit_blinka.microcontroller.bcm283x.pin import Pin
 from collections import namedtuple
-from collections.abc import Callable
 from datetime import timedelta
+from typing import Callable
 
 from physical.helpers import settings
 
 if not settings.get().MOCK:
+    from adafruit_blinka.microcontroller.bcm283x.pin import Pin
     import adafruit_dht
 
 POLL_TIMEOUT = timedelta(seconds=5)
