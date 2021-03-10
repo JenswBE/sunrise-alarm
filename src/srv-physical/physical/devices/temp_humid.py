@@ -48,7 +48,7 @@ class TempHumid:
         try:
             reading = THReading(self._sensor.temperature,
                                 self._sensor.humidity)
-            self.self._new_reading_callback(reading)
+            self._new_reading_callback(reading)
         except RuntimeError as error:
             pass
         except Exception as error:
