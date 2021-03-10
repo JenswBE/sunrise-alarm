@@ -11,8 +11,8 @@ export default new Vuex.Store({
     alarms: {},
     alert: {},
     nextAlarm: "",
-    temperature: 0.0,
-    humidity: 0.0,
+    temperature: "",
+    humidity: "",
   },
 
   getters: {

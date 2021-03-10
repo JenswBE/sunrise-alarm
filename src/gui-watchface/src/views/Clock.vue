@@ -12,7 +12,7 @@
       </v-col>
       <v-col align-self="end" cols="12" class="text-center">
         <p class="text-subtitle-1">{{ nextAlarmText }}</p>
-        <p class="text-subtitle-1">
+        <p class="text-subtitle-1" v-show="temperature">
           {{ temperature }}&#8451; - {{ humidity }}%
         </p>
       </v-col>
