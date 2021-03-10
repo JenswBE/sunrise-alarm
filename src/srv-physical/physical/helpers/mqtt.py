@@ -10,6 +10,7 @@ from gmqtt.mqtt.constants import MQTTv311
 from starlette.requests import Request
 
 from physical.helpers import settings
+from physical.devices.temp_humid import THReading
 
 mqtt = False
 
@@ -24,16 +25,20 @@ class MQTT:
     async def stop(self):
         await self.client.disconnect()
 
-    def _publish(self, topic):
+    def _publish(self, topic: str, payload: str):
         full_topic = self._topic_prefix + topic
         logging.info("Publish event to MQTT topic: %s", full_topic)
-        self.client.publish(full_topic, qos=1)
+        self.client.publish(full_topic, payload, qos=1)
 
     def publish_button_pressed(self):
-        self._publish("button_pressed")
+        self._publish("button_pressed", "")
 
     def publish_button_long_pressed(self):
-        self._publish("button_long_pressed")
+        self._publish("button_long_pressed", "")
+
+    def publish_temp_humid_updated(self, reading: THReading):
+        payload = f"temperature={reading.temperature}&humidity={reading.humidity}"
+        self._publish("temp_humid_updated", payload)
 
 
 async def get() -> MQTT:

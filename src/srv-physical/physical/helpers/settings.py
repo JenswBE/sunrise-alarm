@@ -31,6 +31,9 @@ class Settings(BaseSettings):
     LED_GPIO_PIN: int = 21
     LIGHT_INCREASE_DURATION: timedelta = timedelta(minutes=5)
 
+    # TEMP HUMID
+    TEMP_HUMID_GPIO_PIN: int = 4
+
 
 @lru_cache(maxsize=None)
 def get():

@@ -10,7 +10,7 @@ RUN apt-get update && apt-get -qq install build-essential
 
 FROM base AS base-arm
 ENV MOCK False
-RUN apt-get update && apt-get -qq install build-essential python3-rpi.gpio
+RUN apt-get update && apt-get -qq install build-essential python3-rpi.gpio libgpiod2
 RUN pip install --no-cache-dir -U RPi.GPIO
 
 # Install python dependencies

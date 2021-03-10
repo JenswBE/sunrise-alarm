@@ -14,6 +14,7 @@ gunicorn
 gmqtt
 
 # Raspberry Pi
+adafruit-circuitpython-dht
 adafruit-circuitpython-tsl2591
 gpiozero
 rpi-backlight

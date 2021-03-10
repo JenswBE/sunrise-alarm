@@ -7,7 +7,7 @@ from fastapi import FastAPI
 from starlette.responses import RedirectResponse
 from starlette.middleware.cors import CORSMiddleware
 
-from physical.devices import button, buzzer, display, leds
+from physical.devices import button, buzzer, display, leds, temp_humid
 from physical.devices.common import Devices
 from physical.helpers import mqtt, settings
 from physical.rest import (
@@ -68,11 +68,15 @@ async def setup_service():
         app.state.mqtt.publish_button_pressed)
     top_button.set_long_press_callback(
         app.state.mqtt.publish_button_long_pressed)
+    th_sensor = temp_humid.TempHumid(config.TEMP_HUMID_GPIO_PIN)
+    th_sensor.set_new_reading_callback(
+        app.state.mqtt.publish_temp_humid_updated)
     app.state.devices = Devices(
         button=top_button,
         buzzer=buzzer.Buzzer(config.BUZZER_GPIO_PIN),
         display=display.Display(),
         leds=leds.Leds(),
+        th_sensor=th_sensor,
     )
 
     # Use DPMS instead of custom sleep for time being

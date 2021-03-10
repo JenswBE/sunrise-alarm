@@ -6,6 +6,7 @@ from physical.devices.button import Button
 from physical.devices.buzzer import Buzzer
 from physical.devices.display import Display
 from physical.devices.leds import Leds
+from physical.devices.temp_humid import TempHumid
 
 
 @dataclass
@@ -14,6 +15,7 @@ class Devices:
     buzzer: Buzzer
     display: Display
     leds: Leds
+    th_sensor: TempHumid
 
 
 def dev_from_req(request: Request) -> Devices:
