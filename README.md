@@ -23,7 +23,7 @@ DIY alarm clock using microservices
 Start Docker Compose with following command:
 
 ```bash
-COMPOSE_DOCKER_CLI_BUILD=1 DOCKER_BUILDKIT=1 docker-compose build --parallel
+COMPOSE_DOCKER_CLI_BUILD=1 DOCKER_BUILDKIT=1 docker-compose build
 docker-compose up -d
 ```
 

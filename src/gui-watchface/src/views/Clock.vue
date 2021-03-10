@@ -12,6 +12,9 @@
       </v-col>
       <v-col align-self="end" cols="12" class="text-center">
         <p class="text-subtitle-1">{{ nextAlarmText }}</p>
+        <p class="text-subtitle-1">
+          {{ temperature }}&#8451; - {{ humidity }}%
+        </p>
       </v-col>
     </v-row>
   </v-container>
@@ -33,7 +36,7 @@ export default {
   }),
 
   computed: {
-    ...mapState(["nextAlarm"]),
+    ...mapState(["nextAlarm", "temperature", "humidity"]),
 
     nextAlarmText() {
       // Check if set

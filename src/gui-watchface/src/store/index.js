@@ -11,6 +11,8 @@ export default new Vuex.Store({
     alarms: {},
     alert: {},
     nextAlarm: "",
+    temperature: 0.0,
+    humidity: 0.0,
   },
 
   getters: {
@@ -66,6 +68,19 @@ export default new Vuex.Store({
       console.debug("mut clearAlert");
       state.alert = {};
     },
+
+    setTempHumid(state, tempHumid) {
+      console.debug("mut setTempHumid - Input", tempHumid);
+      const parts = tempHumid
+        .split("&")
+        .map((kv) => kv.split("="))
+        .reduce((result, kv) => {
+          result[kv[0]] = kv[1];
+          return result;
+        }, {});
+      state.temperature = parseFloat(parts["temperature"]);
+      state.humidity = parseFloat(parts["humidity"]);
+    },
   },
 
   actions: {
@@ -74,6 +89,9 @@ export default new Vuex.Store({
       switch (topic) {
         case "sunrise_alarm/next_alarms_updated":
           context.commit("setNextAlarms", payload);
+          break;
+        case "sunrise_alarm/temp_humid_updated":
+          context.commit("setTempHumid", payload);
           break;
       }
     },
