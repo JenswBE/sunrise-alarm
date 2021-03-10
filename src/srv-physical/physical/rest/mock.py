@@ -25,6 +25,6 @@ async def mock_button_long_pressed(mqtt: MQTT = Depends(mqtt_from_req)):
 @router.post("/temp_humid/updated", summary="Mock new reading of temperature and humidity")
 async def mock_temp_humid_updated(mqtt: MQTT = Depends(mqtt_from_req)):
     """Mock new reading of temperature and humidity"""
-    reading = THReading(23.4, 56.8)
+    reading = THReading(23.4, 56.7)
     mqtt.publish_temp_humid_updated(reading)
     return {}

@@ -71,15 +71,8 @@ export default new Vuex.Store({
 
     setTempHumid(state, tempHumid) {
       console.debug("mut setTempHumid - Input", tempHumid);
-      const parts = tempHumid
-        .split("&")
-        .map((kv) => kv.split("="))
-        .reduce((result, kv) => {
-          result[kv[0]] = kv[1];
-          return result;
-        }, {});
-      state.temperature = parseFloat(parts["temperature"]);
-      state.humidity = parseFloat(parts["humidity"]);
+      state.temperature = tempHumid.temperature;
+      state.humidity = tempHumid.humidity;
     },
   },
 

@@ -77,7 +77,10 @@ export default {
       // Settings
       const connectUrl = `mqtt://${window.location.hostname}:9001`;
       const clientId = this.generateClientID();
-      const topics = ["sunrise_alarm/next_alarms_updated"];
+      const topics = [
+        "sunrise_alarm/next_alarms_updated",
+        "sunrise_alarm/temp_humid_updated",
+      ];
 
       // Connect to MQTT
       try {
