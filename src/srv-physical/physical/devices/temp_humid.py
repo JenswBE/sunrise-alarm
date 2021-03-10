@@ -1,8 +1,9 @@
 """This module contains a helper for a temperature and humidity sensor"""
 
 import asyncio
+import json
 import logging
-from collections import namedtuple
+from dataclasses import dataclass, asdict
 from datetime import timedelta
 from typing import Callable
 
@@ -15,7 +16,13 @@ if not settings.get().MOCK:
 POLL_TIMEOUT = timedelta(seconds=5)
 
 
-THReading = namedtuple('THReading', ['temperature', 'humidity'])
+@dataclass
+class THReading:
+    temperature: str
+    humidity: str
+
+    def json(self) -> str:
+        return json.dumps(asdict(self))
 
 
 class TempHumid:

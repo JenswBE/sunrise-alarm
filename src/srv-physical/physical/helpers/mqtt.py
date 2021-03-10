@@ -1,7 +1,6 @@
 """This module handles publishing and receiving of MQTT messages."""
 
-import asyncio
-import functools
+import json
 import logging
 import random
 
@@ -37,8 +36,7 @@ class MQTT:
         self._publish("button_long_pressed", "")
 
     def publish_temp_humid_updated(self, reading: THReading):
-        payload = f"temperature={reading.temperature}&humidity={reading.humidity}"
-        self._publish("temp_humid_updated", payload)
+        self._publish("temp_humid_updated", reading.json())
 
 
 async def get() -> MQTT:
