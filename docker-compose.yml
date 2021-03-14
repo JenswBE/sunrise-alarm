@@ -1,19 +1,34 @@
 version: "3.7"
+
+#################################################################
+#                            DEFAULTS                           #
+#################################################################
+x-defaults: &defaults
+  networks:
+    - sunrise-alarm
+  extra_hosts:
+    - "host.docker.internal:host-gateway"
+
+x-default-env: &default-env
+  TZ: Europe/Brussels
+  MQTT_BROKER_HOST: mosquitto
+  RUST_BACKTRACE: "1"
+
+#################################################################
+#                            SERVICES                           #
+#################################################################
 services:
   srv-alarm:
+    <<: *defaults
     build:
       context: src
       dockerfile: srv-alarm.Dockerfile
     container_name: srv-alarm
-    networks:
-      - sunrise-alarm
     ports:
       - "8000:8080"
     environment:
-      - "TZ=Europe/Brussels"
-      - "MQTT_BROKER_HOST=mosquitto"
-      - "RUST_BACKTRACE=1"
-      - "RUST_LOG=srv_alarm=debug,srv_alarm::mqtt=info,info"
+      <<: *default-env
+      RUST_LOG: "srv_alarm=debug,srv_alarm::mqtt=info,info"
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.srv-alarm.entrypoints=web"
@@ -21,59 +36,50 @@ services:
       - "traefik.http.routers.srv-alarm.priority=100"
 
   srv-config:
+    <<: *defaults
     build:
       context: src
       dockerfile: srv-config.Dockerfile
     container_name: srv-config
-    networks:
-      - sunrise-alarm
     ports:
       - "8001:8080"
     environment:
-      - "TZ=Europe/Brussels"
-      - "MQTT_BROKER_HOST=mosquitto"
-      - "RUST_BACKTRACE=1"
+      <<: *default-env
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.srv-config.entrypoints=web"
       - "traefik.http.routers.srv-config.rule=PathPrefix(`/alarms`)"
 
   srv-physical:
+    <<: *defaults
     build:
       context: src
       dockerfile: srv-physical.Dockerfile
     container_name: srv-physical
-    networks:
-      - sunrise-alarm
     ports:
       - "8002:8080"
     environment:
-      - "TZ=Europe/Brussels"
-      - "MOCK=True"
-      - "MQTT_BROKER_HOST=mosquitto"
-      - "MQTT_CLIENT_ID=srv-physical"
+      <<: *default-env
+      MOCK: "true"
+      MQTT_CLIENT_ID: srv-physical
 
   srv-audio:
+    <<: *defaults
     build:
       context: src
       dockerfile: srv-audio.Dockerfile
     container_name: srv-audio
     volumes:
       - "/tmp/pa-sunrise-alarm.socket:/pulse/pulseaudio.socket"
-    networks:
-      - sunrise-alarm
     ports:
       - "8003:8080"
     environment:
-      - "TZ=Europe/Brussels"
-      - "MQTT_BROKER_HOST=mosquitto"
-      - "RUST_BACKTRACE=1"
+      <<: *default-env
 
   api-watchface:
+    <<: *defaults
     image: traefik
     container_name: api-watchface
-    networks:
-      - sunrise-alarm
     ports:
       - "127.0.0.1:8004:8080"
       - "127.0.0.1:8084:8081"
@@ -88,7 +94,7 @@ services:
       - "--entrypoints.api.address=:8081"
       - "--api=true"
     environment:
-      - "TZ=Europe/Brussels"
+      <<: *default-env
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.api.entrypoints=api"
@@ -100,32 +106,33 @@ services:
       - "traefik.http.middlewares.cors.headers.addvaryheader=true"
 
   gui-watchface:
+    <<: *defaults
     build:
       context: src
       dockerfile: gui-watchface.Dockerfile
     container_name: gui-watchface
     depends_on:
       - api-watchface
-    networks:
-      - sunrise-alarm
     ports:
       - "8080:8080"
     environment:
-      - "TZ=Europe/Brussels"
+      <<: *default-env
 
   mosquitto:
+    <<: *defaults
     image: eclipse-mosquitto:latest
     container_name: mosquitto
-    networks:
-      - sunrise-alarm
     ports:
       - "1883:1883"
       - "9001:9001"
     environment:
-      - "TZ=Europe/Brussels"
+      <<: *default-env
     volumes:
       - "./src/mosquitto/mosquitto.conf:/mosquitto/config/mosquitto.conf:ro"
 
+#################################################################
+#                            NETWORKS                           #
+#################################################################
 networks:
   sunrise-alarm:
     name: sunrise-alarm

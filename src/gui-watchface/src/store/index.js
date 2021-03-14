@@ -18,10 +18,7 @@ export default new Vuex.Store({
   getters: {
     getAlarm: (state) => (id) => cloneDeep(state.alarms[id]),
 
-    sortedAlarms: (state) =>
-      Object.values(state.alarms).sort(
-        (a, b) => a.hour * 100 + a.minute - b.hour * 100 - b.minute
-      ),
+    sortedAlarms: (state) => Object.values(state.alarms).sort(sortAlarms),
   },
 
   mutations: {
@@ -116,3 +113,24 @@ export default new Vuex.Store({
 
   modules: {},
 });
+
+function sortAlarms(a, b) {
+  // Sort by time
+  const byTime = a.hour * 100 + a.minute - b.hour * 100 - b.minute;
+  if (byTime !== 0) return byTime;
+
+  // Sort by enabled
+  const byEnabled = a.enabled !== b.enabled;
+  if (byEnabled) return a.enabled ? -1 : 1;
+
+  // Sort by skip next
+  const bySkipNext = a.skip_next !== b.skip_next;
+  if (bySkipNext) return a.skip_next ? 1 : -1;
+
+  // Sort by repeated
+  const byRepeated = (a.days.length === 0) !== (b.days.length === 0);
+  if (byRepeated) return a.days.length === 0 ? -1 : 1;
+
+  // Sort by repeat days
+  return a.days[0] - b.days[0];
+}
