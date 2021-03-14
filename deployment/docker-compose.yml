@@ -1,9 +1,21 @@
 version: "3.7"
+
+#################################################################
+#                            DEFAULTS                           #
+#################################################################
+x-defaults: &defaults
+  restart: always
+  extra_hosts:
+    - "host.docker.internal:host-gateway"
+
+#################################################################
+#                            SERVICES                           #
+#################################################################
 services:
   srv-alarm:
+    <<: *defaults
     image: jenswbe/sunrise-alarm-srv-alarm
     container_name: srv-alarm
-    restart: always
     depends_on:
       - mosquitto
     networks:
@@ -19,13 +31,11 @@ services:
       - "traefik.http.routers.srv-alarm.entrypoints=web"
       - "traefik.http.routers.srv-alarm.rule=Path(`/alarms/next`)"
       - "traefik.http.routers.srv-alarm.priority=100"
-    # hosts:
-    #   - "localhost:host-gateway"
 
   srv-config:
+    <<: *defaults
     image: jenswbe/sunrise-alarm-srv-config
     container_name: srv-config
-    restart: always
     depends_on:
       - mosquitto
     networks:
@@ -43,9 +53,9 @@ services:
       - "traefik.http.routers.srv-config.rule=PathPrefix(`/alarms`)"
 
   srv-physical:
+    <<: *defaults
     image: jenswbe/sunrise-alarm-srv-physical
     container_name: srv-physical
-    restart: always
     privileged: true
     depends_on:
       - mosquitto
@@ -59,9 +69,9 @@ services:
       - "MQTT_CLIENT_ID=srv-physical"
 
   srv-audio:
+    <<: *defaults
     image: jenswbe/sunrise-alarm-srv-audio
     container_name: srv-audio
-    restart: always
     depends_on:
       - mosquitto
     networks:
@@ -76,9 +86,9 @@ services:
       - "MQTT_BROKER_HOST=mosquitto"
 
   api-watchface:
+    <<: *defaults
     image: traefik
     container_name: api-watchface
-    restart: always
     networks:
       - sunrise-alarm
     ports:
@@ -107,9 +117,9 @@ services:
       - "traefik.http.middlewares.cors.headers.addvaryheader=true"
 
   gui-watchface:
+    <<: *defaults
     image: jenswbe/sunrise-alarm-gui-watchface
     container_name: gui-watchface
-    restart: always
     depends_on:
       - mosquitto
       - api-watchface
@@ -121,9 +131,9 @@ services:
       - "TZ=${TIMEZONE}"
 
   mosquitto:
+    <<: *defaults
     image: eclipse-mosquitto:latest
     container_name: mosquitto
-    restart: always
     networks:
       - sunrise-alarm
     volumes:
@@ -135,12 +145,34 @@ services:
     ports:
       - "9001:9001"
 
+  # =========================
+  # =        LOGGING        =
+  # =========================
+  promtail:
+    <<: *defaults
+    image: grafana/promtail:2.2.0
+    container_name: promtail
+    command: -config.file=/etc/promtail/config.yml
+    volumes:
+      - ./promtail-config.yml:/etc/promtail/config.yml:ro
+      - promtail-positions:/positions
+      - /var/log:/var/log:ro
+    environment:
+      - "TZ={{ general_timezone }}"
+
+#################################################################
+#                            VOLUMES                            #
+#################################################################
 volumes:
   srv-config-data:
   srv-audio-music:
   mosquitto-data:
   mosquitto-log:
+  promtail-positions:
 
+#################################################################
+#                            NETWORKS                           #
+#################################################################
 networks:
   sunrise-alarm:
     name: sunrise-alarm

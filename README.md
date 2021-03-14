@@ -65,6 +65,17 @@ sudo usermod -aG docker pi
 # Install docker-compose
 sudo pip3 install docker-compose
 
+# Configure rsyslog
+sudo cp deployment/rsyslog-40-docker.conf /etc/rsyslog.d/40-docker.conf
+sudo systemctl restart rsyslog
+
+# Configure docker to log to syslog
+sudo cp deployment/docker-daemon.json /etc/docker/daemon.json
+sudo systemctl restart docker
+
+# Configure promtail: Replace placeholders <LOKI_*>
+nano deployment/promtail-config.yml
+
 # Configure screen timeout
 mkdir -p ~/.config/autostart
 tee ~/.config/autostart/screen-timeout.desktop <<EOF
