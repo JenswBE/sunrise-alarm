@@ -68,6 +68,7 @@ sudo pip3 install docker-compose
 # Configure rsyslog
 sudo cp deployment/rsyslog-40-docker.conf /etc/rsyslog.d/40-docker.conf
 sudo systemctl restart rsyslog
+sudo cp deployment/logrotate-docker /etc/logrotate.d/docker
 
 # Configure docker to log to syslog
 sudo cp deployment/docker-daemon.json /etc/docker/daemon.json
