@@ -203,11 +203,10 @@ mod tests {
             assert_eq!(parse_date(alarm_dt), next_alarm.alarm_datetime);
             assert_eq!(parse_date(action_dt), next_alarm.next_action_datetime);
         } else {
-            let msg = format!(
+            panic!(
                 "Alarm shouldn't be None. Expected: {:?} {:?} {:?}",
                 alarm_dt, action, action_dt
             );
-            panic!(msg);
         }
     }
 

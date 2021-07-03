@@ -241,8 +241,8 @@ impl Default for Leds {
     }
 }
 
-#[serde(rename_all = "SCREAMING_SNAKE_CASE")]
 #[derive(Debug, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "SCREAMING_SNAKE_CASE")]
 pub enum LedsColor {
     Black,
     Red,
