@@ -78,7 +78,7 @@ services:
 
   api-watchface:
     <<: *defaults
-    image: traefik
+    image: traefik:v2.5
     container_name: api-watchface
     ports:
       - "127.0.0.1:8004:8080"
@@ -88,7 +88,7 @@ services:
     command:
       - "--providers.docker=true"
       - "--providers.docker.network=traefik"
-      - "--providers.docker.exposedbydefault=false"
+      - "--providers.docker.exposedByDefault=false"
       - "--entrypoints.web.address=:8080"
       - "--entrypoints.web.http.middlewares=cors"
       - "--entrypoints.api.address=:8081"
@@ -100,10 +100,10 @@ services:
       - "traefik.http.routers.api.entrypoints=api"
       - "traefik.http.routers.api.rule=PathPrefix(`/`)"
       - "traefik.http.routers.api.service=api@internal"
-      - "traefik.http.middlewares.cors.headers.accesscontrolallowheaders=*"
-      - "traefik.http.middlewares.cors.headers.accesscontrolallowmethods=*"
-      - "traefik.http.middlewares.cors.headers.accesscontrolalloworigin=*"
-      - "traefik.http.middlewares.cors.headers.addvaryheader=true"
+      - "traefik.http.middlewares.cors.headers.accessControlAllowHeaders=*"
+      - "traefik.http.middlewares.cors.headers.accessControlAllowMethods=*"
+      - "traefik.http.middlewares.cors.headers.accessControlAllowOriginList=*"
+      - "traefik.http.middlewares.cors.headers.addVaryHeader=true"
 
   gui-watchface:
     <<: *defaults
