@@ -11,7 +11,7 @@ RUN apt-get update && apt-get -qq install build-essential
 FROM base AS base-arm
 ENV MOCK False
 RUN apt-get update && apt-get -qq install build-essential python3-rpi.gpio libgpiod2
-RUN pip install --no-cache-dir -U RPi.GPIO
+RUN CFLAGS="-fcommon" pip install --no-cache-dir -U RPi.GPIO # See https://forum.manjaro.org/t/pip-install-rpi-gpio-fail/25788/3
 
 # Install python dependencies
 FROM base-${TARGETARCH}
@@ -19,7 +19,7 @@ ARG SERVICE_NAME
 COPY ${SERVICE_NAME}/requirements.txt .
 RUN pip install --no-cache-dir -U pip wheel && \
     pip install --no-cache-dir gunicorn uvicorn uvloop httptools
-RUN CFLAGS="-fcommon" pip install --no-cache-dir -r requirements.txt # See https://forum.manjaro.org/t/pip-install-rpi-gpio-fail/25788/3
+RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy service
 COPY ${SERVICE_NAME} .
