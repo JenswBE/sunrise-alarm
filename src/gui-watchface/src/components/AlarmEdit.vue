@@ -26,6 +26,7 @@
           format="24hr"
           header-color="primary"
           full-width
+          :allowed-minutes="(m) => m % 5 === 0"
         >
           <v-spacer></v-spacer>
           <v-btn text color="primary" @click="timePicker = false">
