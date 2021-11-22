@@ -163,9 +163,18 @@ cython_debug/
 # =============================================
 # =                JAVASCRIPT                 =
 # =============================================
+#  Custom
 .DS_Store
 node_modules
 /dist
+
+# Yarn
+/src/gui-watchface/.yarn/*
+!/src/gui-watchface/.yarn/releases
+!/src/gui-watchface/.yarn/plugins
+!/src/gui-watchface/.yarn/sdks
+!/src/gui-watchface/.yarn/versions
+/src/gui-watchface/.pnp.*
 
 # local env files
 .env.local

@@ -7,7 +7,12 @@ FROM node:lts-alpine as builder
 ARG SERVICE_NAME
 WORKDIR /app
 COPY ${SERVICE_NAME}/package.json ./
-RUN yarn install
+COPY ${SERVICE_NAME}/.yarnrc.yml ./
+COPY ${SERVICE_NAME}/yarn.lock ./
+RUN mkdir .yarn
+COPY ${SERVICE_NAME}/.yarn/plugins .yarn/plugins
+COPY ${SERVICE_NAME}/.yarn/releases .yarn/releases
+RUN yarn install --immutable
 COPY ${SERVICE_NAME} .
 RUN yarn build
 
