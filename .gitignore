@@ -175,6 +175,12 @@ node_modules
 !/src/gui-watchface/.yarn/sdks
 !/src/gui-watchface/.yarn/versions
 /src/gui-watchface/.pnp.*
+/src/gui-watchface-old/.yarn/*
+!/src/gui-watchface-old/.yarn/releases
+!/src/gui-watchface-old/.yarn/plugins
+!/src/gui-watchface-old/.yarn/sdks
+!/src/gui-watchface-old/.yarn/versions
+/src/gui-watchface-old/.pnp.*
 
 # local env files
 .env.local
