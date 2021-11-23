@@ -57,13 +57,17 @@ sudo apt dist-upgrade -y
 # Install dependencies
 sudo apt install -y firefox-esr onboard
 
-# Install docker
+# Install Docker
 curl -fsSL https://get.docker.com -o get-docker.sh
 sudo sh get-docker.sh
 sudo usermod -aG docker pi
 
-# Install docker-compose
-sudo pip3 install docker-compose
+# Install Docker Compose
+DOCKER_COMPOSE_VERSION=v2.1.1 # See https://github.com/docker/compose/releases for latest version
+DOCKER_COMPOSE_URL="https://github.com/docker/compose/releases/download/${DOCKER_COMPOSE_VERSION}/docker-compose-linux-armv7"
+sudo mkdir -p /usr/local/lib/docker/cli-plugins
+sudo curl -SL ${DOCKER_COMPOSE_URL} -o /usr/local/lib/docker/cli-plugins/docker-compose
+sudo chmod +x /usr/local/lib/docker/cli-plugins/docker-compose
 
 # Configure rsyslog
 sudo cp deployment/rsyslog-40-docker.conf /etc/rsyslog.d/40-docker.conf
