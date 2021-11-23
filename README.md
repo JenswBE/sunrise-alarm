@@ -79,6 +79,7 @@ sudo cp deployment/docker-daemon.json /etc/docker/daemon.json
 sudo systemctl restart docker
 
 # Configure promtail: Replace placeholders <LOKI_*>
+cp deployment/promtail-config.yml.template deployment/promtail-config.yml
 nano deployment/promtail-config.yml
 
 # Configure screen timeout
