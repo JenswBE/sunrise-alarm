@@ -50,9 +50,19 @@ sudo systemctl disable dphys-swapfile
 sudo update-rc.d dphys-swapfile remove
 sudo apt purge dphys-swapfile
 
+# Write all logs to RAM (will be exported with Promtail anyway)
+# Based on https://raspberrypi.stackexchange.com/questions/124605/stop-logs-from-writing-to-var-log
+sudo tee -a /etc/fstab <<EOF
+tmpfs /tmp tmpfs defaults,noatime,mode=1777 0 0
+tmpfs /var/tmp tmpfs defaults,noatime,mode=1777 0 0
+tmpfs /var/log tmpfs defaults,noatime,mode=0755 0 0
+tmpfs /var/spool tmpfs defaults,noatime,mode=1777 0 0
+EOF
+
 # Upgrade system
 sudo apt update
 sudo apt dist-upgrade -y
+sudo reboot # Needed for "Log to RAM" anyway
 
 # Install dependencies
 sudo apt install -y firefox-esr onboard
