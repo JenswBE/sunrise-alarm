@@ -87,38 +87,21 @@
       </v-btn>
     </v-col>
     <v-col cols="6" class="text-center">
-      <v-dialog v-model="confirmDelete" max-width="290">
-        <template v-slot:activator="{ on, attrs }">
-          <v-btn
-            v-bind="attrs"
-            v-on="on"
-            outlined
-            block
-            color="error"
-            :disabled="disabled"
-          >
-            <v-icon left>mdi-alarm-off</v-icon>
-            Delete alarm
-          </v-btn>
-        </template>
-        <v-card>
-          <v-card-title> Are you sure? </v-card-title>
-          <v-card-actions>
-            <v-btn outlined @click="confirmDelete = false"> Cancel </v-btn>
-            <v-spacer></v-spacer>
-            <v-btn
-              color="red darken-1"
-              outlined
-              @click="
-                confirmDelete = false
-                $emit('delete-alarm')
-              "
-            >
-              Confirm
-            </v-btn>
-          </v-card-actions>
-        </v-card>
-      </v-dialog>
+      <DialogConfirm
+        v-model="dialogDeleteOpen"
+        confirmColor="error"
+        @confirm="$emit('delete-alarm')"
+      />
+      <v-btn
+        outlined
+        block
+        color="error"
+        :disabled="disabled"
+        @click="dialogDeleteOpen = true"
+      >
+        <v-icon left>mdi-alarm-off</v-icon>
+        Delete alarm
+      </v-btn>
     </v-col>
   </v-row>
 </template>
@@ -126,14 +109,29 @@
 <script lang="ts">
 import Vue from 'vue'
 import { mapGetters } from 'vuex'
+import DialogConfirm from './DialogConfirm.vue'
 import { DAYS, EMPTY_ALARM, Alarm } from '../store/alarms'
 
 export default Vue.extend({
   name: 'AlarmEdit',
+  components: { DialogConfirm },
 
   props: {
     value: String,
   },
+
+  data: () => ({
+    alarm: {} as Alarm,
+    timePicker: false,
+    dialogDeleteOpen: false,
+    days: DAYS,
+    dayPickers: {
+      None: [],
+      Week: DAYS.slice(0, 5),
+      Weekend: DAYS.slice(5, 7),
+      All: DAYS,
+    },
+  }),
 
   watch: {
     value: {
@@ -147,19 +145,6 @@ export default Vue.extend({
       },
     },
   },
-
-  data: () => ({
-    alarm: {} as Alarm,
-    timePicker: false,
-    confirmDelete: false,
-    days: DAYS,
-    dayPickers: {
-      None: [],
-      Week: DAYS.slice(0, 5),
-      Weekend: DAYS.slice(5, 7),
-      All: DAYS,
-    },
-  }),
 
   computed: {
     ...mapGetters({
