@@ -29,10 +29,6 @@
       "path": "src/gui-watchface"
     },
     {
-      "name": "gui-watchface-old",
-      "path": "src/gui-watchface-old"
-    },
-    {
       "name": "mosquitto",
       "path": "src/mosquitto"
     }
