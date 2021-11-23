@@ -3,23 +3,23 @@ import cloneDeep from 'lodash.clonedeep'
 import Vue from 'vue'
 
 export const DAYS = [
-    "Monday",
-    "Tuesday",
-    "Wednesday",
-    "Thursday",
-    "Friday",
-    "Saturday",
-    "Sunday",
-];
+  'Monday',
+  'Tuesday',
+  'Wednesday',
+  'Thursday',
+  'Friday',
+  'Saturday',
+  'Sunday',
+]
 
 export const EMPTY_ALARM = {
-    enabled: false,
-    name: "",
-    hour: 0,
-    minute: 0,
-    days: [],
-    skip_next: false,
-};
+  enabled: false,
+  name: '',
+  hour: 0,
+  minute: 0,
+  days: [],
+  skip_next: false,
+}
 
 export type Alarm = {
   id?: string
@@ -34,8 +34,8 @@ export type Alarm = {
 export type AlarmsMap = { [id: string]: Alarm }
 
 export const state = () => ({
-    alarms: {} as AlarmsMap,
-    nextAlarm: "",
+  alarms: {} as AlarmsMap,
+  nextAlarm: '',
 })
 
 export type RootState = ReturnType<typeof state>
@@ -54,37 +54,37 @@ export const getters: GetterTree<RootState, RootState> = {
 
 export const mutations: MutationTree<RootState> = {
   SET_ALARMS(state, data) {
-    console.debug("mut setAlarms - Input", data);
+    console.debug('mut SET_ALARMS - Input', data)
     state.alarms = data.reduce((result: AlarmsMap, item: Alarm) => {
-      result[item.id as string] = item;
-      return result;
-    }, {});
-    console.debug("mut setAlarms - Output alarms", state.alarms);
+      result[item.id as string] = item
+      return result
+    }, {})
+    console.debug('mut SET_ALARMS - Output alarms', state.alarms)
   },
 
   SET_NEXT_ALARMS(state, data) {
-    console.debug("mut setNextAlarms - Input", data);
+    console.debug('mut SET_NEXT_ALARMS - Input', data)
     if (
-      data["ring"] == undefined ||
-      data["ring"]["alarm_datetime"] == undefined
+      data['ring'] == undefined ||
+      data['ring']['alarm_datetime'] == undefined
     ) {
-      state.nextAlarm = "";
+      state.nextAlarm = ''
     } else {
-      state.nextAlarm = data["ring"]["alarm_datetime"];
+      state.nextAlarm = data['ring']['alarm_datetime']
     }
-    console.debug("mut setNextAlarms - Output nextAlarm", state.nextAlarm);
+    console.debug('mut SET_NEXT_ALARMS - Output nextAlarm', state.nextAlarm)
   },
 
   UPSERT_ALARM(state, alarm) {
-    console.debug("mut upsertAlarm - Input", alarm);
-    Vue.set(state.alarms, alarm.id, cloneDeep(alarm));
-    console.debug("mut upsertAlarm - Output alarms", state.alarms);
+    console.debug('mut UPSERT_ALARM - Input', alarm)
+    Vue.set(state.alarms, alarm.id, cloneDeep(alarm))
+    console.debug('mut UPSERT_ALARM - Output alarms', state.alarms)
   },
 
   DELETE_ALARM(state, alarmID) {
-    console.debug("mut deleteAlarm - Input", alarmID);
-    Vue.delete(state.alarms, alarmID);
-    console.debug("mut deleteAlarm - Output alarms", state.alarms);
+    console.debug('mut DELETE_ALARM - Input', alarmID)
+    Vue.delete(state.alarms, alarmID)
+    console.debug('mut DELETE_ALARM - Output alarms', state.alarms)
   },
 }
 
@@ -93,44 +93,52 @@ export const actions: ActionTree<RootState, RootState> = {
     this.$axios
       .get(`/alarms`)
       .then(({ data }) => {
-        context.commit("SET_ALARMS", data);
+        context.commit('SET_ALARMS', data)
       })
       .catch((e: any) => {
-        const msg = `Unable to fetch alarms: ${e.message}`;
-        context.commit("SET_ALERT", { type: "error", message: msg });
-      });
+        const msg = `Unable to fetch alarms: ${e.message}`
+        context.commit(
+          'general/SET_ALERT',
+          { type: 'error', message: msg },
+          { root: true }
+        )
+      })
   },
 
   async getNextAlarms(context) {
     this.$axios
       .get(`/alarms/next`)
       .then(({ data }) => {
-        context.commit("SET_NEXT_ALARMS", data);
+        context.commit('SET_NEXT_ALARMS', data)
       })
       .catch((e: any) => {
-        const msg = `Unable to fetch next alarms: ${e.message}`;
-        context.commit("SET_ALERT", { type: "error", message: msg });
-      });
+        const msg = `Unable to fetch next alarms: ${e.message}`
+        context.commit(
+          'general/SET_ALERT',
+          { type: 'error', message: msg },
+          { root: true }
+        )
+      })
   },
 }
 
 function sortAlarms(a: Alarm, b: Alarm): number {
   // Sort by time
-  const byTime = a.hour * 100 + a.minute - b.hour * 100 - b.minute;
-  if (byTime !== 0) return byTime;
+  const byTime = a.hour * 100 + a.minute - b.hour * 100 - b.minute
+  if (byTime !== 0) return byTime
 
   // Sort by enabled
-  const byEnabled = a.enabled !== b.enabled;
-  if (byEnabled) return a.enabled ? -1 : 1;
+  const byEnabled = a.enabled !== b.enabled
+  if (byEnabled) return a.enabled ? -1 : 1
 
   // Sort by skip next
-  const bySkipNext = a.skip_next !== b.skip_next;
-  if (bySkipNext) return a.skip_next ? 1 : -1;
+  const bySkipNext = a.skip_next !== b.skip_next
+  if (bySkipNext) return a.skip_next ? 1 : -1
 
   // Sort by repeated
-  const byRepeated = (a.days.length === 0) !== (b.days.length === 0);
-  if (byRepeated) return a.days.length === 0 ? -1 : 1;
+  const byRepeated = (a.days.length === 0) !== (b.days.length === 0)
+  if (byRepeated) return a.days.length === 0 ? -1 : 1
 
   // Sort by repeat days
-  return a.days[0] - b.days[0];
+  return a.days[0] - b.days[0]
 }

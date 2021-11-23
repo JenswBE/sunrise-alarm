@@ -2,6 +2,7 @@ import Vue from 'vue'
 import { Alarm } from '../store/alarms'
 
 declare module 'vue/types/vue' {
+  // Vue components
   interface Vue {
     $padTime(value: string): string
     $formatTime(alarm: Alarm): string
