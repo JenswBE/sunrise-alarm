@@ -1,25 +1,25 @@
-# Based on https://vuejs.org/v2/cookbook/dockerize-vuejs-app.html
+# Based on https://github.com/nuxt/nuxt.js/blob/dev/examples/docker-build/Dockerfile
 
 ARG SERVICE_NAME=gui-watchface
 
-# Build application
+# Setup builder
 FROM node:lts-alpine as builder
 ARG SERVICE_NAME
-WORKDIR /app
-COPY ${SERVICE_NAME}/package.json ./
-COPY ${SERVICE_NAME}/.yarnrc.yml ./
-COPY ${SERVICE_NAME}/yarn.lock ./
-RUN mkdir .yarn
-COPY ${SERVICE_NAME}/.yarn/plugins .yarn/plugins
-COPY ${SERVICE_NAME}/.yarn/releases .yarn/releases
-RUN yarn install --immutable
+WORKDIR /src
 COPY ${SERVICE_NAME} .
+
+# Build application
+RUN yarn install --immutable
 RUN yarn build
 
+# Only install Production dependencies
+RUN rm -rf node_modules
+RUN NODE_ENV=production yarn workspaces focus --all --production
+RUN yarn cache clean --all
+
 # Build final image
-FROM nginx:stable-alpine
-ARG SERVICE_NAME
-COPY ${SERVICE_NAME}/nginx.conf /etc/nginx/nginx.conf
-COPY --from=builder /app/dist /usr/share/nginx/html
+FROM node:lts-alpine
+WORKDIR /src
+COPY --from=builder /src  .
 EXPOSE 8080
-CMD ["nginx", "-g", "daemon off;"]
+CMD [ "yarn", "start", "--hostname", "0.0.0.0", "--port", "8080" ]
