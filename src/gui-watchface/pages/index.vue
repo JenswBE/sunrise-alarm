@@ -6,9 +6,9 @@
           class="text-h1 font-weight-bold"
           style="font-family: DejaVu Sans Mono, monospace !important"
         >
-          {{ hour }}{{ sep }}{{ minute }}
+          {{ currentTime }}
         </p>
-        <p class="text-h4">{{ date }}</p>
+        <p class="text-h4">{{ currentDate }}</p>
       </v-col>
       <v-col cols="12" class="text-center">
         <p class="text-subtitle-1">{{ nextAlarmText }}</p>
@@ -29,16 +29,27 @@ export default Vue.extend({
   name: 'Clock',
 
   data: () => ({
-    hour: '00',
-    minute: '00',
-    sep: ':',
-    date: '',
+    now: DateTime.local(),
     timer: 0,
   }),
 
   computed: {
     ...mapState('alarms', ['nextAlarm']),
     ...mapState('general', ['temperature', 'humidity']),
+
+    currentTime(): string {
+      const format = this.now.second % 2 == 0 ? 'HH:mm' : 'HH mm'
+      return this.now.toFormat(format)
+    },
+
+    currentDate(): string {
+      return this.now.setLocale('en-UK').toLocaleString({
+        weekday: 'long',
+        day: 'numeric',
+        month: 'long',
+        year: 'numeric',
+      })
+    },
 
     nextAlarmText() {
       // Check if set
@@ -49,11 +60,10 @@ export default Vue.extend({
       // Setup variables
       let day = ''
       const nextAlarmDate = DateTime.fromISO(this.nextAlarm)
-      const now = DateTime.local()
-      const tomorrow = DateTime.local().plus({ days: 1 })
+      const tomorrow = this.now.plus({ days: 1 })
 
       // Check if alarm is today
-      if (nextAlarmDate.weekday == now.weekday) {
+      if (nextAlarmDate.weekday == this.now.weekday) {
         day = 'Today'
       } else if (nextAlarmDate.weekday == tomorrow.weekday) {
         day = 'Tomorrow'
@@ -69,16 +79,7 @@ export default Vue.extend({
 
   methods: {
     updateDateTime() {
-      const now = DateTime.now()
-      this.hour = now.toFormat('HH')
-      this.minute = now.toFormat('mm')
-      this.sep = now.second % 2 == 0 ? ':' : ' '
-      this.date = now.setLocale('en-UK').toLocaleString({
-        weekday: 'long',
-        day: 'numeric',
-        month: 'long',
-        year: 'numeric',
-      })
+      this.now = DateTime.now()
       this.timer = window.setTimeout(this.updateDateTime, 1000)
     },
   },
