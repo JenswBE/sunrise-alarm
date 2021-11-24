@@ -23,7 +23,7 @@ services:
     ports:
       - "127.0.0.1:8000:8080"
     environment:
-      - "TZ=${TIMEZONE}"
+      - "TZ=${TIMEZONE:?}"
       - "MQTT_BROKER_HOST=mosquitto"
       - "RUST_LOG=srv_alarm=debug,srv_alarm::mqtt=info,info"
     labels:
@@ -45,7 +45,7 @@ services:
     volumes:
       - "srv-config-data:/data"
     environment:
-      - "TZ=${TIMEZONE}"
+      - "TZ=${TIMEZONE:?}"
       - "MQTT_BROKER_HOST=mosquitto"
     labels:
       - "traefik.enable=true"
@@ -64,7 +64,7 @@ services:
     ports:
       - "127.0.0.1:8002:8080"
     environment:
-      - "TZ=${TIMEZONE}"
+      - "TZ=${TIMEZONE:?}"
       - "MQTT_BROKER_HOST=mosquitto"
       - "MQTT_CLIENT_ID=srv-physical"
 
@@ -82,7 +82,7 @@ services:
       - "srv-audio-music:/music"
       - "/tmp/pa-sunrise-alarm.socket:/pulse/pulseaudio.socket"
     environment:
-      - "TZ=${TIMEZONE}"
+      - "TZ=${TIMEZONE:?}"
       - "MQTT_BROKER_HOST=mosquitto"
 
   api-watchface:
@@ -105,7 +105,7 @@ services:
       - "--entrypoints.api.address=:8081"
       - "--api=true"
     environment:
-      - "TZ=${TIMEZONE}"
+      - "TZ=${TIMEZONE:?}"
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.api.entrypoints=api"
@@ -128,7 +128,8 @@ services:
     ports:
       - "8080:8080"
     environment:
-      - "TZ=${TIMEZONE}"
+      - "TZ=${TIMEZONE:?}"
+      - "OPENWEATHER_API_KEY=${OPENWEATHER_API_KEY:?}"
 
   mosquitto:
     <<: *defaults
@@ -141,7 +142,7 @@ services:
       - "mosquitto-log:/mosquitto/log"
       - "../src/mosquitto/mosquitto.conf:/mosquitto/config/mosquitto.conf:ro"
     environment:
-      - "TZ=${TIMEZONE}"
+      - "TZ=${TIMEZONE:?}"
     ports:
       - "9001:9001"
 
@@ -158,7 +159,7 @@ services:
       - promtail-positions:/positions
       - /var/log:/var/log:ro
     environment:
-      - "TZ={{ general_timezone }}"
+      - "TZ=${TIMEZONE:?}"
 
 #################################################################
 #                            VOLUMES                            #

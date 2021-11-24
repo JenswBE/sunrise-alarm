@@ -50,6 +50,8 @@ export default {
   modules: [
     // https://go.nuxtjs.dev/axios
     '@nuxtjs/axios',
+    // https://github.com/nuxt-community/proxy-module
+    '@nuxtjs/proxy',
   ],
 
   // Axios module configuration: https://go.nuxtjs.dev/config-axios
@@ -57,10 +59,21 @@ export default {
     baseURL: 'http://localhost:8004',
   },
 
+  proxy: {
+    '/openweather': {
+      target: 'https://api.openweathermap.org',
+      pathRewrite: { '^/openweather': '' },
+    },
+  },
+
   publicRuntimeConfig: {
     // Axios module configuration: https://go.nuxtjs.dev/config-axios
     axios: {
       browserBaseURL: process.env.BACKEND_URL_EXTERNAL,
+    },
+    openWeather: {
+      cityID: process.env.OPENWEATHER_CITY_ID || '2783310', // Zaventem, Belgium
+      apiKey: process.env.OPENWEATHER_API_KEY,
     },
   },
 

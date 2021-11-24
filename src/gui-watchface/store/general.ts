@@ -15,10 +15,15 @@ export enum AlertType {
   Error = 'error',
 }
 
+export type Weather = {
+  temperature: number
+  humidity: number
+}
+
 export const state = () => ({
   alert: {} as Alert,
-  temperature: '',
-  humidity: '',
+  weatherInside: {} as Weather,
+  weatherOutside: {} as Weather,
 })
 
 export type RootState = ReturnType<typeof state>
@@ -34,11 +39,20 @@ export const mutations: MutationTree<RootState> = {
     state.alert = {} as Alert
   },
 
-  SET_TEMP_HUMID(state, tempHumid) {
-    console.debug('mut SET_TEMP_HUMID - Input', tempHumid)
-    state.temperature = tempHumid.temperature
-    state.humidity = tempHumid.humidity
+  SET_WEATHER_INSIDE(state, weather: Weather) {
+    console.debug('mut SET_WEATHER_INSIDE - Input', weather)
+    state.weatherInside = weather
   },
+
+  SET_WEATHER_OUTSIDE(state, weather: Weather) {
+    console.debug('mut SET_WEATHER - Input', weather)
+    state.weatherOutside = weather
+  },
+}
+
+export type UpdateWeatherOutsidePayload = {
+  cityID: string
+  apiKey: string
 }
 
 export const actions: ActionTree<RootState, RootState> = {
@@ -49,8 +63,33 @@ export const actions: ActionTree<RootState, RootState> = {
         context.commit('alarms/SET_NEXT_ALARMS', payload, { root: true })
         break
       case 'sunrise_alarm/temp_humid_updated':
-        context.commit('SET_TEMP_HUMID', payload)
+        const weather: Weather = {
+          temperature: payload.temperature,
+          humidity: payload.humidity,
+        }
+        context.commit('SET_WEATHER_INSIDE', weather)
         break
     }
+  },
+
+  async updateWeatherOutside(context, payload: UpdateWeatherOutsidePayload) {
+    const url = `/openweather/data/2.5/weather?id=${payload.cityID}&appid=${payload.apiKey}&units=metric`
+    this.$axios
+      .get(url, { baseURL: '' })
+      .then(({ data }) => {
+        const weather: Weather = {
+          temperature: data.main.temp,
+          humidity: data.main.humidity,
+        }
+        context.commit('SET_WEATHER_OUTSIDE', weather)
+      })
+      .catch((e: any) => {
+        const msg = `Unable to fetch weather: ${e.message}`
+        context.commit(
+          'general/SET_ALERT',
+          { type: 'error', message: msg },
+          { root: true }
+        )
+      })
   },
 }

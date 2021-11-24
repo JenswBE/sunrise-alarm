@@ -79,6 +79,10 @@ sudo mkdir -p /usr/local/lib/docker/cli-plugins
 sudo curl -SL ${DOCKER_COMPOSE_URL} -o /usr/local/lib/docker/cli-plugins/docker-compose
 sudo chmod +x /usr/local/lib/docker/cli-plugins/docker-compose
 
+# Clone this repo
+git clone https://github.com/JenswBE/sunrise-alarm
+cd sunrise-alarm
+
 # Configure rsyslog
 sudo cp deployment/rsyslog-40-docker.conf /etc/rsyslog.d/40-docker.conf
 sudo systemctl restart rsyslog
@@ -117,12 +121,12 @@ EOF
 # Reboot
 sudo reboot
 
-# Clone this repo
-git clone https://github.com/JenswBE/sunrise-alarm
+# Configure alarm
+cp deployment/.env.template deployment/.env
+nano deployment/.env
 
 # Start alarm
-cd sunrise-alarm/deployment
-docker-compose up -d
+docker compose up -d
 xdg-open "http://localhost:8080"
 ```
 
