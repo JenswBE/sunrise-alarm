@@ -15,7 +15,7 @@ DIY alarm clock using microservices
 | srv-physical  | Interacts with physical features: button, leds, ... | [![DockerHub Repo](https://img.shields.io/badge/DockerHub-repo-blue?logo=docker)](https://hub.docker.com/r/jenswbe/sunrise-alarm-srv-physical)  |    8002    |   Python   |     FastAPI     |
 | srv-audio     | Alarm sound handling                                |   [![DockerHub Repo](https://img.shields.io/badge/DockerHub-repo-blue?logo=docker)](https://hub.docker.com/r/jenswbe/sunrise-alarm-srv-audio)   |    8003    |    Rust    |   Warp, Rodio   |
 | api-watchface | REST API for watchface UI                           |              [![DockerHub Repo](https://img.shields.io/badge/DockerHub-repo-blue?logo=docker)](https://hub.docker.com/r/_/traefik)              |    8004    |    N/A     |     Traefik     |
-| gui-watchface | Web UI for touchscreen                              | [![DockerHub Repo](https://img.shields.io/badge/DockerHub-repo-blue?logo=docker)](https://hub.docker.com/r/jenswbe/sunrise-alarm-gui-watchface) |    8080    | Javascript |     Vue.js      |
+| gui-watchface | Web UI for touchscreen                              | [![DockerHub Repo](https://img.shields.io/badge/DockerHub-repo-blue?logo=docker)](https://hub.docker.com/r/jenswbe/sunrise-alarm-gui-watchface) |    8080    | Typescript |     Nuxt.js     |
 | mosquitto     | MQTT broker                                         |          [![DockerHub Repo](https://img.shields.io/badge/DockerHub-repo-blue?logo=docker)](https://hub.docker.com/_/eclipse-mosquitto)          | 1883, 9001 |    N/A     |    Mosquitto    |
 
 ## Development
