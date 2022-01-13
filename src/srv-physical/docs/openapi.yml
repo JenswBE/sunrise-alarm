@@ -1,0 +1,151 @@
+openapi: 3.0.2
+info:
+  title: srv-physical
+  description: Service to handle buttons, leds, display backlight, ...
+  version: 0.1.0
+paths:
+  /backlight/lock:
+    put:
+      tags:
+        - Backlight
+      summary: Lock the backlight brightness
+      operationId: lock_backlight_lock_put
+      responses:
+        "204":
+          description: No Content
+    delete:
+      tags:
+        - Backlight
+      summary: Unlock the backlight brightness
+      operationId: unlock_backlight_lock_delete
+      responses:
+        "204":
+          description: No Content
+
+  /buzzer/:
+    put:
+      tags:
+        - Buzzer
+      summary: Start the buzzer
+      operationId: start_buzzer__put
+      responses:
+        "204":
+          description: No Content
+    delete:
+      tags:
+        - Buzzer
+      summary: Stop the buzzer
+      operationId: stop_buzzer__delete
+      responses:
+        "204":
+          description: No Content
+
+  /leds/:
+    get:
+      tags:
+        - LEDs
+      summary: Get current color and brightness of LEDs
+      operationId: get_leds_leds__get
+      responses:
+        "200":
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Leds"
+    put:
+      tags:
+        - LEDs
+      summary: Set LEDs to specified color and brightness
+      operationId: set_leds_leds__put
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Leds"
+      responses:
+        "204":
+          description: No Content
+    delete:
+      tags:
+        - LEDs
+      summary: Turn off all LEDs
+      operationId: clear_leds_leds__delete
+      responses:
+        "204":
+          description: No Content
+
+  /leds/sunrise:
+    put:
+      tags:
+        - LEDs
+      summary: Start sunrise simulation
+      operationId: start_sunrise_leds_sunrise_put
+      responses:
+        "204":
+          description: No Content
+    delete:
+      tags:
+        - LEDs
+      summary: Stop sunrise simulation
+      operationId: stop_sunrise_leds_sunrise_delete
+      responses:
+        "204":
+          description: No Content
+
+  /mock/button/pressed:
+    post:
+      tags:
+        - Mock
+      summary: Mock press on the button
+      description: Mock press on the button
+      operationId: mock_button_pressed_mock_button_pressed_post
+      responses:
+        "204":
+          description: No Content
+
+  /mock/button/long_pressed:
+    post:
+      tags:
+        - Mock
+      summary: Mock long press on the button
+      description: Mock long press on the button
+      operationId: mock_button_long_pressed_mock_button_long_pressed_post
+      responses:
+        "204":
+          description: No Content
+
+  /mock/temp_humid/updated:
+    post:
+      tags:
+        - Mock
+      summary: Mock new reading of temperature and humidity
+      description: Mock new reading of temperature and humidity
+      operationId: mock_temp_humid_updated_mock_temp_humid_updated_post
+      responses:
+        "204":
+          description: No Content
+
+components:
+  schemas:
+    Leds:
+      type: object
+      required:
+        - color
+      properties:
+        color:
+          $ref: "#/components/schemas/PresetColor"
+        brightness:
+          type: integer
+          minimum: 0
+          maximum: 255
+          default: 100
+
+    PresetColor:
+      type: string
+      enum:
+        - BLACK
+        - RED
+        - ORANGE
+        - YELLOW
+        - WARM_WHITE
