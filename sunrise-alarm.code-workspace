@@ -21,6 +21,10 @@
       "path": "src/srv-physical"
     },
     {
+      "name": "srv-physical-old",
+      "path": "src/srv-physical-old"
+    },
+    {
       "name": "srv-audio",
       "path": "src/srv-audio"
     },
