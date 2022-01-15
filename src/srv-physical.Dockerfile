@@ -5,8 +5,6 @@ ARG SERVICE_NAME
 WORKDIR /src/
 COPY ${SERVICE_NAME} .
 WORKDIR /src/api
-RUN go install github.com/nishanths/exhaustive/...@latest
-RUN exhaustive ./...
 RUN CGO_ENABLED=0 go build -ldflags='-extldflags=-static' -o /bin/srv-physical
 
 FROM alpine

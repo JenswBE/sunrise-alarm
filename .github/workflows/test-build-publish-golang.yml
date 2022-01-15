@@ -33,6 +33,12 @@ jobs:
           working-directory: ${{ env.BUILD_PATH }}/${{ matrix.service }}
           skip-go-installation: true
 
+      - name: Test exhaustive use of case statements
+        working-directory: ${{ env.BUILD_PATH }}/${{ matrix.service }}
+        run: |
+          go install github.com/nishanths/exhaustive/...@latest
+          exhaustive ./...
+
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v1.2.0
 
