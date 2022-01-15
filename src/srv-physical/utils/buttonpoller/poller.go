@@ -1,4 +1,4 @@
-package debouncedbutton
+package buttonpoller
 
 import (
 	"time"
@@ -19,15 +19,17 @@ const (
 	ButtonPressLong
 )
 
-type DebouncedButton struct {
+// ButtonPoller polls a button and generates short and long press events.
+// The button is debounced as well.
+type ButtonPoller struct {
 	button              repositories.Button
 	notifyChannel       chan ButtonPress
 	firstPressTimestamp time.Time
 	isLongPress         bool
 }
 
-func NewDebouncedButton(button repositories.Button, notifyChannel chan ButtonPress) *DebouncedButton {
-	dButton := &DebouncedButton{
+func NewButtonPoller(button repositories.Button, notifyChannel chan ButtonPress) *ButtonPoller {
+	dButton := &ButtonPoller{
 		button:        button,
 		notifyChannel: notifyChannel,
 		isLongPress:   false,
@@ -36,7 +38,7 @@ func NewDebouncedButton(button repositories.Button, notifyChannel chan ButtonPre
 	return dButton
 }
 
-func (b *DebouncedButton) watcher() {
+func (b *ButtonPoller) watcher() {
 	statePressed := b.button.IsPressed()
 	var isPressed bool
 	var isPressedChangedTS time.Time
@@ -71,7 +73,7 @@ func (b *DebouncedButton) watcher() {
 	}
 }
 
-func (b *DebouncedButton) handlePress() {
+func (b *ButtonPoller) handlePress() {
 	// Ignore if we are in a long press
 	if b.isLongPress {
 		return
@@ -91,7 +93,7 @@ func (b *DebouncedButton) handlePress() {
 	}
 }
 
-func (b *DebouncedButton) handleRelease() {
+func (b *ButtonPoller) handleRelease() {
 	// Send event on short press
 	if !b.isLongPress {
 		b.notifyChannel <- ButtonPressShort

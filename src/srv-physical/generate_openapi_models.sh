@@ -12,7 +12,7 @@ jamescooke/openapi-validator \
 openapi.yml
 
 # Clean directory if exists
-rm api/openapi/* || true
+rm -rf api/openapi/* || true
 
 # Generate models
 docker pull openapitools/openapi-generator-cli
