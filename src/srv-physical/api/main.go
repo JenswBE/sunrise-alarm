@@ -54,7 +54,9 @@ func main() {
 	if !apiConfig.Server.Mocked {
 		// Init real devices
 		button, err = gpiobutton.NewGPIOButton(apiConfig.Button.GPIONum, true)
-		log.Fatal().Err(err).Msg("Button: Failed to initialize GPIO button")
+		if err != nil {
+			log.Fatal().Err(err).Msg("Button: Failed to initialize GPIO button")
+		}
 	} else {
 		// Init mocked devices
 		button = &mockbutton.MockButton{}
