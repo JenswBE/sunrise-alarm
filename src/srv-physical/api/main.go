@@ -1,12 +1,15 @@
 package main
 
 import (
+	"context"
 	"os"
 	"strconv"
 	"time"
 
 	"github.com/JenswBE/sunrise-alarm/src/srv-physical/api/config"
 	"github.com/JenswBE/sunrise-alarm/src/srv-physical/api/handler"
+	"github.com/JenswBE/sunrise-alarm/src/srv-physical/repositories/pahomqtt"
+	"github.com/JenswBE/sunrise-alarm/src/srv-physical/usecases/mqtt"
 	"github.com/gin-gonic/gin"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
@@ -32,6 +35,15 @@ func main() {
 		log.Debug().Msg("Debug logging enabled")
 	}
 
+	// Services
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+	mqttClient, err := pahomqtt.NewPahoMQTT(ctx, "localhost", 1883)
+	if err != nil {
+		log.Fatal().Err(err).Msg("MQTT: Creating client returned error")
+	}
+	mqttService := mqtt.NewService(mqttClient)
+
 	// Setup Gin
 	router := gin.Default()
 	err = router.SetTrustedProxies(apiConfig.Server.TrustedProxies)
@@ -44,7 +56,7 @@ func main() {
 	router.StaticFile("/openapi.yml", "../docs/openapi.yml")
 
 	// Setup handlers
-	mockHandler := handler.NewMockHandler()
+	mockHandler := handler.NewMockHandler(mqttService)
 
 	// Public routes
 	public := router.Group("/")

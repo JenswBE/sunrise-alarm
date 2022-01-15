@@ -1,36 +1,79 @@
 package pahomqtt
 
 import (
+	"context"
 	"fmt"
+	"net/url"
 
-	mqtt "github.com/eclipse/paho.mqtt.golang"
+	"github.com/JenswBE/sunrise-alarm/src/srv-physical/repositories"
+	"github.com/eclipse/paho.golang/autopaho"
+	"github.com/eclipse/paho.golang/paho"
+	"github.com/google/uuid"
+	"github.com/rs/zerolog/log"
 )
 
-var messagePubHandler mqtt.MessageHandler = func(client mqtt.Client, msg mqtt.Message) {
-	fmt.Printf("Received message: %s from topic: %s\n", msg.Payload(), msg.Topic())
+var _ repositories.MQTTClient = &PahoMQTT{}
+
+type PahoMQTT struct {
+	client *autopaho.ConnectionManager
 }
 
-var connectHandler mqtt.OnConnectHandler = func(client mqtt.Client) {
-	fmt.Println("Connected")
+type pahoLogger struct{}
+
+func (pahoLogger) Println(v ...interface{}) {
+	log.Print(v...)
+}
+func (pahoLogger) Printf(format string, v ...interface{}) {
+	log.Printf(format, v...)
 }
 
-var connectLostHandler mqtt.ConnectionLostHandler = func(client mqtt.Client, err error) {
-	fmt.Printf("Connect lost: %v", err)
-}
-
-func Test() {
-	var broker = "broker.emqx.io"
-	var port = 1883
-	opts := mqtt.NewClientOptions()
-	opts.AddBroker(fmt.Sprintf("tcp://%s:%d", broker, port))
-	opts.SetClientID("go_mqtt_client")
-	opts.SetUsername("emqx")
-	opts.SetPassword("public")
-	opts.SetDefaultPublishHandler(messagePubHandler)
-	opts.OnConnect = connectHandler
-	opts.OnConnectionLost = connectLostHandler
-	client := mqtt.NewClient(opts)
-	if token := client.Connect(); token.Wait() && token.Error() != nil {
-		panic(token.Error())
+func NewPahoMQTT(ctx context.Context, mqttBroker string, mqttPort int) (*PahoMQTT, error) {
+	// Create client config
+	brokerURL, err := url.Parse(fmt.Sprintf(`mqtt://%s:%d`, mqttBroker, mqttPort))
+	if err != nil {
+		return nil, fmt.Errorf("failed to parse MQTT broker url: %w", err)
 	}
+	clientIDSuffix := uuid.New().String()[:8]
+	config := autopaho.ClientConfig{
+		BrokerUrls:     []*url.URL{brokerURL},
+		KeepAlive:      10,
+		OnConnectError: func(err error) { log.Error().Err(err).Msg("MQTT: Reconnection to broker failed") },
+		Debug:          pahoLogger{},
+		ClientConfig: paho.ClientConfig{
+			ClientID:      "srv-physical" + clientIDSuffix,
+			OnClientError: func(err error) { log.Error().Err(err).Msg("MQTT: Server requested disconnect") },
+			OnServerDisconnect: func(d *paho.Disconnect) {
+				if d.Properties != nil {
+					log.Error().Str("reason", d.Properties.ReasonString).Msg("MQTT: Server requested disconnect")
+				} else {
+					log.Error().Uint8("reason_code", d.ReasonCode).Msg("MQTT: Server requested disconnect")
+				}
+			},
+		},
+	}
+
+	// Create client
+	cm, err := autopaho.NewConnection(ctx, config)
+	if err != nil {
+		panic(err)
+	}
+
+	// Connect to broker
+	err = cm.AwaitConnection(ctx)
+	if err != nil {
+		// Should only happen when context is cancelled
+		return nil, fmt.Errorf("context cancelled while awaiting MQTT connection: %w", err)
+	}
+
+	// Connect successful
+	return &PahoMQTT{client: cm}, nil
+}
+
+func (p *PahoMQTT) Publish(ctx context.Context, topic, payload string) error {
+	_, err := p.client.Publish(ctx, &paho.Publish{
+		QoS:     2, // 0 - at most once; 1 - at least once; 2 - exactly once
+		Topic:   topic,
+		Payload: []byte(payload),
+	})
+	return err
 }

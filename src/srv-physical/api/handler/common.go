@@ -8,13 +8,13 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-// ErrToResponse checks if the provided error is a GoComError.
+// errToResponse checks if the provided error is an entity of type Error.
 // If yes, status and embedded error message are returned.
 // If no, status is 500 and provided error message are returned.
-func ErrToResponse(e error) (int, *entities.Error) {
+func errToResponse(e error) (int, *entities.Error) {
 	if err, ok := e.(*entities.Error); ok {
 		return err.Status, err
 	}
-	log.Warn().Err(e).Stringer("error_type", reflect.TypeOf(e)).Msg("API received an non-GoComError error")
+	log.Warn().Err(e).Stringer("error_type", reflect.TypeOf(e)).Msg("API received a plain error")
 	return 500, entities.NewError(500, openapi.ERRORCODE_UNKNOWN_ERROR, "", e).(*entities.Error)
 }
