@@ -8,6 +8,7 @@ import (
 
 	"github.com/JenswBE/sunrise-alarm/src/srv-physical/entities"
 	"github.com/JenswBE/sunrise-alarm/src/srv-physical/repositories"
+	"github.com/rs/zerolog/log"
 )
 
 var _ Usecase = &Service{}
@@ -23,14 +24,17 @@ func NewService(mqttClient repositories.MQTTClient) *Service {
 }
 
 func (s *Service) PublishButtonPressed(ctx context.Context) error {
+	log.Debug().Msg("MQTT Service: Publishing button_pressed message to broker")
 	return s.publishEmpty(ctx, "button_pressed")
 }
 
 func (s *Service) PublishButtonLongPressed(ctx context.Context) error {
+	log.Debug().Msg("MQTT Service: Publishing button_long_pressed message to broker")
 	return s.publishEmpty(ctx, "button_long_pressed")
 }
 
 func (s *Service) PublishTempHumidUpdated(ctx context.Context, tempHumid entities.TempHumidReading) error {
+	log.Debug().Interface("temp_humid", tempHumid).Msg("MQTT Service: Publishing temp_humid_updated message to broker")
 	return s.publishJSON(ctx, "temp_humid_updated", tempHumid)
 }
 
