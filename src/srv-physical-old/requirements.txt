@@ -1,0 +1,28 @@
+# Generic
+wheel
+pylint
+autopep8
+
+# FastAPI
+fastapi
+httptools
+uvloop
+uvicorn
+gunicorn
+
+# MQTT
+gmqtt
+
+# Raspberry Pi
+adafruit-circuitpython-dht
+adafruit-circuitpython-tsl2591
+gpiozero
+rpi-backlight
+rpi_ws281x
+
+# Tests
+pytest
+pytest-asyncio
+pytest-env
+pytest-xdist
+requests

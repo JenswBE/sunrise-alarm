@@ -1,0 +1,189 @@
+openapi: 3.0.2
+info:
+  title: srv-physical
+  description: Service to handle buttons, leds, display backlight, ...
+  version: 0.1.0
+servers: []
+paths:
+  /backlight/lock:
+    put:
+      tags:
+        - Backlight
+      summary: Lock the backlight brightness
+      operationId: backlight_lock
+      responses:
+        "204":
+          description: No Content
+    delete:
+      tags:
+        - Backlight
+      summary: Unlock the backlight brightness
+      operationId: backlight_unlock
+      responses:
+        "204":
+          description: No Content
+
+  /buzzer/:
+    put:
+      tags:
+        - Buzzer
+      summary: Start the buzzer
+      operationId: buzzer_start
+      responses:
+        "204":
+          description: No Content
+    delete:
+      tags:
+        - Buzzer
+      summary: Stop the buzzer
+      operationId: buzzer_stop
+      responses:
+        "204":
+          description: No Content
+
+  /leds/:
+    get:
+      tags:
+        - LEDs
+      summary: Get current color and brightness of LEDs
+      operationId: leds_get
+      responses:
+        "200":
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Leds"
+    put:
+      tags:
+        - LEDs
+      summary: Set LEDs to specified color and brightness
+      operationId: leds_set
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Leds"
+      responses:
+        "204":
+          description: No Content
+    delete:
+      tags:
+        - LEDs
+      summary: Turn off all LEDs
+      operationId: leds_clear
+      responses:
+        "204":
+          description: No Content
+
+  /leds/sunrise:
+    put:
+      tags:
+        - LEDs
+      summary: Start sunrise simulation
+      operationId: sunrise_start
+      responses:
+        "204":
+          description: No Content
+    delete:
+      tags:
+        - LEDs
+      summary: Stop sunrise simulation
+      operationId: sunrise_stop
+      responses:
+        "204":
+          description: No Content
+
+  /mock/button/pressed:
+    post:
+      tags:
+        - Mock
+      summary: Mock press on the button
+      description: Mock press on the button
+      operationId: button_mock_press
+      responses:
+        "204":
+          description: No Content
+
+  /mock/button/long_pressed:
+    post:
+      tags:
+        - Mock
+      summary: Mock long press on the button
+      description: Mock long press on the button
+      operationId: button_mock_long_press
+      responses:
+        "204":
+          description: No Content
+
+  /mock/temp_humid/updated:
+    post:
+      tags:
+        - Mock
+      summary: Mock new reading of temperature and humidity
+      description: Mock new reading of temperature and humidity
+      operationId: temp_humid_mock_updated
+      responses:
+        "204":
+          description: No Content
+
+components:
+  responses:
+    Error:
+      description: Default error response
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+
+  schemas:
+    Leds:
+      type: object
+      required:
+        - color
+      properties:
+        color:
+          $ref: "#/components/schemas/PresetColor"
+        brightness:
+          type: integer
+          minimum: 0
+          maximum: 255
+          default: 100
+
+    PresetColor:
+      type: string
+      enum:
+        - BLACK
+        - RED
+        - ORANGE
+        - YELLOW
+        - WARM_WHITE
+
+    Error:
+      type: object
+      required:
+        - code
+        - message
+      properties:
+        status:
+          description: HTTP status code
+          type: integer
+          example: 400
+        code:
+          $ref: "#/components/schemas/ErrorCode"
+        message:
+          description: Human-readable description of the error
+          type: string
+          example: Provided authentication token is invalid
+        instance:
+          description: Object to which this error is related
+          type: string
+          example: ""
+
+    ErrorCode:
+      description: |
+        - UNKNOWN_ERROR: An unknown error occurred
+      type: string
+      example: UNKNOWN_ERROR
+      enum:
+        - UNKNOWN_ERROR

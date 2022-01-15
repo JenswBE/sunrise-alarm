@@ -1,29 +1,18 @@
-ARG SERVICE_NAME=srv-physical
+FROM golang:1.16 AS builder
 
-# Setup base
-FROM --platform=${TARGETPLATFORM} python:3.8-slim AS base
+WORKDIR /src/
+COPY . .
+WORKDIR /src/api
+RUN go install github.com/nishanths/exhaustive/...@latest
+RUN exhaustive ./...
+RUN CGO_ENABLED=0 go build -ldflags='-extldflags=-static' -o /bin/srv-physical
 
-# Install OS dependencies
-FROM base AS base-amd64
-ENV MOCK True
-RUN apt-get update && apt-get -qq install build-essential
-
-FROM base AS base-arm
-ENV MOCK False
-RUN apt-get update && apt-get -qq install build-essential python3-rpi.gpio libgpiod2
-RUN CFLAGS="-fcommon" pip install --no-cache-dir -U RPi.GPIO # See https://forum.manjaro.org/t/pip-install-rpi-gpio-fail/25788/3
-
-# Install python dependencies
-FROM base-${TARGETARCH}
-ARG SERVICE_NAME
-COPY ${SERVICE_NAME}/requirements.txt .
-RUN pip install --no-cache-dir -U pip wheel && \
-    pip install --no-cache-dir gunicorn uvicorn uvloop httptools
-RUN pip install --no-cache-dir -r requirements.txt
-
-# Copy service
-COPY ${SERVICE_NAME} .
-
-# Limiting workers is required for MQTT to work correctly
+FROM alpine
+COPY --from=builder /bin/srv-physical /srv-physical/bin/srv-physical
+COPY --from=builder /src/docs/index.html /srv-physical/docs/index.html
+COPY --from=builder /src/docs/oauth2-redirect.html /srv-physical/docs/oauth2-redirect.html
+COPY --from=builder /src/docs/openapi.yml /srv-physical/docs/openapi.yml
+COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
 EXPOSE 8080
-CMD [ "gunicorn", "physical.main:app", "-c", "gunicorn.conf.py" ]
+WORKDIR /srv-physical/bin
+ENTRYPOINT ["./srv-physical"]

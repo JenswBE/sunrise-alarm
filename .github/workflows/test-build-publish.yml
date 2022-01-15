@@ -16,7 +16,6 @@ jobs:
         service:
           - srv-alarm
           - srv-config
-          - srv-physical
           - srv-audio
           - gui-watchface
     env:
