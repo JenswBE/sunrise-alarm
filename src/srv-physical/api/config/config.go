@@ -9,8 +9,12 @@ import (
 )
 
 type Config struct {
+	Button struct {
+		GPIONum int
+	}
 	Server struct {
 		Debug          bool
+		Mocked         bool
 		Port           int
 		TrustedProxies []string
 	}
@@ -18,6 +22,9 @@ type Config struct {
 
 func ParseConfig() (*Config, error) {
 	// Set defaults
+	viper.SetDefault("Button.GPIONum", 23) // GPIO23 on pin 16
+	viper.SetDefault("Server.Debug", false)
+	viper.SetDefault("Server.Mocked", false)
 	viper.SetDefault("Server.Port", 8080)
 	viper.SetDefault("Server.TrustedProxies", []string{"172.16.0.0/16"}) // Default Docker IP range
 
@@ -36,7 +43,9 @@ func ParseConfig() (*Config, error) {
 
 	// Bind ENV variables
 	err = bindEnvs([]envBinding{
+		{"Button.GPIONum", "BUTTON_GPIO_PIN"},
 		{"Server.Debug", "SRV_PHYSICAL_DEBUG"},
+		{"Server.Mocked", "SRV_PHYSICAL_MOCKED"},
 		{"Server.Port", "SRV_PHYSICAL_PORT"},
 	})
 	if err != nil {

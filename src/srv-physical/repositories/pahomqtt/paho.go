@@ -37,7 +37,7 @@ func NewPahoMQTT(ctx context.Context, mqttBroker string, mqttPort int) (*PahoMQT
 	config := autopaho.ClientConfig{
 		BrokerUrls:     []*url.URL{brokerURL},
 		KeepAlive:      10,
-		OnConnectError: func(err error) { log.Error().Err(err).Msg("MQTT: Reconnection to broker failed") },
+		OnConnectError: func(err error) { log.Error().Err(err).Msg("MQTT: (Re)connecting to broker failed") },
 		Debug:          pahoLogger{},
 		ClientConfig: paho.ClientConfig{
 			ClientID:      "srv-physical" + clientIDSuffix,

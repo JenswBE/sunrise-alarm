@@ -1,4 +1,4 @@
-name: Test, build and publish
+name: Test, build and publish Golang services
 on:
   push:
     branches: [main]
@@ -14,10 +14,7 @@ jobs:
       fail-fast: false
       matrix:
         service:
-          - srv-alarm
-          - srv-config
-          - srv-audio
-          - gui-watchface
+          - srv-physical
     env:
       BUILD_PATH: src
       BUILD_FILE: ${{ matrix.service }}.Dockerfile
@@ -25,6 +22,15 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2.4.0
+
+      - uses: actions/setup-go@v2
+        with:
+          go-version: "1.16.x"
+
+      - name: Lint service
+        uses: golangci/golangci-lint-action@v2
+        with:
+          skip-go-installation: true
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v1.2.0

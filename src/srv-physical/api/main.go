@@ -8,8 +8,12 @@ import (
 
 	"github.com/JenswBE/sunrise-alarm/src/srv-physical/api/config"
 	"github.com/JenswBE/sunrise-alarm/src/srv-physical/api/handler"
+	"github.com/JenswBE/sunrise-alarm/src/srv-physical/repositories"
+	"github.com/JenswBE/sunrise-alarm/src/srv-physical/repositories/gpiobutton"
+	"github.com/JenswBE/sunrise-alarm/src/srv-physical/repositories/mockbutton"
 	"github.com/JenswBE/sunrise-alarm/src/srv-physical/repositories/pahomqtt"
 	"github.com/JenswBE/sunrise-alarm/src/srv-physical/usecases/mqtt"
+	"github.com/JenswBE/sunrise-alarm/src/srv-physical/utils/buttonpoller"
 	"github.com/gin-gonic/gin"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
@@ -43,6 +47,33 @@ func main() {
 		log.Fatal().Err(err).Msg("MQTT: Creating client returned error")
 	}
 	mqttService := mqtt.NewService(mqttClient)
+
+	// Setup devices
+	var button repositories.Button
+	buttonChannel := make(chan buttonpoller.ButtonPress)
+	if !apiConfig.Server.Mocked {
+		// Init real devices
+		button, err = gpiobutton.NewGPIOButton(apiConfig.Button.GPIONum, true)
+		log.Fatal().Err(err).Msg("Button: Failed to initialize GPIO button")
+	} else {
+		// Init mocked devices
+		button = &mockbutton.MockButton{}
+	}
+	buttonpoller.NewButtonPoller(button, buttonChannel)
+	go func() {
+		for {
+			var err error
+			switch <-buttonChannel {
+			case buttonpoller.ButtonPressShort:
+				err = mqttService.PublishButtonPressed(ctx)
+			case buttonpoller.ButtonPressLong:
+				err = mqttService.PublishButtonLongPressed(ctx)
+			}
+			if err != nil {
+				log.Error().Err(err).Msg("Failed to publish button push to MQTT")
+			}
+		}
+	}()
 
 	// Setup Gin
 	router := gin.Default()
