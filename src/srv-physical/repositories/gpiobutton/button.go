@@ -20,12 +20,13 @@ func NewGPIOButton(pinNumber int, highIsActive bool) (*GPIOButton, error) {
 	pin := rpio.Pin(pinNumber)
 	pin.Input()
 
-	button := &GPIOButton{
-		pin:         pin,
-		activeState: rpio.High,
-	}
-	if !highIsActive {
+	button := &GPIOButton{pin: pin}
+	if highIsActive {
+		button.activeState = rpio.High
+		button.pin.PullDown()
+	} else {
 		button.activeState = rpio.Low
+		button.pin.PullUp()
 	}
 	return button, nil
 }
