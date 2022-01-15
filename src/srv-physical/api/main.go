@@ -42,7 +42,7 @@ func main() {
 	// Services
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
-	mqttClient, err := pahomqtt.NewPahoMQTT(ctx, "localhost", 1883)
+	mqttClient, err := pahomqtt.NewPahoMQTT(ctx, apiConfig.MQTT.BrokerHost, apiConfig.MQTT.BrokerPort)
 	if err != nil {
 		log.Fatal().Err(err).Msg("MQTT: Creating client returned error")
 	}
