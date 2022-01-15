@@ -1,7 +1,9 @@
-FROM golang:1.16 AS builder
+ARG SERVICE_NAME=srv-physical
 
+FROM --platform=${TARGETPLATFORM} golang:1.16 AS builder
+ARG SERVICE_NAME
 WORKDIR /src/
-COPY . .
+COPY ${SERVICE_NAME} .
 WORKDIR /src/api
 RUN go install github.com/nishanths/exhaustive/...@latest
 RUN exhaustive ./...
