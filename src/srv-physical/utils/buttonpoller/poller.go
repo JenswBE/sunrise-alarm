@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/JenswBE/sunrise-alarm/src/srv-physical/repositories"
+	"github.com/rs/zerolog/log"
 )
 
 const (
@@ -82,6 +83,7 @@ func (b *ButtonPoller) handlePress() {
 	// Check if we reached a long press
 	if !b.firstPressTimestamp.IsZero() && time.Since(b.firstPressTimestamp) > LongPressDuration {
 		// Long press reached
+		log.Debug().Msg("ButtonPoller: Long press detected")
 		b.notifyChannel <- ButtonPressLong
 		b.isLongPress = true
 		return
@@ -96,10 +98,12 @@ func (b *ButtonPoller) handlePress() {
 func (b *ButtonPoller) handleRelease() {
 	// Send event on short press
 	if !b.isLongPress {
+		log.Debug().Msg("ButtonPoller: Short press detected")
 		b.notifyChannel <- ButtonPressShort
 	}
 
 	// Reset button
+	log.Debug().Msg("ButtonPoller: Reset button because of release")
 	b.isLongPress = false
 	b.firstPressTimestamp = time.Time{}
 }
