@@ -13,10 +13,6 @@ type GPIOButton struct {
 }
 
 func NewGPIOButton(pinNumber int, highIsActive bool) (*GPIOButton, error) {
-	if err := rpio.Open(); err != nil {
-		return nil, err
-	}
-
 	pin := rpio.Pin(pinNumber)
 	pin.Input()
 

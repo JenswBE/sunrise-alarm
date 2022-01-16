@@ -11,12 +11,14 @@ import (
 	"github.com/JenswBE/sunrise-alarm/src/srv-physical/repositories"
 	"github.com/JenswBE/sunrise-alarm/src/srv-physical/repositories/gpiobutton"
 	"github.com/JenswBE/sunrise-alarm/src/srv-physical/repositories/mockbutton"
+	"github.com/JenswBE/sunrise-alarm/src/srv-physical/repositories/p9813led"
 	"github.com/JenswBE/sunrise-alarm/src/srv-physical/repositories/pahomqtt"
 	"github.com/JenswBE/sunrise-alarm/src/srv-physical/usecases/mqtt"
 	"github.com/JenswBE/sunrise-alarm/src/srv-physical/utils/buttonpoller"
 	"github.com/gin-gonic/gin"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
+	"github.com/stianeikeland/go-rpio/v4"
 )
 
 func main() {
@@ -53,10 +55,20 @@ func main() {
 	buttonChannel := make(chan buttonpoller.ButtonPress)
 	if !apiConfig.Server.Mocked {
 		// Init real devices
+		if err := rpio.Open(); err != nil {
+			log.Fatal().Err(err).Msg("RPIO: Failed to initialize GPIO library")
+		}
+		defer rpio.Close()
 		button, err = gpiobutton.NewGPIOButton(apiConfig.Button.GPIONum, true)
 		if err != nil {
 			log.Fatal().Err(err).Msg("Button: Failed to initialize GPIO button")
 		}
+		leds, err := p9813led.NewP9813LED()
+		if err != nil {
+			log.Fatal().Err(err).Msg("LED: Failed to initialize P9813 led driver on SPI0")
+		}
+		leds.SetColor(100, 0, 0)
+		leds.Close()
 	} else {
 		// Init mocked devices
 		button = &mockbutton.MockButton{}
