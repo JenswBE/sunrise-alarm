@@ -3,6 +3,7 @@ package p9813led
 import (
 	"fmt"
 
+	"github.com/rs/zerolog/log"
 	"github.com/stianeikeland/go-rpio/v4"
 )
 
@@ -16,7 +17,8 @@ func NewP9813LED() (*P9813LED, error) {
 	if err != nil {
 		return nil, fmt.Errorf("failed to initialize SPI for P9813 LED driver: %w", err)
 	}
-	rpio.SpiSpeed(10_000_000) // 10MHz
+	// rpio.SpiMode(1, 0)
+	rpio.SpiSpeed(10_000) // 10kHz
 	return &P9813LED{}, nil
 }
 
@@ -41,6 +43,7 @@ func (p *P9813LED) SetColor(r, g, b byte) {
 	data[7] = r
 
 	// Send over SPI
+	log.Debug().Uint8("red", r).Uint8("green", g).Uint8("blue", b).Hex("data", data).Msg("P9813: Setting new color")
 	rpio.SpiTransmit(data...)
 }
 
