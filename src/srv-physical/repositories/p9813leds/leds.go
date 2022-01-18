@@ -52,9 +52,9 @@ func (l *P9813Leds) SetColorAndBrightness(color entities.Color, brightness byte)
 	data[4] = header
 
 	// Set color data
-	data[5] = red
+	data[5] = blue
 	data[6] = green
-	data[7] = blue
+	data[7] = red
 
 	// Send over SPI
 	log.Debug().
