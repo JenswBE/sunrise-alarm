@@ -11,8 +11,10 @@ import (
 	"github.com/JenswBE/sunrise-alarm/src/srv-physical/repositories"
 	"github.com/JenswBE/sunrise-alarm/src/srv-physical/repositories/gpiobutton"
 	"github.com/JenswBE/sunrise-alarm/src/srv-physical/repositories/mockbutton"
-	"github.com/JenswBE/sunrise-alarm/src/srv-physical/repositories/p9813led"
+	"github.com/JenswBE/sunrise-alarm/src/srv-physical/repositories/mockleds"
+	"github.com/JenswBE/sunrise-alarm/src/srv-physical/repositories/p9813leds"
 	"github.com/JenswBE/sunrise-alarm/src/srv-physical/repositories/pahomqtt"
+	"github.com/JenswBE/sunrise-alarm/src/srv-physical/usecases/leds"
 	"github.com/JenswBE/sunrise-alarm/src/srv-physical/usecases/mqtt"
 	"github.com/JenswBE/sunrise-alarm/src/srv-physical/utils/buttonpoller"
 	"github.com/gin-gonic/gin"
@@ -41,17 +43,9 @@ func main() {
 		log.Debug().Msg("Debug logging enabled")
 	}
 
-	// Services
-	ctx, cancel := context.WithCancel(context.Background())
-	defer cancel()
-	mqttClient, err := pahomqtt.NewPahoMQTT(ctx, apiConfig.MQTT.BrokerHost, apiConfig.MQTT.BrokerPort)
-	if err != nil {
-		log.Fatal().Err(err).Msg("MQTT: Creating client returned error")
-	}
-	mqttService := mqtt.NewService(mqttClient)
-
 	// Setup devices
-	var button repositories.Button
+	var devButton repositories.Button
+	var devLeds repositories.Leds
 	buttonChannel := make(chan buttonpoller.ButtonPress)
 	if !apiConfig.Server.Mocked {
 		// Init real devices
@@ -59,21 +53,36 @@ func main() {
 			log.Fatal().Err(err).Msg("RPIO: Failed to initialize GPIO library")
 		}
 		defer rpio.Close()
-		button, err = gpiobutton.NewGPIOButton(apiConfig.Button.GPIONum, true)
+		devButton, err = gpiobutton.NewGPIOButton(apiConfig.Button.GPIONum, true)
 		if err != nil {
 			log.Fatal().Err(err).Msg("Button: Failed to initialize GPIO button")
 		}
-		leds, err := p9813led.NewP9813LED()
+		p9813Leds, err := p9813leds.NewP9813Leds()
 		if err != nil {
 			log.Fatal().Err(err).Msg("LED: Failed to initialize P9813 led driver on SPI0")
 		}
-		leds.SetColor(100, 0, 0)
-		leds.Close()
+		defer p9813Leds.Close()
+		devLeds = p9813Leds
 	} else {
 		// Init mocked devices
-		button = &mockbutton.MockButton{}
+		devButton = &mockbutton.MockButton{}
+		devLeds = &mockleds.MockLeds{}
 	}
-	buttonpoller.NewButtonPoller(button, buttonChannel)
+
+	// Setup repositories
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+	mqttClient, err := pahomqtt.NewPahoMQTT(ctx, apiConfig.MQTT.BrokerHost, apiConfig.MQTT.BrokerPort)
+	if err != nil {
+		log.Fatal().Err(err).Msg("MQTT: Creating client returned error")
+	}
+
+	// Setup services
+	ledsService := leds.NewService(devLeds)
+	mqttService := mqtt.NewService(mqttClient)
+
+	// Start polling button
+	buttonpoller.NewButtonPoller(devButton, buttonChannel)
 	go func() {
 		for {
 			var err error
@@ -102,9 +111,11 @@ func main() {
 
 	// Setup handlers
 	mockHandler := handler.NewMockHandler(mqttService)
+	ledsHandler := handler.NewLedsHandler(ledsService)
 
 	// Public routes
 	public := router.Group("/")
+	ledsHandler.RegisterRoutes(public)
 	mockHandler.RegisterRoutes(public)
 
 	// Start Gin

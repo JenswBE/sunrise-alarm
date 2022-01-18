@@ -45,6 +45,8 @@ func NewError(status int, code openapi.ErrorCode, instance string, err error) er
 
 func translateCodeToMessage(code openapi.ErrorCode) string {
 	switch code {
+	case openapi.ERRORCODE_BRIGHTNESS_OUT_OF_RANGE:
+		return `Brightness must be between 0 and 255`
 	case openapi.ERRORCODE_UNKNOWN_ERROR:
 		return `An unknown error occurred`
 	}

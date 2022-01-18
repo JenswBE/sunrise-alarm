@@ -15,16 +15,18 @@ import (
 	"fmt"
 )
 
-// ErrorCode - UNKNOWN_ERROR: An unknown error occurred 
+// ErrorCode - BRIGHTNESS_OUT_OF_RANGE: Brightness must be between 0 and 255 - UNKNOWN_ERROR: An unknown error occurred 
 type ErrorCode string
 
 // List of ErrorCode
 const (
+	ERRORCODE_BRIGHTNESS_OUT_OF_RANGE ErrorCode = "BRIGHTNESS_OUT_OF_RANGE"
 	ERRORCODE_UNKNOWN_ERROR ErrorCode = "UNKNOWN_ERROR"
 )
 
 // All allowed values of ErrorCode enum
 var AllowedErrorCodeEnumValues = []ErrorCode{
+	"BRIGHTNESS_OUT_OF_RANGE",
 	"UNKNOWN_ERROR",
 }
 

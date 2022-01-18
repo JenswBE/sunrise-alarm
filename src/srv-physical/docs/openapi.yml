@@ -182,8 +182,10 @@ components:
 
     ErrorCode:
       description: |
+        - BRIGHTNESS_OUT_OF_RANGE: Brightness must be between 0 and 255
         - UNKNOWN_ERROR: An unknown error occurred
       type: string
       example: UNKNOWN_ERROR
       enum:
+        - BRIGHTNESS_OUT_OF_RANGE
         - UNKNOWN_ERROR
