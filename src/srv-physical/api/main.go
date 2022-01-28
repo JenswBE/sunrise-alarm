@@ -110,11 +110,13 @@ func main() {
 	router.StaticFile("/openapi.yml", "../docs/openapi.yml")
 
 	// Setup handlers
+	backlightHandler := handler.NewBacklightHandler()
 	mockHandler := handler.NewMockHandler(mqttService)
 	ledsHandler := handler.NewLedsHandler(ledsService)
 
 	// Public routes
 	public := router.Group("/")
+	backlightHandler.RegisterRoutes(public)
 	ledsHandler.RegisterRoutes(public)
 	mockHandler.RegisterRoutes(public)
 
