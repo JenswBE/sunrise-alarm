@@ -2,6 +2,7 @@ package config
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/go-playground/validator/v10"
 	"github.com/rs/zerolog/log"
@@ -11,6 +12,9 @@ import (
 type Config struct {
 	Button struct {
 		GPIONum int
+	}
+	Leds struct {
+		SunriseDuration time.Duration
 	}
 	MQTT struct {
 		BrokerHost string
@@ -27,6 +31,7 @@ type Config struct {
 func ParseConfig() (*Config, error) {
 	// Set defaults
 	viper.SetDefault("Button.GPIONum", 23) // GPIO23 on pin 16
+	viper.SetDefault("Leds.SunriseDuration", 5*time.Minute)
 	viper.SetDefault("MQTT.BrokerHost", "localhost")
 	viper.SetDefault("MQTT.BrokerPort", 1883)
 	viper.SetDefault("Server.Debug", false)
@@ -50,6 +55,7 @@ func ParseConfig() (*Config, error) {
 	// Bind ENV variables
 	err = bindEnvs([]envBinding{
 		{"Button.GPIONum", "BUTTON_GPIO_PIN"},
+		{"Leds.SunriseDuration", "LEDS_SUNRISE_DURATION"},
 		{"MQTT.BrokerHost", "MQTT_BROKER_HOST"},
 		{"MQTT.BrokerPort", "MQTT_BROKER_PORT"},
 		{"Server.Debug", "SRV_PHYSICAL_DEBUG"},

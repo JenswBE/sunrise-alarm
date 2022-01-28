@@ -11,16 +11,18 @@ import (
 
 var _ Usecase = &Service{}
 
-const SunriseDuration = 5 * time.Minute
-
 type Service struct {
-	leds        repositories.Leds
-	sunriseStop chan bool
-	sunriseLock sync.Mutex // Ensures we don't mess with sunriseStop between nil check and sunriseStop creation/deletion
+	leds            repositories.Leds
+	sunriseStop     chan bool
+	sunriseLock     sync.Mutex // Ensures we don't mess with sunriseStop between nil check and sunriseStop creation/deletion
+	sunriseDuration time.Duration
 }
 
-func NewService(leds repositories.Leds) *Service {
-	return &Service{leds: leds}
+func NewService(leds repositories.Leds, sunriseDuration time.Duration) *Service {
+	return &Service{
+		leds:            leds,
+		sunriseDuration: sunriseDuration,
+	}
 }
 
 func (s *Service) GetColorAndBrightness() (entities.PresetColor, byte) {
@@ -49,7 +51,6 @@ func (s *Service) StartSunrise() {
 	}
 
 	// Start sunrise
-	s.SetColorAndBrightness(entities.PresetColorRed, 5)
 	s.sunriseStop = make(chan bool)
 	go s.runSunrise(s.sunriseStop)
 }
@@ -71,7 +72,7 @@ func (s *Service) StopSunrise() {
 }
 
 func (s *Service) runSunrise(stop chan bool) {
-	var brightness byte = 5
+	var brightness byte = 4 // First brightness will be 5
 	for {
 		select {
 		case <-stop:
@@ -98,7 +99,7 @@ func (s *Service) runSunrise(stop chan bool) {
 				log.Debug().Msg("Leds Service: runSunrise received stop signal on final state.")
 				return
 			}
-			time.Sleep(SunriseDuration / 95) // 5 to 100 has 95 steps
+			time.Sleep(s.sunriseDuration / 95) // 5 to 100 has 95 steps
 		}
 	}
 }

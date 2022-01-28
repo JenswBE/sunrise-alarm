@@ -78,7 +78,7 @@ func main() {
 	}
 
 	// Setup services
-	ledsService := leds.NewService(devLeds)
+	ledsService := leds.NewService(devLeds, apiConfig.Leds.SunriseDuration)
 	mqttService := mqtt.NewService(mqttClient)
 
 	// Start polling button
