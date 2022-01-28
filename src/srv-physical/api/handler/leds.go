@@ -19,9 +19,9 @@ func NewLedsHandler(service leds.Usecase) *LedsHandler {
 
 func (h *LedsHandler) RegisterRoutes(rg *gin.RouterGroup) {
 	groupMock := rg.Group(pathPrefixLeds)
-	groupMock.GET("/", h.getLeds)
-	groupMock.PUT("/", h.setLeds)
-	groupMock.DELETE("/", h.clearLeds)
+	groupMock.GET("", h.getLeds)
+	groupMock.PUT("", h.setLeds)
+	groupMock.DELETE("", h.clearLeds)
 }
 
 func (h *LedsHandler) getLeds(c *gin.Context) {

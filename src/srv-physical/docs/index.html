@@ -13,7 +13,7 @@
       integrity="sha256-PtYS9B4FDKXnAAytbxy+fn2jn2X8qZwC6Z5lkQVuWDc="
       crossorigin="anonymous"
     />
-    <title>GoCommerce - Swagger UI</title>
+    <title>srv-physical - Swagger UI</title>
   </head>
 
   <body>
@@ -36,16 +36,6 @@
         deepLinking: true,
         showExtensions: true,
         showCommonExtensions: true,
-        oauth2RedirectUrl: new URL("oauth2-redirect.html", window.location.href)
-          .href,
-      });
-
-      ui.initOAuth({
-        clientId: "go-commerce-admin",
-        realm: "go-commerce",
-        scopeSeparator: " ",
-        scopes: "openid profile",
-        usePkceWithAuthorizationCodeGrant: true,
       });
     </script>
   </body>

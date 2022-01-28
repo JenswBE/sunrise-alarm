@@ -23,7 +23,7 @@ paths:
         "204":
           description: No Content
 
-  /buzzer/:
+  /buzzer:
     put:
       tags:
         - Buzzer
@@ -41,7 +41,7 @@ paths:
         "204":
           description: No Content
 
-  /leds/:
+  /leds:
     get:
       tags:
         - LEDs
