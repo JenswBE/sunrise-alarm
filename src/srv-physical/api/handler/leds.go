@@ -25,8 +25,9 @@ func (h *LedsHandler) RegisterRoutes(rg *gin.RouterGroup) {
 }
 
 func (h *LedsHandler) getLeds(c *gin.Context) {
-	// TODO
-	c.String(204, "")
+	// Call service
+	color, brightness := h.service.GetColorAndBrightness()
+	c.JSON(200, presenter.LedsFromEntity(color, brightness))
 }
 
 func (h *LedsHandler) setLeds(c *gin.Context) {

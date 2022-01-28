@@ -16,17 +16,17 @@ func NewService(leds repositories.Leds) *Service {
 	return &Service{leds: leds}
 }
 
-func (s *Service) GetColorAndBrightness() (entities.Color, byte) {
+func (s *Service) GetColorAndBrightness() (entities.PresetColor, byte) {
 	log.Debug().Msg("Leds Service: Getting current leds color and brightness")
 	return s.leds.GetColorAndBrightness()
 }
 
-func (s *Service) SetColorAndBrightness(color entities.Color, brightness byte) {
+func (s *Service) SetColorAndBrightness(color entities.PresetColor, brightness byte) {
 	log.Debug().Interface("color", color).Uint8("brightness", brightness).Msg("Leds Service: Setting new color and brightness")
 	s.leds.SetColorAndBrightness(color, brightness)
 }
 
 func (s *Service) Clear() {
 	log.Debug().Msg("Leds Service: Clearing leds")
-	s.leds.SetColorAndBrightness(entities.ColorBlack, 0)
+	s.leds.SetColorAndBrightness(entities.PresetColorBlack, 0)
 }

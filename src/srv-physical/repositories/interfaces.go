@@ -11,8 +11,8 @@ type Button interface {
 }
 
 type Leds interface {
-	GetColorAndBrightness() (entities.Color, byte)
-	SetColorAndBrightness(color entities.Color, brightness byte)
+	GetColorAndBrightness() (entities.PresetColor, byte)
+	SetColorAndBrightness(color entities.PresetColor, brightness byte)
 }
 
 type MQTTClient interface {

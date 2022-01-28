@@ -12,7 +12,7 @@ import (
 var _ repositories.Leds = &P9813Leds{}
 
 type P9813Leds struct {
-	currentColor      entities.Color
+	currentColor      entities.PresetColor
 	currentBrightness byte
 }
 
@@ -28,18 +28,20 @@ func NewP9813Leds() (*P9813Leds, error) {
 }
 
 func (l *P9813Leds) Close() {
+	l.SetColorAndBrightness(entities.PresetColorBlack, 0)
 	rpio.SpiEnd(rpio.Spi0)
 }
 
-func (l *P9813Leds) GetColorAndBrightness() (entities.Color, byte) {
+func (l *P9813Leds) GetColorAndBrightness() (entities.PresetColor, byte) {
 	return l.currentColor, l.currentBrightness
 }
 
-func (l *P9813Leds) SetColorAndBrightness(color entities.Color, brightness byte) {
+func (l *P9813Leds) SetColorAndBrightness(color entities.PresetColor, brightness byte) {
 	// Scale color to brightness
-	red := scaleColor(color.Red, brightness)
-	green := scaleColor(color.Green, brightness)
-	blue := scaleColor(color.Blue, brightness)
+	rgb := color.ToRGB()
+	red := scaleColor(rgb.Red, brightness)
+	green := scaleColor(rgb.Green, brightness)
+	blue := scaleColor(rgb.Blue, brightness)
 
 	// Data is 96 bits, first and last 32 bits are empty
 	data := make([]byte, 12)
@@ -58,11 +60,11 @@ func (l *P9813Leds) SetColorAndBrightness(color entities.Color, brightness byte)
 
 	// Send over SPI
 	log.Debug().
-		Uint8("red", color.Red).
+		Uint8("red", rgb.Red).
 		Uint8("scaled_red", red).
-		Uint8("green", color.Green).
+		Uint8("green", rgb.Green).
 		Uint8("scaled_green", green).
-		Uint8("blue", color.Blue).
+		Uint8("blue", rgb.Blue).
 		Uint8("scaled_blue", blue).
 		Uint8("brightness", brightness).
 		Hex("data", data).
