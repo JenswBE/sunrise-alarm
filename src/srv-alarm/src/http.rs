@@ -227,7 +227,7 @@ impl Leds {
     pub fn night_light_dark() -> Self {
         Self {
             color: LedsColor::Orange,
-            brightness: Some(2),
+            brightness: Some(10),
         }
     }
 }
