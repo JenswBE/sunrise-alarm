@@ -106,7 +106,6 @@ func main() {
 	}
 	router.StaticFile("/", "../docs/index.html")
 	router.StaticFile("/index.html", "../docs/index.html")
-	router.StaticFile("/oauth2-redirect.html", "../docs/oauth2-redirect.html")
 	router.StaticFile("/openapi.yml", "../docs/openapi.yml")
 
 	// Setup handlers
