@@ -13,6 +13,10 @@ type MockLeds struct {
 	currentBrightness byte
 }
 
+func NewMockLeds() *MockLeds {
+	return &MockLeds{}
+}
+
 func (l *MockLeds) GetColorAndBrightness() (entities.PresetColor, byte) {
 	log.Debug().Interface("color", l.currentColor).Uint8("brightness", l.currentBrightness).Msg("MockLeds: Current color and brightness requested")
 	return l.currentColor, l.currentBrightness

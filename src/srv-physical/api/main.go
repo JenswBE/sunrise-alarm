@@ -10,10 +10,13 @@ import (
 	"github.com/JenswBE/sunrise-alarm/src/srv-physical/api/handler"
 	"github.com/JenswBE/sunrise-alarm/src/srv-physical/repositories"
 	"github.com/JenswBE/sunrise-alarm/src/srv-physical/repositories/gpiobutton"
+	"github.com/JenswBE/sunrise-alarm/src/srv-physical/repositories/gpiobuzzer"
 	"github.com/JenswBE/sunrise-alarm/src/srv-physical/repositories/mockbutton"
+	"github.com/JenswBE/sunrise-alarm/src/srv-physical/repositories/mockbuzzer"
 	"github.com/JenswBE/sunrise-alarm/src/srv-physical/repositories/mockleds"
 	"github.com/JenswBE/sunrise-alarm/src/srv-physical/repositories/p9813leds"
 	"github.com/JenswBE/sunrise-alarm/src/srv-physical/repositories/pahomqtt"
+	"github.com/JenswBE/sunrise-alarm/src/srv-physical/usecases/buzzer"
 	"github.com/JenswBE/sunrise-alarm/src/srv-physical/usecases/leds"
 	"github.com/JenswBE/sunrise-alarm/src/srv-physical/usecases/mqtt"
 	"github.com/JenswBE/sunrise-alarm/src/srv-physical/utils/buttonpoller"
@@ -45,6 +48,7 @@ func main() {
 
 	// Setup devices
 	var devButton repositories.Button
+	var devBuzzer repositories.Buzzer
 	var devLeds repositories.Leds
 	buttonChannel := make(chan buttonpoller.ButtonPress)
 	if !apiConfig.Server.Mocked {
@@ -53,10 +57,8 @@ func main() {
 			log.Fatal().Err(err).Msg("RPIO: Failed to initialize GPIO library")
 		}
 		defer rpio.Close()
-		devButton, err = gpiobutton.NewGPIOButton(apiConfig.Button.GPIONum, true)
-		if err != nil {
-			log.Fatal().Err(err).Msg("Button: Failed to initialize GPIO button")
-		}
+		devButton = gpiobutton.NewGPIOButton(apiConfig.Button.GPIONum, true)
+		devBuzzer = gpiobuzzer.NewGPIOBuzzer(apiConfig.Buzzer.GPIONum)
 		p9813Leds, err := p9813leds.NewP9813Leds()
 		if err != nil {
 			log.Fatal().Err(err).Msg("LED: Failed to initialize P9813 led driver on SPI0")
@@ -65,8 +67,9 @@ func main() {
 		devLeds = p9813Leds
 	} else {
 		// Init mocked devices
-		devButton = &mockbutton.MockButton{}
-		devLeds = &mockleds.MockLeds{}
+		devButton = mockbutton.NewMockButton()
+		devBuzzer = mockbuzzer.NewMockBuzzer()
+		devLeds = mockleds.NewMockLeds()
 	}
 
 	// Setup repositories
@@ -78,6 +81,7 @@ func main() {
 	}
 
 	// Setup services
+	buzzerService := buzzer.NewService(devBuzzer)
 	ledsService := leds.NewService(devLeds, apiConfig.Leds.SunriseDuration)
 	mqttService := mqtt.NewService(mqttClient)
 
@@ -110,14 +114,16 @@ func main() {
 
 	// Setup handlers
 	backlightHandler := handler.NewBacklightHandler()
+	buzzerHandler := handler.NewBuzzerHandler(buzzerService)
 	mockHandler := handler.NewMockHandler(mqttService)
 	ledsHandler := handler.NewLedsHandler(ledsService)
 
-	// Public routes
-	public := router.Group("/")
-	backlightHandler.RegisterRoutes(public)
-	ledsHandler.RegisterRoutes(public)
-	mockHandler.RegisterRoutes(public)
+	// Register routes
+	root := router.Group("/")
+	backlightHandler.RegisterRoutes(root)
+	buzzerHandler.RegisterRoutes(root)
+	ledsHandler.RegisterRoutes(root)
+	mockHandler.RegisterRoutes(root)
 
 	// Start Gin
 	port := strconv.Itoa(apiConfig.Server.Port)

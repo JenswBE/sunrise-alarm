@@ -10,6 +10,10 @@ type MockButton struct {
 	Pressed bool
 }
 
+func NewMockButton() *MockButton {
+	return &MockButton{}
+}
+
 func (b *MockButton) IsPressed() bool {
 	return b.Pressed
 }

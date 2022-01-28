@@ -12,7 +12,7 @@ type GPIOButton struct {
 	activeState rpio.State
 }
 
-func NewGPIOButton(pinNumber int, highIsActive bool) (*GPIOButton, error) {
+func NewGPIOButton(pinNumber int, highIsActive bool) *GPIOButton {
 	pin := rpio.Pin(pinNumber)
 	pin.Input()
 
@@ -24,7 +24,7 @@ func NewGPIOButton(pinNumber int, highIsActive bool) (*GPIOButton, error) {
 		button.activeState = rpio.Low
 		button.pin.PullUp()
 	}
-	return button, nil
+	return button
 }
 
 func (b *GPIOButton) IsPressed() bool {

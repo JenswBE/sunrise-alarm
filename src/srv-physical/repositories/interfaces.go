@@ -10,6 +10,11 @@ type Button interface {
 	IsPressed() bool
 }
 
+type Buzzer interface {
+	On()
+	Off()
+}
+
 type Leds interface {
 	GetColorAndBrightness() (entities.PresetColor, byte)
 	SetColorAndBrightness(color entities.PresetColor, brightness byte)

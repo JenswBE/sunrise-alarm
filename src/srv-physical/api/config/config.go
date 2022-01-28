@@ -13,6 +13,9 @@ type Config struct {
 	Button struct {
 		GPIONum int
 	}
+	Buzzer struct {
+		GPIONum int
+	}
 	Leds struct {
 		SunriseDuration time.Duration
 	}
@@ -31,6 +34,7 @@ type Config struct {
 func ParseConfig() (*Config, error) {
 	// Set defaults
 	viper.SetDefault("Button.GPIONum", 23) // GPIO23 on pin 16
+	viper.SetDefault("Buzzer.GPIONum", 18) // GPIO18 on pin 12
 	viper.SetDefault("Leds.SunriseDuration", 5*time.Minute)
 	viper.SetDefault("MQTT.BrokerHost", "localhost")
 	viper.SetDefault("MQTT.BrokerPort", 1883)
@@ -55,6 +59,7 @@ func ParseConfig() (*Config, error) {
 	// Bind ENV variables
 	err = bindEnvs([]envBinding{
 		{"Button.GPIONum", "BUTTON_GPIO_PIN"},
+		{"Buzzer.GPIONum", "BUZZER_GPIO_PIN"},
 		{"Leds.SunriseDuration", "LEDS_SUNRISE_DURATION"},
 		{"MQTT.BrokerHost", "MQTT_BROKER_HOST"},
 		{"MQTT.BrokerPort", "MQTT_BROKER_PORT"},

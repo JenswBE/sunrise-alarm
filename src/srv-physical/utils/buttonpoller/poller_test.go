@@ -12,9 +12,9 @@ import (
 func TestDebounceShort(t *testing.T) {
 	// Setup test
 	t.Parallel()
-	mockButton := mockbutton.MockButton{}
+	mockButton := mockbutton.NewMockButton()
 	notifyChannel := make(chan buttonpoller.ButtonPress)
-	buttonpoller.NewButtonPoller(&mockButton, notifyChannel)
+	buttonpoller.NewButtonPoller(mockButton, notifyChannel)
 
 	// Test short press
 	mockButton.Pressed = true
@@ -32,9 +32,9 @@ func TestDebounceShort(t *testing.T) {
 func TestDebounceLong(t *testing.T) {
 	// Setup test
 	t.Parallel()
-	mockButton := mockbutton.MockButton{}
+	mockButton := mockbutton.NewMockButton()
 	notifyChannel := make(chan buttonpoller.ButtonPress)
-	buttonpoller.NewButtonPoller(&mockButton, notifyChannel)
+	buttonpoller.NewButtonPoller(mockButton, notifyChannel)
 
 	// Test long press
 	mockButton.Pressed = true
@@ -52,9 +52,9 @@ func TestDebounceLong(t *testing.T) {
 func TestDebounceNoPress(t *testing.T) {
 	// Setup test
 	t.Parallel()
-	mockButton := mockbutton.MockButton{}
+	mockButton := mockbutton.NewMockButton()
 	notifyChannel := make(chan buttonpoller.ButtonPress)
-	buttonpoller.NewButtonPoller(&mockButton, notifyChannel)
+	buttonpoller.NewButtonPoller(mockButton, notifyChannel)
 
 	// Test debouncing
 	mockButton.Pressed = true
