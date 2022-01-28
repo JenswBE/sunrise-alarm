@@ -10,6 +10,10 @@ const (
 	PresetColorWarmWhite PresetColor = "WARM_WHITE"
 )
 
+func (p PresetColor) String() string {
+	return string(p)
+}
+
 func (p PresetColor) ToRGB() RGBColor {
 	switch p {
 	case PresetColorBlack:

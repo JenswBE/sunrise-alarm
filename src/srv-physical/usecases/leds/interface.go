@@ -8,4 +8,7 @@ type Usecase interface {
 	GetColorAndBrightness() (entities.PresetColor, byte)
 	SetColorAndBrightness(color entities.PresetColor, brightness byte)
 	Clear()
+
+	StartSunrise()
+	StopSunrise()
 }

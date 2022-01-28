@@ -22,6 +22,9 @@ func (h *LedsHandler) RegisterRoutes(rg *gin.RouterGroup) {
 	groupMock.GET("", h.getLeds)
 	groupMock.PUT("", h.setLeds)
 	groupMock.DELETE("", h.clearLeds)
+
+	groupMock.PUT("/sunrise", h.startSunrise)
+	groupMock.DELETE("/sunrise", h.stopSunrise)
 }
 
 func (h *LedsHandler) getLeds(c *gin.Context) {
@@ -52,5 +55,15 @@ func (h *LedsHandler) setLeds(c *gin.Context) {
 
 func (h *LedsHandler) clearLeds(c *gin.Context) {
 	h.service.Clear()
+	c.String(204, "")
+}
+
+func (h *LedsHandler) startSunrise(c *gin.Context) {
+	h.service.StartSunrise()
+	c.String(204, "")
+}
+
+func (h *LedsHandler) stopSunrise(c *gin.Context) {
+	h.service.StopSunrise()
 	c.String(204, "")
 }
