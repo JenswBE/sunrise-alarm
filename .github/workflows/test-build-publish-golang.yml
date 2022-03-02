@@ -21,7 +21,7 @@ jobs:
       DOCKER_HUB_REPO: jenswbe/sunrise-alarm-${{ matrix.service }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v2.4.0
+        uses: actions/checkout@v3
 
       - uses: actions/setup-go@v2
         with:
