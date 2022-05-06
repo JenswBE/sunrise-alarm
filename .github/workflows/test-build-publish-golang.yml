@@ -52,7 +52,7 @@ jobs:
           password: ${{ secrets.DOCKER_HUB_PASSWORD }}
 
       - name: Build and push
-        uses: docker/build-push-action@v2
+        uses: docker/build-push-action@v3
         with:
           context: ${{ env.BUILD_PATH }}
           file: ${{ env.BUILD_PATH }}/${{ env.BUILD_FILE }}
