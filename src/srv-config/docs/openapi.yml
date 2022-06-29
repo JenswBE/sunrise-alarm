@@ -1,0 +1,97 @@
+openapi: 3.0.2
+info:
+  title: srv-config
+  description: Service to manage configuration
+  version: 0.1.0
+servers: []
+paths:
+  /alarms:
+    get:
+      summary: List alarms
+      operationId: alarms_list
+      responses:
+        "200":
+          description: OK
+    post:
+      summary: Create alarm
+      operationId: alarms_create
+      responses:
+        "200":
+          description: OK
+
+  /alarms/{id}:
+    put:
+      summary: Update alarm
+      operationId: alarms_update
+      responses:
+        "200":
+          description: OK
+    delete:
+      summary: Delete alarm
+      operationId: alarms_delete
+      responses:
+        "204":
+          description: No Content
+
+components:
+  responses:
+    Error:
+      description: Default error response
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+
+  schemas:
+    Leds:
+      type: object
+      required:
+        - color
+      properties:
+        color:
+          $ref: "#/components/schemas/PresetColor"
+        brightness:
+          type: integer
+          minimum: 0
+          maximum: 255
+          default: 100
+
+    PresetColor:
+      type: string
+      enum:
+        - BLACK
+        - RED
+        - ORANGE
+        - YELLOW
+        - WARM_WHITE
+
+    Error:
+      type: object
+      required:
+        - code
+        - message
+      properties:
+        status:
+          description: HTTP status code
+          type: integer
+          example: 400
+        code:
+          $ref: "#/components/schemas/ErrorCode"
+        message:
+          description: Human-readable description of the error
+          type: string
+          example: Provided authentication token is invalid
+        instance:
+          description: Object to which this error is related
+          type: string
+          example: ""
+
+    ErrorCode:
+      description: |
+        - BRIGHTNESS_OUT_OF_RANGE: Brightness must be between 0 and 255
+        - UNKNOWN_ERROR: An unknown error occurred
+      type: string
+      example: UNKNOWN_ERROR
+      enum:
+        - BRIGHTNESS_OUT_OF_RANGE
+        - UNKNOWN_ERROR
