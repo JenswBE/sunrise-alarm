@@ -1,7 +1,7 @@
 /*
-srv-physical
+srv-config
 
-Service to handle buttons, leds, display backlight, ...
+Service to manage configuration
 
 API version: 0.1.0
 */
@@ -15,18 +15,22 @@ import (
 	"fmt"
 )
 
-// ErrorCode - BRIGHTNESS_OUT_OF_RANGE: Brightness must be between 0 and 255 - UNKNOWN_ERROR: An unknown error occurred 
+// ErrorCode - INVALID_WEEKDAY: Provided weekday is not in range 1 (Monday) to 7 (Sunday) - INVALID_UUID: Provided ID is not a valid UUID - PARAMETER_MISSING: Required parameter is missing from the URL - UNKNOWN_ERROR: An unknown error occurred 
 type ErrorCode string
 
 // List of ErrorCode
 const (
-	ERRORCODE_BRIGHTNESS_OUT_OF_RANGE ErrorCode = "BRIGHTNESS_OUT_OF_RANGE"
+	ERRORCODE_INVALID_WEEKDAY ErrorCode = "INVALID_WEEKDAY"
+	ERRORCODE_INVALID_UUID ErrorCode = "INVALID_UUID"
+	ERRORCODE_PARAMETER_MISSING ErrorCode = "PARAMETER_MISSING"
 	ERRORCODE_UNKNOWN_ERROR ErrorCode = "UNKNOWN_ERROR"
 )
 
 // All allowed values of ErrorCode enum
 var AllowedErrorCodeEnumValues = []ErrorCode{
-	"BRIGHTNESS_OUT_OF_RANGE",
+	"INVALID_WEEKDAY",
+	"INVALID_UUID",
+	"PARAMETER_MISSING",
 	"UNKNOWN_ERROR",
 }
 

@@ -1,7 +1,7 @@
 /*
-srv-physical
+srv-config
 
-Service to handle buttons, leds, display backlight, ...
+Service to manage configuration
 
 API version: 0.1.0
 */

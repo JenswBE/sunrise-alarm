@@ -1,16 +1,14 @@
 package main
 
 import (
-	"context"
 	"os"
 	"strconv"
 	"time"
 
 	"github.com/JenswBE/sunrise-alarm/src/srv-config/api/config"
 	"github.com/JenswBE/sunrise-alarm/src/srv-config/api/handler"
-	"github.com/JenswBE/sunrise-alarm/src/srv-config/repositories/pahomqtt"
-	"github.com/JenswBE/sunrise-alarm/src/srv-config/usecases/mqtt"
-	"github.com/dgraph-io/badger"
+	"github.com/JenswBE/sunrise-alarm/src/srv-config/repositories/jsondb"
+	"github.com/JenswBE/sunrise-alarm/src/srv-config/usecases/alarms"
 	"github.com/gin-gonic/gin"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
@@ -37,22 +35,25 @@ func main() {
 	}
 
 	// Setup DB
-	db, err := badger.Open(badger.DefaultOptions("/tmp/badger"))
+	dataPath := "alarms.json"
+	db, err := jsondb.NewJSONDB(dataPath)
 	if err != nil {
-		log.Fatal().Err(err).Msg("Failed to open BadgerDB")
+		log.Fatal().Err(err).Str("data_path", dataPath).Msg("Failed to open JSON DB")
 	}
 	defer db.Close()
 
 	// Setup repositories
-	ctx, cancel := context.WithCancel(context.Background())
-	defer cancel()
-	mqttClient, err := pahomqtt.NewPahoMQTT(ctx, apiConfig.MQTT.BrokerHost, apiConfig.MQTT.BrokerPort)
-	if err != nil {
-		log.Fatal().Err(err).Msg("MQTT: Creating client returned error")
-	}
 
-	// Setup services
-	mqttService := mqtt.NewService(mqttClient)
+	// ctx, cancel := context.WithCancel(context.Background())
+	// defer cancel()
+	// mqttClient, err := pahomqtt.NewPahoMQTT(ctx, apiConfig.MQTT.BrokerHost, apiConfig.MQTT.BrokerPort)
+	// if err != nil {
+	// 	log.Fatal().Err(err).Msg("MQTT: Creating client returned error")
+	// }
+
+	// // Setup services
+	// mqttService := mqtt.NewService(mqttClient)
+	alarmsService := alarms.NewService(db)
 
 	// Setup Gin
 	router := gin.Default()
@@ -65,7 +66,7 @@ func main() {
 	router.StaticFile("/openapi.yml", "../docs/openapi.yml")
 
 	// Setup handlers
-	alarmsHandler := handler.NewAlarmsHandler(mqttService)
+	alarmsHandler := handler.NewAlarmsHandler(alarmsService)
 
 	// Register routes
 	root := router.Group("/")

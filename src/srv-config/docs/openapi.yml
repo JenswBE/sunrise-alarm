@@ -12,20 +12,40 @@ paths:
       responses:
         "200":
           description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AlarmList"
     post:
       summary: Create alarm
       operationId: alarms_create
       responses:
         "200":
           description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Alarm"
 
   /alarms/{id}:
+    parameters:
+      - $ref: "#/components/parameters/pathID"
+    get:
+      summary: Get alarm
+      operationId: alarms_get
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Alarm"
     put:
       summary: Update alarm
       operationId: alarms_update
       responses:
-        "200":
-          description: OK
+        "204":
+          description: No Content
     delete:
       summary: Delete alarm
       operationId: alarms_delete
@@ -34,6 +54,16 @@ paths:
           description: No Content
 
 components:
+  parameters:
+    pathID:
+      name: id
+      in: path
+      description: UUID
+      required: true
+      schema:
+        type: string
+        format: uuid
+
   responses:
     Error:
       description: Default error response
@@ -43,27 +73,46 @@ components:
             $ref: "#/components/schemas/Error"
 
   schemas:
-    Leds:
+    Alarm:
       type: object
       required:
-        - color
+        - id
+        - enabled
+        - name
+        - hour
+        - minute
+        - days
+        - skip_next
       properties:
-        color:
-          $ref: "#/components/schemas/PresetColor"
-        brightness:
+        id:
+          type: string
+          format: uuid
+        enabled:
+          type: boolean
+        name:
+          type: string
+        hour:
           type: integer
-          minimum: 0
-          maximum: 255
-          default: 100
+        minute:
+          type: integer
+        days:
+          type: array
+          items:
+            type: integer
+            minimum: 0 # Monday
+            maximum: 6 # Sunday
+        skip_next:
+          type: boolean
 
-    PresetColor:
-      type: string
-      enum:
-        - BLACK
-        - RED
-        - ORANGE
-        - YELLOW
-        - WARM_WHITE
+    AlarmList:
+      type: object
+      required:
+        - alarms
+      properties:
+        alarms:
+          type: array
+          items:
+            $ref: "#/components/schemas/Alarm"
 
     Error:
       type: object
@@ -88,10 +137,14 @@ components:
 
     ErrorCode:
       description: |
-        - BRIGHTNESS_OUT_OF_RANGE: Brightness must be between 0 and 255
+        - INVALID_WEEKDAY: Provided weekday is not in range 1 (Monday) to 7 (Sunday)
+        - INVALID_UUID: Provided ID is not a valid UUID
+        - PARAMETER_MISSING: Required parameter is missing from the URL
         - UNKNOWN_ERROR: An unknown error occurred
       type: string
       example: UNKNOWN_ERROR
       enum:
-        - BRIGHTNESS_OUT_OF_RANGE
+        - INVALID_WEEKDAY
+        - INVALID_UUID
+        - PARAMETER_MISSING
         - UNKNOWN_ERROR

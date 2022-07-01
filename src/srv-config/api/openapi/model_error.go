@@ -1,7 +1,7 @@
 /*
-srv-physical
+srv-config
 
-Service to handle buttons, leds, display backlight, ...
+Service to manage configuration
 
 API version: 0.1.0
 */
@@ -89,7 +89,7 @@ func (o *Error) GetCode() ErrorCode {
 // GetCodeOk returns a tuple with the Code field value
 // and a boolean to check if the value has been set.
 func (o *Error) GetCodeOk() (*ErrorCode, bool) {
-	if o == nil  {
+	if o == nil {
 		return nil, false
 	}
 	return &o.Code, true
@@ -113,7 +113,7 @@ func (o *Error) GetMessage() string {
 // GetMessageOk returns a tuple with the Message field value
 // and a boolean to check if the value has been set.
 func (o *Error) GetMessageOk() (*string, bool) {
-	if o == nil  {
+	if o == nil {
 		return nil, false
 	}
 	return &o.Message, true

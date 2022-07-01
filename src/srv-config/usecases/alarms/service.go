@@ -16,10 +16,10 @@ type Service struct {
 	mqttClient repositories.MQTTClient
 }
 
-func NewService(db repositories.DB, mqttClient repositories.MQTTClient) *Service {
+func NewService(db repositories.DB) *Service {
 	return &Service{
-		db:         db,
-		mqttClient: mqttClient,
+		db: db,
+		// mqttClient: mqttClient,
 	}
 }
 

@@ -1,4 +1,4 @@
-package badgerdb
+package jsondb
 
 import (
 	"encoding/json"
