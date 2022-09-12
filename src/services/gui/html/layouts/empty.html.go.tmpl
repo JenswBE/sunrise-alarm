@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="nl">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="" />
+    <title>{{ .Title }} - Sunrise Alarm</title>
+
+    <link
+      rel="stylesheet"
+      href="{{ getStaticURL "vendor/bootstrap-dark-5/dist/css/bootstrap-night.css" }}"
+    />
+    <link
+      rel="stylesheet"
+      href="{{ getStaticURL "vendor/bootstrap-icons/font/bootstrap-icons.css" }}"
+    />
+
+    <link href="{{ getStaticURL "css/main.css" }}" rel="stylesheet" />
+
+    {{ block "empty_head" . }}{{ end }}
+  </head>
+  <body>
+    {{ range $i, $msg := .Messages }}
+      {{ if eq .Type "success" }}
+        <script>
+          setTimeout(() => {
+            var alert = document.getElementById("alert-{{ $i }}");
+            alert.parentNode.removeChild(alert);
+          }, 2000);
+        </script>
+      {{ end }}
+      <div
+        id="alert-{{ $i }}"
+        class="alert alert-{{ .Type }} alert-fixed alert-dismissible"
+        role="alert"
+        style="top: {{ add 10 (product $i 50) }}px;"
+      >
+        {{ .Content }}
+        <button
+          type="button"
+          class="btn-close"
+          data-bs-dismiss="alert"
+          aria-label="Close"
+        ></button>
+      </div>
+    {{ end }}
+
+    {{ block "empty_content" . }}{{ end }}
+
+
+    <script src="{{ getStaticURL "vendor/bootstrap/dist/js/bootstrap.bundle.min.js" }}
+      "></script>
+
+    <script src="{{ getStaticURL "vendor/luxon/luxon.min.js" }}
+      "></script>
+
+    <!-- Extra body content -->
+    {{ block "empty_body_end" . }}{{ end }}
+  </body>
+</html>

@@ -1,0 +1,23 @@
+name: Test
+on:
+  push:
+    branches: [main]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - uses: actions/setup-go@v3
+        with:
+          go-version: "1.18.x"
+
+      - name: Lint
+        uses: golangci/golangci-lint-action@v3
+
+      - name: Test exhaustive use of case statements
+        run: |
+          go install github.com/nishanths/exhaustive/...@latest
+          exhaustive ./...

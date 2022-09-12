@@ -1,0 +1,158 @@
+{{ template "base.html.go.tmpl" . }}
+
+{{ define "base_head" }}
+  <!-- Popperjs -->
+  <script src="{{ getStaticURL "vendor/popperjs-core/dist/umd/popper.min.js" }}"></script>
+
+  <!-- Tempus Dominus -->
+  <script src="{{ getStaticURL "vendor/tempus-dominus/dist/js/tempus-dominus.js" }}"></script>
+  <script src="{{ getStaticURL "vendor/tempus-dominus/dist/plugins/customDateFormat.js" }}"></script>
+  <link
+    href="{{ getStaticURL "vendor/tempus-dominus/dist/css/tempus-dominus.css" }}"
+    rel="stylesheet"
+  />
+
+  <!-- Simple Keyboard -->
+  <script src="{{ getStaticURL "vendor/simple-keyboard/build/index.modern.js" }}"></script>
+  <link
+    href="{{ getStaticURL "vendor/simple-keyboard/build/css/index.css" }}"
+    rel="stylesheet"
+  />
+  <link href="{{ getStaticURL "css/keyboard.css" }}" rel="stylesheet" />
+{{ end }}
+
+{{ define "base_content" }}
+  <form method="post">
+    <div id="alarms-form-container" class="gap-2">
+      <div class="mb-3" style="grid-area: input-time;">
+        <label for="inputTime" class="form-label">Time</label>
+        <input
+          required
+          type="text"
+          name="time"
+          class="form-control"
+          id="inputTime"
+          value="{{ .AlarmBody.Time }}"
+        />
+      </div>
+      <div class="mb-3" style="grid-area: input-name;">
+        <label for="inputName" class="form-label">Name</label>
+        <input
+          required
+          type="text"
+          name="name"
+          class="form-control inputName"
+          id="inputName"
+          value="{{ .AlarmBody.Name }}"
+        />
+      </div>
+      <div class="simple-keyboard" style="grid-area: keyboard;"></div>
+      <div class="hide-on-keyboard" style="grid-area: days-checkboxes;">
+        {{ range .Weekdays }}
+          <div class="form-check">
+            <input
+              class="form-check-input"
+              type="checkbox"
+              value="{{ rawWeekday . }}"
+              id="checkbox{{ . }}"
+              name="days"
+              {{ if $.AlarmBody.HasWeekday . -}}
+                checked
+              {{- end }}
+            />
+            <label class="form-check-label" for="checkbox{{ . }}">
+              {{ . }}
+            </label>
+          </div>
+        {{ end }}
+      </div>
+      <div
+        class="hide-on-keyboard gap-2"
+        style="grid-area: days-presets; display: flex; flex-direction: column;"
+      >
+        {{ range $name, $days := .WeekdaysPresets }}
+          <button
+            type="button"
+            class="btn btn-secondary"
+            id="daysPreset{{ $name }}"
+          >
+            {{ $name }}
+          </button>
+        {{ end }}
+      </div>
+
+      <a
+        href="/alarms"
+        class="btn btn-danger hide-on-keyboard"
+        style="grid-area: button-cancel;"
+        >Cancel</a
+      >
+      <button
+        type="submit"
+        id="buttonSave"
+        style="grid-area: button-save;"
+        class="btn btn-success  hide-on-keyboard"
+      >
+        Save
+      </button>
+    </div>
+  </form>
+{{ end }}
+
+{{ define "base_body_end" }}
+  <script src="{{ getStaticURL "js/keyboard.js" }}"></script>
+  <script>
+    // Set current value in keyboard
+    keyboard.setInput({{ .AlarmBody.Name }})
+
+    // Setup time picker
+    tempusDominus.extend(window.tempusDominus.plugins.customDateFormat);
+    new tempusDominus.TempusDominus(document.getElementById("inputTime"), {
+      display: {
+        icons: {
+          up: "bi bi-chevron-up",
+          down: "bi bi-chevron-down",
+        },
+        viewMode: "clock",
+        components: {
+          decades: false,
+          year: false,
+          month: false,
+          date: false,
+          hours: true,
+          minutes: true,
+          seconds: false,
+          useTwentyfourHour: true,
+        },
+      },
+      localization: {
+        format: 'HH:mm',
+      },
+      stepping: 5,
+    });
+
+    // Setup days presets
+    function setDays(days) {
+      const weekdays = [
+        {{- range .Weekdays }}
+        {name: {{ . }}, value: "{{ rawWeekday . }}"},
+        {{- end }}
+      ]
+      for (weekday of weekdays) {
+        const checkbox = document.getElementById("checkbox"+weekday.name)
+        checkbox.checked = days.includes(weekday.value)
+      }
+    }
+
+    {{ range $name, $days := .WeekdaysPresets }}
+    const btn{{ rawJS $name }} = document.getElementById("daysPreset{{ $name }}")
+    btn{{ rawJS $name }}.addEventListener("click", (event) => {
+      setDays([
+        {{- range $days }}
+        "{{ rawWeekday . }}",
+        {{- end }}
+      ])
+    });
+    {{ end }}
+  </script>
+{{ end }}

@@ -1,0 +1,19 @@
+{{ template "base.html.go.tmpl" . }}
+
+{{ define "base_content" }}
+  <div
+    class="d-flex flex-column justify-content-center align-items-center gap-2"
+    style="min-height: 100%;"
+  >
+    <form action="/debug/simulate-button-pressed-short" method="POST">
+      <button type="submit" class="btn btn-secondary btn-lg">
+        Simulate short button press
+      </button>
+    </form>
+    <form action="/debug/simulate-button-pressed-long" method="POST">
+      <button type="submit" class="btn btn-secondary btn-lg">
+        Simulate long button press
+      </button>
+    </form>
+  </div>
+{{ end }}

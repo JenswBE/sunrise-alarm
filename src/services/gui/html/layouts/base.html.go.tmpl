@@ -1,0 +1,50 @@
+{{ template "empty.html.go.tmpl" . }}
+
+{{ define "empty_head" }}
+  {{ block "base_head" . }}{{ end }}
+{{ end }}
+
+{{ define "empty_content" }}
+  <div id="base-grid">
+    <main style="grid-area: content;">
+      {{ block "base_content" . }}{{ end }}
+    </main>
+    <div style="grid-area: nav-clock;">
+      <a
+        class="nav-link {{ if eq .ParentPath "clock" }}
+          active
+        {{ end }}"
+        href="/"
+      >
+        <i class="bi bi-clock"></i>
+        CLOCK
+      </a>
+    </div>
+    <div style="grid-area: nav-alarms;">
+      <a
+        class="nav-link {{ if eq .ParentPath "alarms" }}
+          active
+        {{ end }}"
+        href="/alarms"
+      >
+        <i class="bi bi-alarm"></i>
+        ALARMS
+      </a>
+    </div>
+    <div style="grid-area: nav-settings;">
+      <a
+        class="nav-link {{ if eq .ParentPath "settings" }}
+          active
+        {{ end }}"
+        href="/settings"
+      >
+        <i class="bi bi-sliders"></i>
+        SETTINGS
+      </a>
+    </div>
+  </div>
+{{ end }}
+
+{{ define "empty_body_end" }}
+  {{ block "base_body_end" . }}{{ end }}
+{{ end }}
