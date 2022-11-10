@@ -26,7 +26,7 @@ type AlarmService struct {
 	nextAlarmWithAction *entities.NextAlarm     // Managed by manager
 }
 
-func NewAlarmService(physicalService physical.Service, audioService audio.Service, pubSub pubsub.PubSub, alarmLightDuration, alarmSoundDuration time.Duration) *AlarmService {
+func NewAlarmService(physicalService physical.Service, audioService audio.Service, pubSub pubsub.PubSub, alarmLightDuration, alarmSoundDuration time.Duration) (*AlarmService, error) {
 	// Setup DB
 	dataPath := "alarms.json"
 	db, err := jsondb.NewJSONDB(dataPath)
@@ -45,8 +45,7 @@ func NewAlarmService(physicalService physical.Service, audioService audio.Servic
 
 		lastRings: map[uuid.UUID]time.Time{},
 	}
-	s.startManager(managerActions)
-	return s
+	return s, s.startManager(managerActions)
 }
 
 func (s *AlarmService) Close() error {

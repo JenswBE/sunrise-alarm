@@ -47,7 +47,9 @@ func NewRinger(physicalService physical.Service, audioService audio.Service, lig
 				} else {
 					physicalService.StopSunriseSimulation()
 					physicalService.StopBuzzer()
-					audioService.StopMusic()
+					if err := audioService.StopMusic(); err != nil {
+						log.Error().Err(err).Msg("Ringer: Failed to stop music")
+					}
 				}
 			case <-trigger.C:
 				if !ringer.ringing {
