@@ -19,6 +19,8 @@ type Service interface {
 	ResetLEDState()
 	StartSunriseSimulation()
 	StopSunriseSimulation()
+
+	Close()
 }
 
 func NewPhysicalService(config config.PhysicalConfig, pubSub pubsub.PubSub) Service {

@@ -22,6 +22,7 @@ import (
 type PhysicalService struct {
 	seq *buzzersequencer.BuzzerSequencer
 
+	isMocked        bool
 	leds            repositories.Leds
 	sunriseStop     chan bool
 	sunriseLock     sync.Mutex // Ensures we don't mess with sunriseStop between nil check and sunriseStop creation/deletion
@@ -39,14 +40,12 @@ func NewPhysicalService(config config.PhysicalConfig, pubSub pubsub.PubSub) *Phy
 		if err := rpio.Open(); err != nil {
 			log.Fatal().Err(err).Msg("RPIO: Failed to initialize GPIO library")
 		}
-		defer rpio.Close()
 		devButton = gpiobutton.NewGPIOButton(config.Button.GPIONum, true)
 		devBuzzer = gpiobuzzer.NewGPIOBuzzer(config.Buzzer.GPIONum)
 		p9813Leds, err := p9813leds.NewP9813Leds()
 		if err != nil {
 			log.Fatal().Err(err).Msg("LED: Failed to initialize P9813 led driver on SPI0")
 		}
-		defer p9813Leds.Close()
 		devLeds = p9813Leds
 	} else {
 		// Init mocked devices
@@ -71,7 +70,19 @@ func NewPhysicalService(config config.PhysicalConfig, pubSub pubsub.PubSub) *Phy
 	// Build service
 	return &PhysicalService{
 		seq:             buzzersequencer.NewBuzzerSequencer(devBuzzer),
+		isMocked:        config.Mocked,
 		leds:            devLeds,
 		sunriseDuration: config.Leds.SunriseDuration,
+	}
+}
+
+func (s *PhysicalService) Close() {
+	if !s.isMocked {
+		if err := rpio.Close(); err != nil {
+			log.Error().Err(err).Msg("PhysicalService.Close: Failed to close rpio library")
+		}
+		if leds, ok := s.leds.(*p9813leds.P9813Leds); ok {
+			leds.Close()
+		}
 	}
 }

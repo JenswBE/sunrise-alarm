@@ -43,6 +43,7 @@ func main() {
 		log.Fatal().Err(err).Msg("Main: Failed to init audio service")
 	}
 	physicalSvc := physical.NewPhysicalService(svcConfig.Physical, eventBus)
+	physicalSvc.Close()
 	alarmSvc, err := alarm.NewAlarmService(physicalSvc, audioSvc, eventBus, 10*time.Minute, 5*time.Minute) // TODO: Put in config?
 	if err != nil {
 		log.Fatal().Err(err).Msg("Main: Failed to create the alarm service")
