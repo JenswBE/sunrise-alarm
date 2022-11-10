@@ -67,10 +67,10 @@ sudo apt install -y firefox-esr onboard libasound2-dev
 # Update below to latest version at https://go.dev/dl/
 # See https://go.dev/doc/install for official instructions
 GO_URL="https://go.dev/dl/go1.19.3.linux-arm64.tar.gz"
-wget -O go.linux-amd64.tar.gz "${GO_URL:?}"
-sudo rm -rf /usr/local/go || true # Removes old install
-sudo tar -C /usr/local -xzf go.linux-amd64.tar.gz
-rm go.linux-amd64.tar.gz
+wget -O go.linux-arm64.tar.gz "${GO_URL:?}"
+sudo rm -rf /usr/local/go ~/go || true # Removes old install
+sudo tar -C /usr/local -xzf go.linux-arm64.tar.gz
+rm go.linux-arm64.tar.gz
 sudo tee /etc/profile.d/add-go-to-path.sh <<EOF
 export PATH=\$PATH:/usr/local/go/bin
 export GOPATH=~/go
