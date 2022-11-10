@@ -78,6 +78,7 @@ func NewPhysicalService(config config.PhysicalConfig, pubSub pubsub.PubSub) *Phy
 
 func (s *PhysicalService) Close() {
 	if !s.isMocked {
+		log.Info().Msg("PhysicalService.Close: Gracefully closing physical devices")
 		if err := rpio.Close(); err != nil {
 			log.Error().Err(err).Msg("PhysicalService.Close: Failed to close rpio library")
 		}
