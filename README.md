@@ -95,7 +95,7 @@ Environment="GOPATH=${GOPATH:?}"
 Environment="HOME=${HOME:?}"
 Environment="PATH=${PATH:?}"
 ExecStartPre=-$(which git) pull
-ExecStartPre=-$(which bash) update-vendors.sh
+ExecStartPre=-$(which bash) src/update_vendors.sh
 ExecStartPre=$(which bash) -c "cd src; go build -o ../sunrise-alarm ./cmd/"
 ExecStart=${HOME:?}/sunrise-alarm/sunrise-alarm
 
