@@ -1,0 +1,84 @@
+{{ template "base.html.go.tmpl" . }}
+
+{{ define "base_content" }}
+  <div id="alarms-list-container" class="gap-2">
+    <a
+      class="btn btn-secondary btn-lg disabled"
+      role="button"
+      style="grid-area: previous-page;"
+    >
+      <i class="bi bi-chevron-left"></i>
+    </a>
+    <a
+      href="/alarms/new"
+      class="btn btn-secondary btn-lg"
+      role="button"
+      style="grid-area: add-alarm;"
+    >
+      <i class="bi bi-plus-circle text-yellow"></i>
+    </a>
+    <a
+      class="btn btn-secondary btn-lg disabled"
+      role="button"
+      style="grid-area: next-page;"
+    >
+      <i class="bi bi-chevron-right"></i>
+    </a>
+    <div style="grid-area: alarms;" id="alarms-list-grid" class="gap-2">
+      {{ range .Alarms }}
+        <div class="alarms-list-item" style="border: 1px solid white;">
+          <form
+            action="/alarms/{{ .ID }}/enabled"
+            method="POST"
+            style="grid-area: toggle-enabled;"
+          >
+            <button
+              type="submit"
+              class="btn btn-link btn-lg"
+              style="width: 100%;"
+            >
+              {{ if .Enabled }}
+                <i class="bi bi-toggle-on"></i>
+              {{ else }}
+                <i class="bi bi-toggle-off"></i>
+              {{ end }}
+            </button>
+            <input type="hidden" name="value" value="{{ not .Enabled }}" />
+          </form>
+
+          <p style="grid-area: time;" class="m-0">
+            {{ .TimeToString }}
+          </p>
+          <p style="grid-area: days;" class="m-0">{{ formatDays .Days }}</p>
+
+          <form
+            action="/alarms/{{ .ID }}/skip-next"
+            method="POST"
+            style="grid-area: toggle-skip-next;"
+          >
+            <button
+              type="submit"
+              class="btn btn-link btn-lg"
+              style="width: 100%;"
+            >
+              {{ if .SkipNext }}
+                <i class="bi bi-skip-end-btn-fill" style="color: red;"></i>
+              {{ else }}
+                <i class="bi bi-skip-end-btn-fill" style="color: grey;"></i>
+              {{ end }}
+            </button>
+            <input type="hidden" name="value" value="{{ not .SkipNext }}" />
+          </form>
+
+          <a
+            style="grid-area: edit-alarm; width: 100%;"
+            href="/alarms/{{ .ID }}"
+            class="btn btn-link btn-lg"
+          >
+            <i class="bi bi-pencil-square"></i>
+          </a>
+        </div>
+      {{ end }}
+    </div>
+  </div>
+{{ end }}

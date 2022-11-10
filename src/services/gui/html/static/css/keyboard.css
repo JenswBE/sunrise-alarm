@@ -1,0 +1,19 @@
+.simple-keyboard {
+  display: none;
+}
+
+.show-keyboard {
+  display: block;
+}
+
+.simple-keyboard.dark {
+  border-radius: 10px;
+  margin: 10px;
+  width: calc(100% - 20px);
+  background: rgba(255, 255, 255, 0.7);
+}
+
+.simple-keyboard.dark .hg-button {
+  background: #222222;
+  color: rgb(255, 193, 7);
+}

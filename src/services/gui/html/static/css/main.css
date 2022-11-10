@@ -1,0 +1,85 @@
+/* =============================== */
+/*               BASE              */
+/* =============================== */
+
+body {
+  width: 100%;
+  min-height: 100vh;
+}
+
+#base-grid {
+  min-height: 100vh;
+  display: grid;
+  grid-template-areas:
+    "content content content"
+    "nav-clock nav-alarms nav-settings";
+  grid-template-rows: auto 60px;
+}
+
+.nav-link {
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 24px;
+  text-align: center;
+}
+
+.nav-link i {
+  margin-right: 5px;
+}
+
+.nav-link.active,
+.text-yellow {
+  color: rgb(255, 193, 7);
+}
+
+/* =============================== */
+/*              CLOCK              */
+/* =============================== */
+
+#clock-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100%;
+}
+
+#sunrise-clock {
+  line-height: 96px;
+  font-size: 96px;
+  font-family: DejaVu Sans Mono, monospace !important;
+  font-weight: bold;
+}
+
+#sunrise-date {
+  font-size: 34px;
+}
+
+/* =============================== */
+/*              ALARMS             */
+/* =============================== */
+#alarms-list-container {
+  display: grid;
+  grid-template-areas:
+    "previous-page add-alarm next-page"
+    "alarms alarms alarms";
+}
+
+#alarms-list-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+}
+
+.alarms-list-item {
+  display: grid;
+  grid-template-areas: "toggle-enabled time days toggle-skip-next edit-alarm";
+  align-items: center;
+}
+
+#alarms-form-container {
+  display: grid;
+  grid-template-areas:
+    "input-time input-name"
+    "days-checkboxes days-presets"
+    "keyboard keyboard"
+    "button-cancel button-save";
+  padding: 10px;
+}

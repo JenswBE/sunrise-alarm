@@ -1,0 +1,69 @@
+package buttonpoller_test
+
+import (
+	"testing"
+	"time"
+
+	"github.com/JenswBE/sunrise-alarm/src/services/physical/repositories/mockbutton"
+	"github.com/JenswBE/sunrise-alarm/src/services/physical/utils/buttonpoller"
+	"github.com/stretchr/testify/require"
+)
+
+func TestDebounceShort(t *testing.T) {
+	// Setup test
+	t.Parallel()
+	mockButton := mockbutton.NewMockButton()
+	notifyChannel := make(chan buttonpoller.ButtonPress)
+	buttonpoller.NewButtonPoller(mockButton, notifyChannel)
+
+	// Test short press
+	mockButton.Pressed = true
+	time.Sleep(2 * buttonpoller.DebounceDuration)
+	mockButton.Pressed = false
+	time.Sleep(2 * buttonpoller.DebounceDuration)
+	select {
+	case notif := <-notifyChannel:
+		require.Equal(t, buttonpoller.ButtonPressShort, notif)
+	default:
+		require.FailNow(t, "No short button press detected")
+	}
+}
+
+func TestDebounceLong(t *testing.T) {
+	// Setup test
+	t.Parallel()
+	mockButton := mockbutton.NewMockButton()
+	notifyChannel := make(chan buttonpoller.ButtonPress)
+	buttonpoller.NewButtonPoller(mockButton, notifyChannel)
+
+	// Test long press
+	mockButton.Pressed = true
+	time.Sleep(buttonpoller.DebounceDuration*2 + buttonpoller.LongPressDuration)
+	mockButton.Pressed = false
+	time.Sleep(2 * buttonpoller.DebounceDuration)
+	select {
+	case notif := <-notifyChannel:
+		require.Equal(t, buttonpoller.ButtonPressLong, notif)
+	default:
+		require.FailNow(t, "No long button press detected")
+	}
+}
+
+func TestDebounceNoPress(t *testing.T) {
+	// Setup test
+	t.Parallel()
+	mockButton := mockbutton.NewMockButton()
+	notifyChannel := make(chan buttonpoller.ButtonPress)
+	buttonpoller.NewButtonPoller(mockButton, notifyChannel)
+
+	// Test debouncing
+	mockButton.Pressed = true
+	time.Sleep(buttonpoller.DebounceDuration)
+	mockButton.Pressed = false
+	time.Sleep(buttonpoller.DebounceDuration)
+	mockButton.Pressed = true
+	time.Sleep(buttonpoller.DebounceDuration)
+	mockButton.Pressed = false
+	time.Sleep(buttonpoller.DebounceDuration)
+	require.Empty(t, notifyChannel)
+}

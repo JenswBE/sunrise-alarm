@@ -1,0 +1,40 @@
+{{ template "base.html.go.tmpl" . }}
+
+{{ define "base_content" }}
+  <div id="clock-container" class="text-center">
+    <div>
+      {{/* Set by src/services/gui/html/static/js/clock.js */}}
+      <p id="sunrise-clock"></p>
+      <p id="sunrise-date"></p>
+      <p id="sunrise-next-alarm" class="mb-0"></p>
+    </div>
+      {{/*
+      <div
+        cols="weatherCols"
+        class="col text-center"
+        v-if="weatherInside.temperature"
+      >
+        <p class="text-subtitle-1">
+          <v-icon class="mr-2">mdi-home</v-icon>
+          {{ weatherInside.temperature.toFixed(1) }}&#8451; -
+          {{ weatherInside.humidity.toFixed(0) }}%
+        </p>
+      </div>
+      <div
+        cols="weatherCols"
+        class="col text-center"
+        v-if="weatherOutside.temperature"
+      >
+        <p class="text-subtitle-1">
+          <v-icon class="mr-2">mdi-sun-thermometer</v-icon>
+          {{ weatherOutside.temperature.toFixed(1) }}&#8451; -
+          {{ weatherOutside.humidity.toFixed(0) }}%
+        </p>
+      </div>
+      */}}
+  </div>
+{{ end }}
+
+{{ define "base_body_end" }}
+  <script src="{{ getStaticURL "js/clock.js" }}"></script>
+{{ end }}

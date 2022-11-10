@@ -1,3 +1,0 @@
-extends: "@ibm-cloud/openapi-ruleset"
-rules:
-  missing-required-property: error

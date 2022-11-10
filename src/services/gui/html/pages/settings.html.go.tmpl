@@ -1,0 +1,35 @@
+{{ template "base.html.go.tmpl" . }}
+
+{{ define "base_content" }}
+  <div
+    class="d-flex flex-column justify-content-center align-items-center"
+    style="min-height: 100%;"
+  >
+    <button
+      type="button"
+      class="btn btn-secondary btn-lg"
+      id="toggle-fullscreen"
+    >
+      Toggle fullscreen
+    </button>
+  </div>
+{{ end }}
+
+{{ define "base_body_end" }}
+  <script>
+    function toggleFullscreen() {
+      // Based on https://developer.mozilla.org/en-US/docs/Web/API/Fullscreen_API
+      if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen();
+      } else {
+        if (document.exitFullscreen) {
+          document.exitFullscreen();
+        }
+      }
+    }
+
+    document
+      .getElementById("toggle-fullscreen")
+      .addEventListener("click", toggleFullscreen, false);
+  </script>
+{{ end }}

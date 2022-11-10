@@ -1,7 +1,0 @@
-{
-    "max-concurrent-downloads": 1,
-    "log-driver": "syslog",
-    "log-opts": {
-        "tag": "docker-{{.Name}}"
-    }
-}
