@@ -82,19 +82,19 @@ func (r *Ringer) handleNextStep() {
 
 	// Check for buzzer
 	if currentDelay > r.lightDuration {
-		logger.Info().Msg("Ringer.handleNextStep: Starting buzzer")
+		logger.Debug().Msg("Ringer.handleNextStep: Starting buzzer")
 		r.physicalService.StartBuzzer()
 	}
 
 	// Check for music
 	soundDelay := r.lightDuration - r.soundDuration
 	if soundDelay.Truncate(time.Minute) == currentDelay.Truncate(time.Minute) {
-		logger.Info().Msg("Ringer.handleNextStep: Starting alarm music")
+		logger.Debug().Msg("Ringer.handleNextStep: Starting alarm music")
 		if err := r.audioService.PlayMusic(); err != nil {
 			logger.Error().Msg("Ringer.handleNextStep: Failed to play music")
 		}
 	} else if currentDelay > soundDelay {
-		logger.Info().Msg("Ringer.handleNextStep: Increasing alarm volume")
+		logger.Debug().Msg("Ringer.handleNextStep: Increasing alarm volume")
 		if err := r.audioService.IncreaseVolume(); err != nil {
 			logger.Error().Msg("Ringer.handleNextStep: Failed to increase alarm volume")
 		}

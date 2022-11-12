@@ -94,6 +94,10 @@ func (h *Handler) handleAlarmsFormPOST(c *gin.Context) {
 		return
 	}
 	if isNew {
+		// Enable new alarms by default
+		alarmEntity.Enabled = true
+
+		// Create alarm
 		_, err := h.alarmService.CreateAlarm(alarmEntity)
 		if err != nil {
 			renderAlarmsFormWithError(c, isNew, alarmBody, fmt.Sprintf("Failed to add alarm: %v", err))
