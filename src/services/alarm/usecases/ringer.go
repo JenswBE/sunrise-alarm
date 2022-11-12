@@ -67,35 +67,39 @@ func NewRinger(physicalService physical.Service, audioService audio.Service, lig
 }
 
 func (r *Ringer) handleNextStep() {
-	log.Debug().Msgf("Handle next alarm step at minute %d", r.ringingSinceMinutes)
+	// Init
+	currentDelay := time.Duration(r.ringingSinceMinutes) * time.Minute
+	logger := log.With().Stringer("current_delay", currentDelay).Stringer("sound_duration", r.soundDuration).Stringer("light_duration", r.lightDuration).Logger()
+	logger.Debug().Msgf("Ringer.handleNextStep: Handle next alarm step at minute %d", r.ringingSinceMinutes)
 
 	// Check for abort
-	currentDelay := time.Duration(r.ringingSinceMinutes) * time.Minute
 	abortDelay := r.lightDuration + 10*time.Minute
 	if currentDelay > abortDelay {
-		log.Warn().Dur("abort_delay", abortDelay).Msg("Ringer reached abort limit. Requesting manager to abort alarm.")
+		logger.Warn().Stringer("abort_delay", abortDelay).Msg("Ringer.handleNextStep: Ringer reached abort limit. Requesting manager to abort alarm.")
 		r.managerActions <- ManagerActionAbortAlarm
 		return
 	}
 
 	// Check for buzzer
 	if currentDelay > r.lightDuration {
-		log.Info().Dur("current_delay", currentDelay).Msg("Starting buzzer")
+		logger.Info().Msg("Ringer.handleNextStep: Starting buzzer")
 		r.physicalService.StartBuzzer()
 	}
 
 	// Check for music
 	soundDelay := r.lightDuration - r.soundDuration
 	if soundDelay.Truncate(time.Minute) == currentDelay.Truncate(time.Minute) {
-		log.Info().Dur("current_delay", currentDelay).Msg("Starting alarm music")
+		logger.Info().Msg("Ringer.handleNextStep: Starting alarm music")
 		if err := r.audioService.PlayMusic(); err != nil {
-			log.Error().Dur("current_delay", currentDelay).Msg("Failed to play music")
+			logger.Error().Msg("Ringer.handleNextStep: Failed to play music")
 		}
 	} else if currentDelay > soundDelay {
-		log.Info().Dur("current_delay", currentDelay).Msg("Increasing alarm volume")
+		logger.Info().Msg("Ringer.handleNextStep: Increasing alarm volume")
 		if err := r.audioService.IncreaseVolume(); err != nil {
-			log.Error().Dur("current_delay", currentDelay).Msg("Failed to increase alarm volume")
+			logger.Error().Msg("Ringer.handleNextStep: Failed to increase alarm volume")
 		}
+	} else {
+		logger.Debug().Msg("Ringer.handleNextStep: No action required (yet) for music")
 	}
 }
 
