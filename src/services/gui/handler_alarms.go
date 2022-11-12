@@ -93,8 +93,8 @@ func (h *Handler) handleAlarmsFormPOST(c *gin.Context) {
 		renderAlarmsFormWithError(c, isNew, alarmBody, fmt.Sprintf("Failed to parse alarm body into an entity: %v", err))
 		return
 	}
-	alarmEntity.Enabled = true // Force enable alarm on edit
 	if isNew {
+		alarmEntity.Enabled = true // Enable alarms by default
 		_, err := h.alarmService.CreateAlarm(alarmEntity)
 		if err != nil {
 			renderAlarmsFormWithError(c, isNew, alarmBody, fmt.Sprintf("Failed to add alarm: %v", err))
@@ -116,6 +116,7 @@ func (h *Handler) handleAlarmsFormPOST(c *gin.Context) {
 		}
 
 		// Update alarm
+		current.Enabled = true // Enable alarms on edit
 		current.Name = alarmEntity.Name
 		current.Hour = alarmEntity.Hour
 		current.Minute = alarmEntity.Minute
