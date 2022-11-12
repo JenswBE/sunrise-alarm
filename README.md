@@ -46,7 +46,7 @@ sudo systemctl disable dphys-swapfile
 sudo update-rc.d dphys-swapfile remove
 sudo apt purge dphys-swapfile
 
-# Write all logs to RAM (will be exported with Promtail anyway)
+# Write all logs to RAM (will be exported anyway)
 # Based on https://raspberrypi.stackexchange.com/questions/124605/stop-logs-from-writing-to-var-log
 sudo tee -a /etc/fstab <<EOF
 tmpfs /tmp tmpfs defaults,noatime,mode=1777 0 0
@@ -54,6 +54,13 @@ tmpfs /var/tmp tmpfs defaults,noatime,mode=1777 0 0
 tmpfs /var/log tmpfs defaults,noatime,mode=0755 0 0
 tmpfs /var/spool tmpfs defaults,noatime,mode=1777 0 0
 EOF
+
+# Export logs
+RSYSLOG_SERVER='' # IP or hostname
+sudo tee /etc/rsyslog.d/rsyslog-99-graylog.conf <<EOF
+*.* @${RSYSLOG_SERVER:?}:1514;RSYSLOG_SyslogProtocol23Format
+EOF
+sudo systemctl restart rsyslog
 
 # Upgrade system
 sudo apt update
