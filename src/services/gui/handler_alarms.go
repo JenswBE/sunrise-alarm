@@ -89,11 +89,11 @@ func (h *Handler) handleAlarmsFormPOST(c *gin.Context) {
 
 	// Create entity
 	alarmEntity, err := alarmBody.ToEntity()
-	alarmEntity.Enabled = true // Force enable alarm on edit
 	if err != nil {
 		renderAlarmsFormWithError(c, isNew, alarmBody, fmt.Sprintf("Failed to parse alarm body into an entity: %v", err))
 		return
 	}
+	alarmEntity.Enabled = true // Force enable alarm on edit
 	if isNew {
 		_, err := h.alarmService.CreateAlarm(alarmEntity)
 		if err != nil {
