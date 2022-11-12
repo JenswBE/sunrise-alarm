@@ -11,7 +11,15 @@ import (
 
 type Config struct {
 	Debug    bool
+	Alarms   AlarmsConfig
 	Physical PhysicalConfig
+}
+
+type AlarmsConfig struct {
+	// Number of minutes the light will start before alarm time.
+	LightDurationInMinutes uint
+	// Number of minutes the sound will start before alarm time.
+	SoundDurationInMinutes uint
 }
 
 type PhysicalConfig struct {
@@ -30,8 +38,10 @@ type PhysicalConfig struct {
 func ParseConfig() (*Config, error) {
 	// Set defaults
 	viper.SetDefault("Debug", false)
-	viper.SetDefault("Physical.Button.GPIONum", 23) // GPIO23 on pin 16
-	viper.SetDefault("Physical.Buzzer.GPIONum", 18) // GPIO18 on pin 12
+	viper.SetDefault("Alarms.LightDurationInMinutes", 10) // Light will start 10 minutes before alarm time
+	viper.SetDefault("Alarms.SoundDurationInMinutes", 7)  // Sound will start 10 minutes before alarm time
+	viper.SetDefault("Physical.Button.GPIONum", 23)       // GPIO23 on pin 16
+	viper.SetDefault("Physical.Buzzer.GPIONum", 18)       // GPIO18 on pin 12
 	viper.SetDefault("Physical.Leds.SunriseDuration", 5*time.Minute)
 	viper.SetDefault("Physical.Mocked", false)
 
@@ -51,6 +61,8 @@ func ParseConfig() (*Config, error) {
 	// Bind ENV variables
 	err = bindEnvs([]envBinding{
 		{"Debug", "DEBUG"},
+		{"Alarms.LightDurationInMinutes", "ALARMS_LIGHT_DURATION_IN_MINUTES"},
+		{"Alarms.SoundDurationInMinutes", "ALARMS_SOUND_DURATION_IN_MINUTES"},
 		{"Physical.Button.GPIONum", "PHYSICAL_BUTTON_GPIO_PIN"},
 		{"Physical.Buzzer.GPIONum", "PHYSICAL_BUZZER_GPIO_PIN"},
 		{"Physical.Leds.SunriseDuration", "PHYSICAL_LEDS_SUNRISE_DURATION"},
