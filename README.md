@@ -19,6 +19,9 @@ Dependencies:
 # Auto-restart Sunrise Alarm on changes to the code
 go install github.com/cespare/reflex@latest
 reflex -s -G alarms.json go run ./cmd/
+
+# OR ignoring "next-ring-time" calls
+reflex -s -G alarms.json go run ./cmd/ 2>&1 | grep -v "next-ring-time"
 ```
 
 **NOTE:** GUI optimized for [Raspberry Pi Touch Display](https://www.raspberrypi.com/products/raspberry-pi-touch-display/) (800x480px)

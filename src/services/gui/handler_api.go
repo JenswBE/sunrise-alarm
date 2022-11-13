@@ -7,11 +7,11 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func (h *Handler) handleAPINextAlarmToRing(c *gin.Context) {
-	nextAlarm := h.alarmService.GetNextAlarmToRing()
-	if nextAlarm == nil {
+func (h *Handler) handleAPINextRingTime(c *gin.Context) {
+	nextRingTime := h.alarmService.GetNextRingTime()
+	if nextRingTime.IsZero() {
 		c.Status(http.StatusNoContent)
 		return
 	}
-	c.JSON(http.StatusOK, entities.NextAlarmToRingResponseFromEntity(*nextAlarm))
+	c.JSON(http.StatusOK, entities.NextRingTimeResponseFromEntity(nextRingTime))
 }
