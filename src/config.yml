@@ -1,3 +1,4 @@
 Debug: true
+LogFormat: CONSOLE
 Physical:
   Mocked: true

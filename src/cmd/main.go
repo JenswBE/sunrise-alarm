@@ -1,6 +1,7 @@
 package main
 
 import (
+	"io"
 	"os"
 	"time"
 
@@ -18,14 +19,38 @@ import (
 
 func main() {
 	// Setup logging
-	output := zerolog.ConsoleWriter{Out: os.Stdout, TimeFormat: time.RFC3339}
-	log.Logger = log.Output(output)
 	zerolog.SetGlobalLevel(zerolog.InfoLevel)
 
 	// Parse config
 	svcConfig, err := config.ParseConfig()
 	if err != nil {
 		log.Fatal().Err(err).Msg("Main: Failed to parse config")
+	}
+
+	// Setup log format
+	ginLogger := gin.Logger()
+	switch svcConfig.LogFormat {
+	case config.LogFormatConsole:
+		// Gin already defaults to Console
+		output := zerolog.ConsoleWriter{Out: os.Stdout, TimeFormat: time.RFC3339}
+		log.Logger = log.Output(output)
+	case config.LogFormatJSON:
+		// Zerolog already defaults to JSON
+		gin.DebugPrintRouteFunc = func(httpMethod, absolutePath, handlerName string, handlerCount int) {
+			log.Debug().Str("method", httpMethod).Str("path", absolutePath).Str("handler", handlerName).Int("handler_count", handlerCount).Msg("Registered new gin handler")
+		}
+		ginLogger = gin.LoggerWithConfig(gin.LoggerConfig{
+			Formatter: func(params gin.LogFormatterParams) string {
+				log.Debug().
+					Time("timestamp", params.TimeStamp).
+					Int("status", params.StatusCode).
+					Stringer("latency", params.Latency).
+					Str("client_ip", params.ClientIP).
+					Msgf("%s %s", params.Method, params.Path)
+				return "" // Outputs will be discarded anyway
+			},
+			Output: io.Discard,
+		})
 	}
 
 	// Setup Debug logging if enabled
@@ -57,7 +82,8 @@ func main() {
 	}()
 
 	// Start GUI
-	router := gin.Default()
+	router := gin.New()
+	router.Use(ginLogger, gin.Recovery())
 	lo.Must0(router.SetTrustedProxies(nil)) // nil can never return a parsing error
 	router.RedirectTrailingSlash = true
 	guiHandler := gui.NewHandler(eventBus, alarmSvc, svcConfig.Debug)

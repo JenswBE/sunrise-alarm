@@ -10,10 +10,18 @@ import (
 )
 
 type Config struct {
-	Debug    bool
-	Alarms   AlarmsConfig
-	Physical PhysicalConfig
+	Debug     bool
+	LogFormat LogFormat
+	Alarms    AlarmsConfig
+	Physical  PhysicalConfig
 }
+
+type LogFormat string
+
+const (
+	LogFormatConsole LogFormat = "CONSOLE"
+	LogFormatJSON    LogFormat = "JSON"
+)
 
 type AlarmsConfig struct {
 	// Number of minutes the light will start before alarm time.
@@ -38,6 +46,7 @@ type PhysicalConfig struct {
 func ParseConfig() (*Config, error) {
 	// Set defaults
 	viper.SetDefault("Debug", false)
+	viper.SetDefault("LogFormat", LogFormatJSON)
 	viper.SetDefault("Alarms.LightDurationInMinutes", 10) // Light will start 10 minutes before alarm time
 	viper.SetDefault("Alarms.SoundDurationInMinutes", 7)  // Sound will start 10 minutes before alarm time
 	viper.SetDefault("Physical.Button.GPIONum", 23)       // GPIO23 on pin 16
@@ -61,6 +70,7 @@ func ParseConfig() (*Config, error) {
 	// Bind ENV variables
 	err = bindEnvs([]envBinding{
 		{"Debug", "DEBUG"},
+		{"LogFormat", "LOG_FORMAT"},
 		{"Alarms.LightDurationInMinutes", "ALARMS_LIGHT_DURATION_IN_MINUTES"},
 		{"Alarms.SoundDurationInMinutes", "ALARMS_SOUND_DURATION_IN_MINUTES"},
 		{"Physical.Button.GPIONum", "PHYSICAL_BUTTON_GPIO_PIN"},
