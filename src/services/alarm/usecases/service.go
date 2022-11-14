@@ -11,19 +11,23 @@ import (
 	"github.com/JenswBE/sunrise-alarm/src/utils/pubsub"
 	"github.com/google/uuid"
 	"github.com/rs/zerolog/log"
+	"github.com/samber/lo"
 )
 
 type AlarmService struct {
-	db                 repositories.DB
-	pubSub             pubsub.PubSub
-	ringer             *Ringer
-	alarmLightDuration time.Duration
-	physicalService    physical.Service
+	db              repositories.DB
+	pubSub          pubsub.PubSub
+	ringer          *Ringer
+	physicalService physical.Service
 
-	status              Status                  // Managed by manager
-	lastRings           map[uuid.UUID]time.Time // Managed by manager
-	nextAlarmToRing     *entities.NextAlarm     // Managed by manager
-	nextAlarmWithAction *entities.NextAlarm     // Managed by manager
+	alarmLightDuration time.Duration
+	alarmSoundDuration time.Duration
+	alarmMaxDuration   time.Duration
+
+	status             Status                          // Managed by manager
+	planningsByAlarmID map[uuid.UUID]entities.Planning // Managed by manager
+	timersByAlarmID    map[uuid.UUID]*time.Timer       // Managed by manager
+	timerChan          chan uuid.UUID                  // Managed by manager
 }
 
 func NewAlarmService(physicalService physical.Service, audioService audio.Service, pubSub pubsub.PubSub, alarmLightDuration, alarmSoundDuration time.Duration) (*AlarmService, error) {
@@ -35,17 +39,18 @@ func NewAlarmService(physicalService physical.Service, audioService audio.Servic
 	}
 
 	// Build service
-	managerActions := make(chan ManagerAction, 1)
+	abortAlarm := make(chan struct{}, 1)
 	s := &AlarmService{
-		db:                 db,
-		pubSub:             pubSub,
-		ringer:             NewRinger(physicalService, audioService, alarmLightDuration, alarmSoundDuration, managerActions),
-		alarmLightDuration: alarmLightDuration,
-		physicalService:    physicalService,
+		db:              db,
+		pubSub:          pubSub,
+		ringer:          NewRinger(physicalService, audioService, alarmLightDuration, alarmSoundDuration, abortAlarm),
+		physicalService: physicalService,
 
-		lastRings: map[uuid.UUID]time.Time{},
+		alarmLightDuration: alarmLightDuration,
+		alarmSoundDuration: alarmSoundDuration,
+		alarmMaxDuration:   lo.Max([]time.Duration{alarmLightDuration, alarmSoundDuration}),
 	}
-	return s, s.startManager(managerActions)
+	return s, s.startManager(abortAlarm)
 }
 
 func (s *AlarmService) Close() error {

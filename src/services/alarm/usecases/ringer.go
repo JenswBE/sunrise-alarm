@@ -17,20 +17,20 @@ type Ringer struct {
 	ringingSinceMinutes uint
 	lightDuration       time.Duration
 	soundDuration       time.Duration
-	managerActions      chan<- ManagerAction
+	abortAlarm          chan<- struct{}
 	audioService        audio.Service
 	physicalService     physical.Service
 }
 
 const tickDuration = time.Minute
 
-func NewRinger(physicalService physical.Service, audioService audio.Service, lightDuration, soundDuration time.Duration, managerActions chan<- ManagerAction) *Ringer {
+func NewRinger(physicalService physical.Service, audioService audio.Service, lightDuration, soundDuration time.Duration, abortAlarm chan<- struct{}) *Ringer {
 	// Init
 	ringer := &Ringer{
 		ringingChan:     make(chan bool, 1),
 		lightDuration:   lightDuration,
 		soundDuration:   soundDuration,
-		managerActions:  managerActions,
+		abortAlarm:      abortAlarm,
 		audioService:    audioService,
 		physicalService: physicalService,
 	}
@@ -76,7 +76,7 @@ func (r *Ringer) handleNextStep() {
 	abortDelay := r.lightDuration + 10*time.Minute
 	if currentDelay > abortDelay {
 		logger.Warn().Stringer("abort_delay", abortDelay).Msg("Ringer.handleNextStep: Ringer reached abort limit. Requesting manager to abort alarm.")
-		r.managerActions <- ManagerActionAbortAlarm
+		r.abortAlarm <- struct{}{}
 		return
 	}
 

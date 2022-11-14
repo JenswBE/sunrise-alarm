@@ -51,7 +51,7 @@ func (h *Handler) RegisterRoutes(r *gin.Engine) {
 
 	// Register API routes
 	api := r.Group("/api")
-	api.GET("/next-alarm-to-ring", h.handleAPINextAlarmToRing)
+	api.GET("/next-ring-time", h.handleAPINextRingTime)
 
 	// Register debug routes
 	if h.isDebugEnabled {

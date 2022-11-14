@@ -14,19 +14,23 @@ func (e *EventButtonPressedLong) GetTopic() string {
 	return "button_pressed_long"
 }
 
-type EventAlarmsChanged struct {
-	Alarms []entities.Alarm
+type EventAlarmChanged struct {
+	Action AlarmChangedAction
+	Alarm  entities.Alarm
 }
 
-func (e *EventAlarmsChanged) GetTopic() string {
-	return "alarms_changed"
+type AlarmChangedAction string
+
+const (
+	AlarmChangedActionCreated AlarmChangedAction = "CREATED"
+	AlarmChangedActionUpdated AlarmChangedAction = "UPDATED"
+	AlarmChangedActionDeleted AlarmChangedAction = "DELETED"
+)
+
+func (action AlarmChangedAction) String() string {
+	return string(action)
 }
 
-type EventNextAlarmsUpdated struct {
-	ToRing     *entities.NextAlarm
-	WithAction *entities.NextAlarm
-}
-
-func (e *EventNextAlarmsUpdated) GetTopic() string {
-	return "next_alarms_updated"
+func (e *EventAlarmChanged) GetTopic() string {
+	return "alarm_changed"
 }

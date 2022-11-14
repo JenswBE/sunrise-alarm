@@ -2,16 +2,14 @@ package entities
 
 import (
 	"time"
-
-	"github.com/JenswBE/sunrise-alarm/src/entities"
 )
 
-type NextAlarmToRing struct {
-	AlarmTime string `json:"alarm_time"`
+type NextRingTime struct {
+	RingTime string `json:"ring_time"`
 }
 
-func NextAlarmToRingResponseFromEntity(input entities.NextAlarm) NextAlarmToRing {
-	return NextAlarmToRing{
-		AlarmTime: input.AlarmTime.Format(time.RFC3339),
+func NextRingTimeResponseFromEntity(nextRingTime time.Time) NextRingTime {
+	return NextRingTime{
+		RingTime: nextRingTime.Format(time.RFC3339),
 	}
 }

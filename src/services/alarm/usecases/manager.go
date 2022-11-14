@@ -4,155 +4,131 @@ import (
 	"time"
 
 	"github.com/JenswBE/sunrise-alarm/src/entities"
+	"github.com/JenswBE/sunrise-alarm/src/services/alarm/planner"
 	physicalEntities "github.com/JenswBE/sunrise-alarm/src/services/physical/entities"
 	"github.com/JenswBE/sunrise-alarm/src/utils/pubsub"
-	"github.com/JenswBE/sunrise-alarm/src/utils/trigger"
-	"github.com/rs/zerolog"
+	"github.com/google/uuid"
 	"github.com/rs/zerolog/log"
 	"github.com/samber/lo"
 )
 
-type ManagerAction string
-
-const (
-	ManagerActionAbortAlarm     ManagerAction = "ABORT_ALARM"
-	ManagerActionUpdateSchedule ManagerAction = "UPDATE_SCHEDULE"
-)
-
-func (action ManagerAction) String() string {
-	return string(action)
-}
-
-func (s *AlarmService) startManager(managerActions chan ManagerAction) error {
-	// Calculate initial next alarms
+func (s *AlarmService) startManager(abortAlarm chan struct{}) error {
+	// Calculate initial plannings
 	alarms, err := s.ListAlarms()
 	if err != nil {
 		return err
 	}
-	s.nextAlarmToRing, s.nextAlarmWithAction = s.calculateNextAlarms(alarms)
-	log.Debug().Interface("next_alarm_to_ring", s.nextAlarmToRing).Interface("next_alarm_with_action", s.nextAlarmWithAction).Msg("Manager: Initial next alarms calculated")
+	enabledAlarms := lo.Filter(alarms, func(a entities.Alarm, _ int) bool { return a.Enabled })
+	s.planningsByAlarmID = lo.SliceToMap(enabledAlarms, func(a entities.Alarm) (uuid.UUID, entities.Planning) {
+		return a.ID, planner.CalculatePlanning(a, time.Now())
+	})
+	log.Debug().Time("next_ring_time", s.GetNextRingTime()).Msg("Manager.startManager: Initial plannings calculated")
 
-	// Setup initial delay
-	initialDelay := s.durationUntilNextAction(time.Second)
-	loggerWithFormattedDelay(initialDelay).Info().Msg("Initial delay set")
+	// Create timers
+	s.timerChan = make(chan uuid.UUID)
+	s.timersByAlarmID = make(map[uuid.UUID]*time.Timer, len(s.planningsByAlarmID))
+	for alarmID, planning := range s.planningsByAlarmID {
+		s.timersByAlarmID[alarmID] = createTimer(alarmID, planning, s.timerChan)
+	}
 
-	go func(initialDelay time.Duration) {
-		trigger := trigger.NewDelayedTrigger()
-		trigger.Schedule(initialDelay)
-		events := make(chan pubsub.Event, 1)
-		s.pubSub.Subscribe(&pubsub.EventAlarmsChanged{}, events)
-		s.pubSub.Subscribe(&pubsub.EventButtonPressedShort{}, events)
-		s.pubSub.Subscribe(&pubsub.EventButtonPressedLong{}, events)
-		for {
-			select {
-			case event := <-events:
-				switch e := event.(type) {
-				case *pubsub.EventAlarmsChanged:
-					log.Debug().Msg("Manager: EventAlarmsChanged event received, requesting planner to calculate next alarms...")
-					s.nextAlarmToRing, s.nextAlarmWithAction = s.calculateNextAlarms(e.Alarms)
-					log.Debug().Interface("next_alarm_to_ring", s.nextAlarmToRing).Interface("next_alarm_with_action", s.nextAlarmWithAction).Msg("Manager: Next alarms calculated")
-					managerActions <- ManagerActionUpdateSchedule
-				case *pubsub.EventButtonPressedShort:
-					log.Debug().Msg("Manager: EventButtonPressedShort event received, handling button press...")
-					s.handleButtonPressed()
-				case *pubsub.EventButtonPressedLong:
-					log.Debug().Msg("Manager: EventButtonPressedLong event received, handling button press...")
-					s.handleButtonLongPressed()
-				}
-			case action := <-managerActions:
-				newDelay := s.handleManagerAction(action)
-				if newDelay != nil {
-					loggerWithFormattedDelay(*newDelay).Debug().Msg("Manager: Set new delayed trigger")
-					trigger.Schedule(*newDelay)
-				}
-			case <-trigger.C:
-				// Delay will be set by handle_action (through UpdateSchedule)
-				log.Debug().Msg("Manager: Received delayed trigger, calling handleNextAction...")
-				s.handleNextAction()
-			}
-		}
-	}(initialDelay)
+	// Start manager loop
+	go s.eventLoop(abortAlarm)
 
 	return nil
 }
 
-func loggerWithFormattedDelay(delay time.Duration) *zerolog.Logger {
-	logger := log.With().
-		Stringer("delay", delay).
-		Float64("delay_days", float64(delay)/float64(24*time.Hour)).
-		Logger()
-	return &logger
+func createTimer(alarmID uuid.UUID, planning entities.Planning, timerChan chan uuid.UUID) *time.Timer {
+	// Calculate next time
+	nextTime := planning.NextRingTime
+	if !planning.NextSkipTime.IsZero() {
+		nextTime = planning.NextSkipTime
+	}
+
+	// Create timer
+	return time.AfterFunc(time.Until(nextTime), func() { timerChan <- alarmID })
 }
 
-func (s *AlarmService) durationUntilNextAction(fallback time.Duration) time.Duration {
-	// Check if there is a next alarm action
-	logger := log.With().Dur("fallback", fallback).Interface("next_alarm_with_action", s.nextAlarmWithAction).Logger()
-	if s.nextAlarmWithAction == nil {
-		logger.Debug().Msg("No next alarm action. Returning fallback value.")
-		return fallback
+func (s *AlarmService) eventLoop(abortAlarm chan struct{}) {
+	events := make(chan pubsub.Event, 1)
+	s.pubSub.Subscribe(&pubsub.EventAlarmChanged{}, events)
+	s.pubSub.Subscribe(&pubsub.EventButtonPressedShort{}, events)
+	s.pubSub.Subscribe(&pubsub.EventButtonPressedLong{}, events)
+	for {
+		select {
+		case event := <-events:
+			switch e := event.(type) {
+			case *pubsub.EventAlarmChanged:
+				log.Debug().Stringer("action", e.Action).Stringer("alarm_id", e.Alarm.ID).Msg("Manager.eventLoop: EventAlarmChanged event received, update plannings and timers...")
+				s.handleAlarmChanged(e)
+			case *pubsub.EventButtonPressedShort:
+				log.Debug().Msg("Manager.eventLoop: EventButtonPressedShort event received, handling button press...")
+				s.handleButtonPressed()
+			case *pubsub.EventButtonPressedLong:
+				log.Debug().Msg("Manager.eventLoop: EventButtonPressedLong event received, handling button press...")
+				s.handleButtonLongPressed()
+			}
+		case <-abortAlarm:
+			log.Debug().Msg("Manager.eventLoop: Abort alarm request received, calling stopAlarm...")
+			s.stopAlarm()
+		case alarmID := <-s.timerChan:
+			// Delay will be set by handle_action (through UpdateSchedule)
+			log.Debug().Msg("Manager.eventLoop: Received trigger from timer, calling handleTimer...")
+			s.handleTimer(alarmID)
+		}
 	}
-
-	// Calculate time to next action
-	now := time.Now()
-	until := s.nextAlarmWithAction.NextActionTime.Sub(now)
-	if until < 0 {
-		logger.Debug().Msg("Next action already passed. Returning fallback value.")
-	}
-	return until
 }
 
-func (s *AlarmService) handleManagerAction(action ManagerAction) *time.Duration {
-	log.Debug().Stringer("action", action).Msg("Handling manager action")
-	switch action {
-	case ManagerActionAbortAlarm:
-		s.stopAlarm()
-		return nil
-	case ManagerActionUpdateSchedule:
-		return s.handleUpdateSchedule()
-	}
-	return nil // Shouldn't be called. Enforced by exhaustive check.
-}
-
-func (s *AlarmService) stopAlarm() {
-	// Check if an alarm is ringing
-	if s.status.IsIdle() {
-		log.Warn().Msg("Manager.stopAlarm: Called but no alarm is ringing")
-		return
-	}
-
-	// Stop alarm and ringer
-	alarmID := s.status.GetAlarmID()
-	s.status.SetIdle()
-	s.ringer.Stop()
-
-	// Disable alarm if not repeated
-	var ringingAlarmUpdated bool
-	alarm, err := s.GetAlarm(alarmID)
-	if err != nil {
-		log.Error().Err(err).Stringer("alarm_id", alarmID).Msg("Failed to get alarm")
-		return
-	}
-	if len(alarm.Days) == 0 && alarm.Enabled {
-		alarm.Enabled = false
-		ringingAlarmUpdated = true
-	}
-	if err = s.UpdateAlarm(alarm); err != nil {
-		log.Error().Err(err).Stringer("alarm_id", alarmID).Msg("Failed to update alarm")
-	}
-
-	// Alarm was not updated => Force update of next alarms
-	if !ringingAlarmUpdated {
-		alarms, err := s.ListAlarms()
-		if err != nil {
-			log.Error().Err(err).Msg("Failed to list alarms to calculate next alarms")
+func (s *AlarmService) handleAlarmChanged(event *pubsub.EventAlarmChanged) {
+	alarmID := event.Alarm.ID
+	logger := log.With().Stringer("action", event.Action).Stringer("alarm_id", alarmID).Logger()
+	switch event.Action {
+	case pubsub.AlarmChangedActionCreated:
+		// Check alarm is enabled
+		if !event.Alarm.Enabled {
+			logger.Info().Msg("Manager.handleAlarmChanged: Created alarm is not enabled, ignoring event.")
 			return
 		}
-		nextAlarmToRing, nextAlarmWithAction := s.calculateNextAlarms(alarms)
-		s.pubSub.Publish(&pubsub.EventNextAlarmsUpdated{
-			ToRing:     nextAlarmToRing,
-			WithAction: nextAlarmWithAction,
-		})
+
+		// Create planning and timer
+		planning := planner.CalculatePlanning(event.Alarm, time.Now())
+		s.planningsByAlarmID[alarmID] = planning
+		s.timersByAlarmID[alarmID] = createTimer(alarmID, planning, s.timerChan)
+	case pubsub.AlarmChangedActionUpdated:
+		// Check alarm is enabled
+		if !event.Alarm.Enabled {
+			// Might not exist if alarm was disabled and something else changed
+			logger.Debug().Msg("Manager.handleAlarmChanged: Updated alarm is disabled, deleting planning and timer (might not exist).")
+			s.deletePlanningAndTimer(alarmID, false)
+			return
+		}
+
+		// Recreate planning and alarm
+		logger.Debug().Msg("Manager.handleAlarmChanged: Updated alarm is enabled, recreating planning and timer.")
+		s.deletePlanningAndTimer(alarmID, true)
+		planning := planner.CalculatePlanning(event.Alarm, time.Now())
+		s.planningsByAlarmID[alarmID] = planning
+		s.timersByAlarmID[alarmID] = createTimer(alarmID, planning, s.timerChan)
+	case pubsub.AlarmChangedActionDeleted:
+		s.deletePlanningAndTimer(alarmID, true)
 	}
+}
+
+func (s *AlarmService) deletePlanningAndTimer(alarmID uuid.UUID, expectedToExist bool) {
+	// Delete planning
+	delete(s.planningsByAlarmID, alarmID)
+
+	// Get planning and timer
+	timer, ok := s.timersByAlarmID[alarmID]
+	if !ok {
+		if expectedToExist {
+			log.Error().Stringer("alarm_id", alarmID).Msg("Manager.deletePlanningAndTimer: No timer found for deleted alarm, ignoring timer.")
+		}
+		return
+	}
+
+	// Delete timer
+	timer.Stop()
+	delete(s.timersByAlarmID, alarmID)
 }
 
 func (s *AlarmService) handleButtonPressed() {
@@ -192,49 +168,58 @@ func (s *AlarmService) handleButtonLongPressed() {
 	}
 }
 
-func (s *AlarmService) handleUpdateSchedule() *time.Duration {
-	// Skip update if not idle
-	// Will be updated after alarm is stopped
-	if s.status.IsRinging() {
-		return nil
+func (s *AlarmService) stopAlarm() {
+	// Check if an alarm is ringing
+	if s.status.IsIdle() {
+		log.Warn().Msg("Manager.stopAlarm: Called but no alarm is ringing")
+		return
 	}
 
-	// Skip reschedule if no next alarm
-	if s.nextAlarmWithAction == nil {
-		return nil
-	}
+	// Stop alarm and ringer
+	alarmID := s.status.GetAlarmID()
+	s.status.SetIdle()
+	s.ringer.Stop()
 
-	// Calculate duration
-	return lo.ToPtr(s.durationUntilNextAction(time.Second))
+	// Disable alarm if not repeated
+	alarm, err := s.GetAlarm(alarmID)
+	if err != nil {
+		log.Error().Err(err).Stringer("alarm_id", alarmID).Msg("Manager.stopAlarm: Failed to get alarm")
+		return
+	}
+	if len(alarm.Days) == 0 && alarm.Enabled {
+		alarm.Enabled = false
+	}
+	if err = s.UpdateAlarm(alarm); err != nil {
+		log.Error().Err(err).Stringer("alarm_id", alarmID).Msg("Manager.stopAlarm: Failed to update alarm")
+	}
 }
 
-func (s *AlarmService) handleNextAction() {
-	// Check if nextAlarmWithAction is set and is due
-	caller := "Manager.handleNextAction"
-	if s.nextAlarmWithAction == nil || time.Now().Before(s.nextAlarmWithAction.NextActionTime) {
-		// No action required
-		log.Warn().Interface("next_alarm_with_action", s.nextAlarmWithAction).Msgf("%s: Called but nextAlarmWithAction not set are not yet due.", caller)
+func (s *AlarmService) handleTimer(alarmID uuid.UUID) {
+	// Get planning
+	logger := log.With().Stringer("alarm_id", alarmID).Logger()
+	planning, ok := s.planningsByAlarmID[alarmID]
+	if !ok {
+		logger.Error().Msg("Manager.handleTimer: Failed to get planning. Ignoring timer.")
 		return
 	}
 
 	// Handle next action
-	switch s.nextAlarmWithAction.NextAction {
-	case entities.NextActionSkip:
-		alarm, err := s.GetAlarm(s.nextAlarmWithAction.ID)
+	switch {
+	case !planning.NextSkipTime.IsZero(): // => Skipping alarm
+		alarm, err := s.GetAlarm(alarmID)
 		if err != nil {
-			log.Error().Stringer("alarm_id", s.nextAlarmWithAction.ID).Msgf("%s: Failed to get alarm to update SkipNext", caller)
+			logger.Error().Err(err).Msg("Manager.handleTimer: Failed to get alarm to update SkipNext")
 			return
 		}
 		alarm.SkipNext = false
 		err = s.UpdateAlarm(alarm)
 		if err != nil {
-			log.Error().Stringer("alarm_id", s.nextAlarmWithAction.ID).Msgf("%s: Failed to set alarm.SkipNext to false", caller)
+			logger.Error().Err(err).Msg("Manager.handleTimer: Failed to set alarm.SkipNext to false")
 			return
 		}
-	case entities.NextActionRing:
-		log.Info().Stringer("alarm_id", s.nextAlarmWithAction.ID).Msgf("%s: Starting alarm", caller)
-		s.status.SetRinging(s.nextAlarmWithAction.ID)
-		s.lastRings[s.nextAlarmWithAction.ID] = s.nextAlarmWithAction.AlarmTime
+	default: // => Ringing alarm
+		logger.Info().Msg("Manager.handleTimer: Starting alarm")
+		s.status.SetRinging(alarmID)
 		s.ringer.Start()
 	}
 }

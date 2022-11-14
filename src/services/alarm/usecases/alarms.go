@@ -1,10 +1,13 @@
 package usecases
 
 import (
+	"time"
+
 	"github.com/JenswBE/sunrise-alarm/src/entities"
 	"github.com/JenswBE/sunrise-alarm/src/utils/pubsub"
 	"github.com/google/uuid"
 	"github.com/rs/zerolog/log"
+	"github.com/samber/lo"
 )
 
 func (s *AlarmService) ListAlarms() ([]entities.Alarm, error) {
@@ -17,10 +20,14 @@ func (s *AlarmService) GetAlarm(id uuid.UUID) (entities.Alarm, error) {
 	return s.db.Get(id)
 }
 
-// GetNextAlarmToRing returns the next alarm that will ring.
-// If there are no future alarms, nil will be returned.
-func (s *AlarmService) GetNextAlarmToRing() *entities.NextAlarm {
-	return s.nextAlarmToRing
+// GetNextRingTime returns the next time an alarm will ring.
+// If there are no future alarms, a zero time.Time will be returned.
+func (s *AlarmService) GetNextRingTime() time.Time {
+	plannings := lo.Values(s.planningsByAlarmID)
+	firstPlanning := lo.MinBy(plannings, func(a, b entities.Planning) bool {
+		return a.NextRingTime.Before(b.NextRingTime)
+	})
+	return firstPlanning.NextRingTime
 }
 
 func (s *AlarmService) CreateAlarm(alarm entities.Alarm) (entities.Alarm, error) {
@@ -29,7 +36,10 @@ func (s *AlarmService) CreateAlarm(alarm entities.Alarm) (entities.Alarm, error)
 	if err != nil {
 		return entities.Alarm{}, err
 	}
-	s.publishAlarmsChanged("alarm_created")
+	s.pubSub.Publish(&pubsub.EventAlarmChanged{
+		Action: pubsub.AlarmChangedActionCreated,
+		Alarm:  newAlarm,
+	})
 	return newAlarm, nil
 }
 
@@ -38,7 +48,10 @@ func (s *AlarmService) UpdateAlarm(alarm entities.Alarm) error {
 	if err := s.db.Update(alarm); err != nil {
 		return err
 	}
-	s.publishAlarmsChanged("alarm_updated")
+	s.pubSub.Publish(&pubsub.EventAlarmChanged{
+		Action: pubsub.AlarmChangedActionUpdated,
+		Alarm:  alarm,
+	})
 	return nil
 }
 
@@ -47,15 +60,9 @@ func (s *AlarmService) DeleteAlarm(id uuid.UUID) error {
 	if err := s.db.Delete(id); err != nil {
 		return err
 	}
-	s.publishAlarmsChanged("alarm_updated")
+	s.pubSub.Publish(&pubsub.EventAlarmChanged{
+		Action: pubsub.AlarmChangedActionDeleted,
+		Alarm:  entities.Alarm{ID: id},
+	})
 	return nil
-}
-
-func (s *AlarmService) publishAlarmsChanged(trigger string) {
-	alarms, err := s.db.List()
-	if err != nil {
-		log.Error().Err(err).Str("trigger", trigger).Msg("Failed to list alarms to publish alarms_changed event")
-		return
-	}
-	s.pubSub.Publish(&pubsub.EventAlarmsChanged{Alarms: alarms})
 }

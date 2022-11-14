@@ -14,9 +14,9 @@ import (
 type Service interface {
 	ListAlarms() ([]entities.Alarm, error)
 	GetAlarm(id uuid.UUID) (entities.Alarm, error)
-	// GetNextAlarmToRing returns the next alarm that will ring.
-	// If there are no future alarms, nil will be returned.
-	GetNextAlarmToRing() *entities.NextAlarm
+	// GetNextRingTime returns the next time an alarm will ring.
+	// If there are no future alarms, a zero time.Time will be returned.
+	GetNextRingTime() time.Time
 	CreateAlarm(alarm entities.Alarm) (entities.Alarm, error)
 	UpdateAlarm(alarm entities.Alarm) error
 	DeleteAlarm(id uuid.UUID) error

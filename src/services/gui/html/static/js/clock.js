@@ -17,8 +17,8 @@ function updateClockAndDate() {
   });
 }
 
-function updateNextAlarm() {
-  fetch("/api/next-alarm-to-ring")
+function updateNextRing() {
+  fetch("/api/next-ring-time")
     .then((response) => {
       if (response.status !== 200) {
         throw new Error(response.status);
@@ -26,40 +26,40 @@ function updateNextAlarm() {
       return response.json();
     })
     .then((data) => {
-      nextAlarm.textContent = generateNextAlarmText(data.alarm_time);
+      nextAlarm.textContent = generateNextRingTimeText(data.ring_time);
     })
     .catch((error) => {
       if (error.message === "204") {
         nextAlarm.textContent = "";
       } else {
-        nextAlarm.textContent = `Unable to fetch next alarm: ${error.message}`;
+        nextAlarm.textContent = `Unable to fetch next ring time: ${error.message}`;
       }
     });
 }
 
-function generateNextAlarmText(time) {
+function generateNextRingTimeText(time) {
   // Setup variables
   let day = "";
   const now = luxon.DateTime.local();
-  const nextAlarmDate = luxon.DateTime.fromISO(time);
+  const nextRingDate = luxon.DateTime.fromISO(time);
   const tomorrow = now.plus({ days: 1 });
 
-  // Check if alarm is today
-  if (nextAlarmDate.weekday == now.weekday) {
+  // Check if ring is today
+  if (nextRingDate.weekday == now.weekday) {
     day = "Today";
-  } else if (nextAlarmDate.weekday == tomorrow.weekday) {
+  } else if (nextRingDate.weekday == tomorrow.weekday) {
     day = "Tomorrow";
   } else {
-    day = nextAlarmDate.toFormat("cccc");
+    day = nextRingDate.toFormat("cccc");
   }
 
   // Format and set text
-  const alarm_time = nextAlarmDate.toFormat("HH:mm");
-  return `Next alarm: ${day} at ${alarm_time}`;
+  const ring_time = nextRingDate.toFormat("HH:mm");
+  return `Next ring time: ${day} at ${ring_time}`;
 }
 
 updateClockAndDate();
 setInterval(updateClockAndDate, 1000);
 
-updateNextAlarm();
-setInterval(updateNextAlarm, 5000);
+updateNextRing();
+setInterval(updateNextRing, 5000);
