@@ -1,6 +1,7 @@
 package usecases
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/JenswBE/sunrise-alarm/src/entities"
@@ -32,6 +33,14 @@ func (s *AlarmService) GetNextRingTime() time.Time {
 
 func (s *AlarmService) CreateAlarm(alarm entities.Alarm) (entities.Alarm, error) {
 	log.Debug().Interface("alarm", alarm).Msg("Alarms Service: Creating alarm")
+	existingAlarms, err := s.db.List()
+	if err != nil {
+		return entities.Alarm{}, err
+	}
+	if len(existingAlarms) >= entities.MaxNumberOfAlarms {
+		return entities.Alarm{}, fmt.Errorf("maximum number of %d alarms reached to prevent display issues", entities.MaxNumberOfAlarms)
+	}
+
 	newAlarm, err := s.db.Create(alarm)
 	if err != nil {
 		return entities.Alarm{}, err

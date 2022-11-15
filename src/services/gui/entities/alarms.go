@@ -11,7 +11,8 @@ import (
 
 type AlarmsListTemplate struct {
 	BaseData
-	AlarmsByStatus []AlarmsWithStatus
+	AlarmsByStatus           []AlarmsWithStatus
+	MaxNumberOfAlarmsReached bool
 }
 
 type AlarmsWithStatus struct {
@@ -28,6 +29,14 @@ const (
 
 func (s AlarmStatus) String() string {
 	return string(s)
+}
+
+func (s AlarmStatus) IsEnabled() bool {
+	return s == AlarmStatusEnabled
+}
+
+func (s AlarmStatus) IsDisabled() bool {
+	return s == AlarmStatusDisabled
 }
 
 func (t AlarmsListTemplate) GetTemplateName() string {

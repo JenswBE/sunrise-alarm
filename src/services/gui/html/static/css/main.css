@@ -56,14 +56,6 @@ body {
 /* =============================== */
 /*              ALARMS             */
 /* =============================== */
-#alarms-list-container {
-  display: grid;
-  grid-template-areas:
-    "previous-page add-alarm next-page"
-    "enabled-alarms enabled-alarms enabled-alarms"
-    "disabled-alarms disabled-alarms disabled-alarms";
-}
-
 .alarms-list-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;

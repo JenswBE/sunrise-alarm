@@ -9,6 +9,8 @@ import (
 	"github.com/google/uuid"
 )
 
+const MaxNumberOfAlarms = 8
+
 type Alarm struct {
 	ID       uuid.UUID
 	Enabled  bool

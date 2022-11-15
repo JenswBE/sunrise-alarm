@@ -57,6 +57,7 @@ func (h *Handler) handleAlarmsList(c *gin.Context) {
 				Alarms: lo.Filter(alarms, func(a globalEntities.Alarm, _ int) bool { return !a.Enabled }),
 			},
 		},
+		MaxNumberOfAlarmsReached: len(alarms) >= globalEntities.MaxNumberOfAlarms,
 	})
 }
 
@@ -171,7 +172,13 @@ func renderAlarmsFormWithError(c *gin.Context, isNew bool, alarmBody entities.Al
 }
 
 func (h *Handler) handleAlarmsSetEnabled(c *gin.Context) {
-	h.setBooleanAlarmAttribute(c, func(alarm *globalEntities.Alarm, value bool) { alarm.Enabled = value })
+	h.setBooleanAlarmAttribute(c, func(alarm *globalEntities.Alarm, value bool) {
+		alarm.Enabled = value
+		if !alarm.Enabled {
+			// Disabling alarm also disables SkipNext
+			alarm.SkipNext = false
+		}
+	})
 }
 
 func (h *Handler) handleAlarmsSetSkipNext(c *gin.Context) {
