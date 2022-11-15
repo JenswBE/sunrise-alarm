@@ -70,7 +70,7 @@ body {
 
 .alarms-list-item {
   display: grid;
-  grid-template-areas: "toggle-enabled time days toggle-skip-next edit-alarm";
+  grid-template-areas: "toggle-enabled time days toggle-skip-next edit-alarm delete-alarm";
   align-items: center;
 }
 

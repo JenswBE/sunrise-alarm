@@ -128,8 +128,8 @@ func (h *Handler) handleAlarmsFormPOST(c *gin.Context) {
 		}
 	}
 
-	// Upsert successful
-	h.redirectWithSuccessMessage(c, "/alarms", "Alarm successfully added/updated")
+	// Redirect back to overview
+	redirect(c, "/alarms")
 }
 
 func renderAlarmsFormWithError(c *gin.Context, isNew bool, alarmBody entities.AlarmBody, message string) {
@@ -192,6 +192,25 @@ func (h *Handler) setBooleanAlarmAttribute(c *gin.Context, updateAlarmFunc func(
 	err = h.alarmService.UpdateAlarm(alarm)
 	if err != nil {
 		h.redirectWithErrorMessage(c, "/alarms", `Failed to update alarm "%s": %v`, alarmID, err.Error())
+		return
+	}
+
+	// Redirect back to overview
+	redirect(c, "/alarms")
+}
+
+func (h *Handler) handleDeleteAlarm(c *gin.Context) {
+	// Parse alarm ID
+	rawAlarmID := c.Param("alarm_id")
+	alarmID, err := uuid.Parse(rawAlarmID)
+	if err != nil {
+		h.redirectWithErrorMessage(c, "/alarms", `Failed to parse invalid alarm ID "%s": %v`, rawAlarmID, err.Error())
+		return
+	}
+
+	// Delete alarm
+	if err = h.alarmService.DeleteAlarm(alarmID); err != nil {
+		h.redirectWithErrorMessage(c, "/alarms", `Failed to delete alarm: %v`, err.Error())
 		return
 	}
 

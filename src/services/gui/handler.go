@@ -47,6 +47,7 @@ func (h *Handler) RegisterRoutes(r *gin.Engine) {
 	r.POST("/alarms/:alarm_id", h.handleAlarmsFormPOST)
 	r.POST("/alarms/:alarm_id/enabled", h.handleAlarmsSetEnabled)    // HTML forms only allow GET or POST
 	r.POST("/alarms/:alarm_id/skip-next", h.handleAlarmsSetSkipNext) // HTML forms only allow GET or POST
+	r.POST("/alarms/:alarm_id/delete", h.handleDeleteAlarm)          // HTML forms only allow GET or POST
 	r.GET("/settings", h.handleSettings)
 
 	// Register API routes
@@ -88,8 +89,4 @@ func (h *Handler) redirectWithMessage(c *gin.Context, redirectLocation string, m
 
 func (h *Handler) redirectWithErrorMessage(c *gin.Context, redirectLocation, messageFormat string, messageArgs ...any) {
 	h.redirectWithMessage(c, redirectLocation, entities.MessageTypeError, messageFormat, messageArgs...)
-}
-
-func (h *Handler) redirectWithSuccessMessage(c *gin.Context, redirectLocation, messageFormat string, messageArgs ...any) {
-	h.redirectWithMessage(c, redirectLocation, entities.MessageTypeSuccess, messageFormat, messageArgs...)
 }
