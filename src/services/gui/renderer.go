@@ -24,7 +24,6 @@ func (h *Handler) NewRenderer() multitemplate.Renderer {
 		"debug":      {"pages/debug"},
 		"alarmsList": {"pages/alarms_list"},
 		"alarmsForm": {"pages/alarms_form"},
-		"settings":   {"pages/settings"},
 	}
 
 	r := multitemplate.NewRenderer()

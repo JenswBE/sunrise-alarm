@@ -48,7 +48,6 @@ func (h *Handler) RegisterRoutes(r *gin.Engine) {
 	r.POST("/alarms/:alarm_id/enabled", h.handleAlarmsSetEnabled)    // HTML forms only allow GET or POST
 	r.POST("/alarms/:alarm_id/skip-next", h.handleAlarmsSetSkipNext) // HTML forms only allow GET or POST
 	r.POST("/alarms/:alarm_id/delete", h.handleDeleteAlarm)          // HTML forms only allow GET or POST
-	r.GET("/settings", h.handleSettings)
 
 	// Register API routes
 	api := r.Group("/api")

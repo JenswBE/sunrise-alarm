@@ -11,8 +11,8 @@ body {
   min-height: 100vh;
   display: grid;
   grid-template-areas:
-    "content content content"
-    "nav-clock nav-alarms nav-settings";
+    "content content"
+    "nav-clock nav-alarms";
   grid-template-rows: auto 60px;
 }
 
