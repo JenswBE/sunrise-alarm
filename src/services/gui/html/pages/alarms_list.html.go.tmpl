@@ -24,76 +24,82 @@
     >
       <i class="bi bi-chevron-right"></i>
     </a>
-    <div style="grid-area: alarms;" id="alarms-list-grid" class="gap-2">
-      {{ range .Alarms }}
-        <div class="alarms-list-item" style="border: 1px solid white;">
-          <form
-            action="/alarms/{{ .ID }}/enabled"
-            method="POST"
-            style="grid-area: toggle-enabled;"
-          >
-            <button
-              type="submit"
-              class="btn btn-link btn-lg"
-              style="width: 100%;"
+
+    {{ range .AlarmsByStatus }}
+      <div
+        style="grid-area: {{ toLower .Status.String }}-alarms;"
+        class="alarms-list-grid gap-2"
+      >
+        {{ range .Alarms }}
+          <div class="alarms-list-item" style="border: 1px solid white;">
+            <form
+              action="/alarms/{{ .ID }}/enabled"
+              method="POST"
+              style="grid-area: toggle-enabled;"
             >
-              {{ if .Enabled }}
-                <i class="bi bi-toggle-on"></i>
-              {{ else }}
-                <i class="bi bi-toggle-off"></i>
-              {{ end }}
-            </button>
-            <input type="hidden" name="value" value="{{ not .Enabled }}" />
-          </form>
+              <button
+                type="submit"
+                class="btn btn-link btn-lg"
+                style="width: 100%;"
+              >
+                {{ if .Enabled }}
+                  <i class="bi bi-toggle-on"></i>
+                {{ else }}
+                  <i class="bi bi-toggle-off"></i>
+                {{ end }}
+              </button>
+              <input type="hidden" name="value" value="{{ not .Enabled }}" />
+            </form>
 
-          <p style="grid-area: time;" class="m-0">
-            {{ .TimeToString }}
-          </p>
-          <p style="grid-area: days;" class="m-0">{{ formatDays .Days }}</p>
+            <p style="grid-area: time;" class="m-0">
+              {{ .TimeToString }}
+            </p>
+            <p style="grid-area: days;" class="m-0">{{ formatDays .Days }}</p>
 
-          <form
-            action="/alarms/{{ .ID }}/skip-next"
-            method="POST"
-            style="grid-area: toggle-skip-next;"
-          >
-            <button
-              type="submit"
-              class="btn btn-link btn-lg"
-              style="width: 100%;"
+            <form
+              action="/alarms/{{ .ID }}/skip-next"
+              method="POST"
+              style="grid-area: toggle-skip-next;"
             >
-              {{ if .SkipNext }}
-                <i class="bi bi-skip-end-btn-fill" style="color: red;"></i>
-              {{ else }}
-                <i class="bi bi-skip-end-btn-fill" style="color: grey;"></i>
-              {{ end }}
-            </button>
-            <input type="hidden" name="value" value="{{ not .SkipNext }}" />
-          </form>
+              <button
+                type="submit"
+                class="btn btn-link btn-lg"
+                style="width: 100%;"
+              >
+                {{ if .SkipNext }}
+                  <i class="bi bi-skip-end-btn-fill" style="color: red;"></i>
+                {{ else }}
+                  <i class="bi bi-skip-end-btn-fill" style="color: grey;"></i>
+                {{ end }}
+              </button>
+              <input type="hidden" name="value" value="{{ not .SkipNext }}" />
+            </form>
 
-          <a
-            style="grid-area: edit-alarm; width: 100%;"
-            href="/alarms/{{ .ID }}"
-            class="btn btn-link btn-lg"
-          >
-            <i class="bi bi-pencil-square"></i>
-          </a>
-
-          <form
-            method="post"
-            action="/alarms/{{ .ID }}/delete"
-            onsubmit="return confirm('Are you sure?');"
-            style="grid-area: delete-alarm;"
-          >
-            <button
-              type="submit"
+            <a
+              style="grid-area: edit-alarm; width: 100%;"
+              href="/alarms/{{ .ID }}"
               class="btn btn-link btn-lg"
-              style="width: 100%;"
             >
-              <i class="bi bi-trash" style="color: red;"></i>
-            </button>
-          </form>
-        </div>
-      {{ end }}
-    </div>
+              <i class="bi bi-pencil-square"></i>
+            </a>
+
+            <form
+              method="post"
+              action="/alarms/{{ .ID }}/delete"
+              onsubmit="return confirm('Are you sure?');"
+              style="grid-area: delete-alarm;"
+            >
+              <button
+                type="submit"
+                class="btn btn-link btn-lg"
+                style="width: 100%;"
+              >
+                <i class="bi bi-trash" style="color: red;"></i>
+              </button>
+            </form>
+          </div>
+        {{ end }}
+      </div>
+    {{ end }}
   </div>
 {{ end }}

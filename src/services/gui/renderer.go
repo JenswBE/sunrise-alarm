@@ -44,6 +44,7 @@ func (h *Handler) NewRenderer() multitemplate.Renderer {
 			"rawWeekday":   rawWeekday,
 			"repeat":       lo.Range,
 			"substract":    substract,
+			"toLower":      strings.ToLower,
 		})
 
 		// Parse and add templates

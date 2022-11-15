@@ -11,7 +11,23 @@ import (
 
 type AlarmsListTemplate struct {
 	BaseData
+	AlarmsByStatus []AlarmsWithStatus
+}
+
+type AlarmsWithStatus struct {
 	Alarms []entities.Alarm
+	Status AlarmStatus
+}
+
+type AlarmStatus string
+
+const (
+	AlarmStatusEnabled  AlarmStatus = "ENABLED"
+	AlarmStatusDisabled AlarmStatus = "DISABLED"
+)
+
+func (s AlarmStatus) String() string {
+	return string(s)
 }
 
 func (t AlarmsListTemplate) GetTemplateName() string {
