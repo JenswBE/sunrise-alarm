@@ -48,6 +48,9 @@ func createTimer(alarmID uuid.UUID, planning entities.Planning, timerChan chan u
 	return time.AfterFunc(time.Until(nextTime), func() { timerChan <- alarmID })
 }
 
+// eventLoop handles all manager events.
+// Having a function in a single go-routine handle all data manipulations,
+// we are sure we don't create race conditions and using locks is not needed.
 func (s *AlarmService) eventLoop(abortAlarm chan struct{}) {
 	events := make(chan pubsub.Event, 1)
 	s.pubSub.Subscribe(&pubsub.EventAlarmChanged{}, events)
