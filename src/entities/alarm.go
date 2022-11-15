@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"golang.org/x/exp/slices"
 )
 
 const MaxNumberOfAlarms = 8
@@ -48,4 +49,35 @@ func (a *Alarm) SetTimeFromString(time string) error {
 	a.Hour = uint8(hour)
 	a.Minute = uint8(minute)
 	return nil
+}
+
+func SortAlarms(alarms []Alarm) {
+	slices.SortFunc(alarms, func(a, b Alarm) bool {
+		switch {
+		case a.Hour != b.Hour:
+			return a.Hour < b.Hour
+		case a.Minute != b.Minute:
+			return a.Minute < b.Minute
+		case len(a.Days) > 0 || len(b.Days) > 0:
+			if len(a.Days) == 0 {
+				return true
+			}
+			if len(b.Days) == 0 {
+				return false
+			}
+			firstDayA := a.Days[0]
+			if firstDayA == 0 {
+				// We consider Sunday last day of the week
+				firstDayA = 6
+			}
+			firstDayB := b.Days[0]
+			if firstDayB == 0 {
+				// We consider Sunday last day of the week
+				firstDayB = 6
+			}
+			return firstDayA < firstDayB
+		default:
+			return a.Name < b.Name
+		}
+	})
 }

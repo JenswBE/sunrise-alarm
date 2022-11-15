@@ -10,7 +10,6 @@ import (
 	"github.com/gin-gonic/gin/binding"
 	"github.com/google/uuid"
 	"github.com/samber/lo"
-	"golang.org/x/exp/slices"
 
 	globalEntities "github.com/JenswBE/sunrise-alarm/src/entities"
 	"github.com/JenswBE/sunrise-alarm/src/services/gui/entities"
@@ -31,16 +30,7 @@ func (h *Handler) handleAlarmsList(c *gin.Context) {
 		c.String(http.StatusInternalServerError, `Failed to list alarms: %v`, err.Error())
 		return
 	}
-	slices.SortFunc(alarms, func(a, b globalEntities.Alarm) bool {
-		switch {
-		case a.Hour != b.Hour:
-			return a.Hour < b.Hour
-		case a.Minute != b.Minute:
-			return a.Minute < b.Minute
-		default:
-			return a.Name < b.Name
-		}
-	})
+	globalEntities.SortAlarms(alarms)
 
 	h.htmlWithFlashes(c, http.StatusOK, &entities.AlarmsListTemplate{
 		BaseData: entities.BaseData{
