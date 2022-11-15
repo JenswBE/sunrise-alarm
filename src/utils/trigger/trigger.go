@@ -14,9 +14,16 @@ func NewDelayedTrigger() *DelayedTrigger {
 	}
 }
 
+// Schedule schedules a future trigger.
 func (t *DelayedTrigger) Schedule(delay time.Duration) {
 	go func() {
 		time.Sleep(delay)
-		t.C <- struct{}{}
+		t.Trigger()
 	}()
+}
+
+// Trigger forces a manual trigger of the delayed trigger.
+// Scheduled triggers are unharmed.
+func (t *DelayedTrigger) Trigger() {
+	t.C <- struct{}{}
 }

@@ -69,9 +69,7 @@ func main() {
 	}
 	physicalSvc := physical.NewPhysicalService(svcConfig.Physical, eventBus)
 	defer physicalSvc.Close()
-	alarmLightDuration := time.Duration(svcConfig.Alarms.LightDurationInMinutes) * time.Minute
-	alarmSoundDuration := time.Duration(svcConfig.Alarms.SoundDurationInMinutes) * time.Minute
-	alarmSvc, err := alarm.NewAlarmService(physicalSvc, audioSvc, eventBus, alarmLightDuration, alarmSoundDuration)
+	alarmSvc, err := alarm.NewAlarmService(physicalSvc, audioSvc, eventBus)
 	if err != nil {
 		log.Fatal().Err(err).Msg("Main: Failed to create the alarm service")
 	}

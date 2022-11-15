@@ -23,6 +23,6 @@ type Service interface {
 	Close() error
 }
 
-func NewAlarmService(physicalService physical.Service, audioService audio.Service, pubSub pubsub.PubSub, alarmLightDuration time.Duration, alarmSoundDuration time.Duration) (Service, error) {
-	return usecases.NewAlarmService(physicalService, audioService, pubSub, alarmLightDuration, alarmSoundDuration)
+func NewAlarmService(physicalService physical.Service, audioService audio.Service, pubSub pubsub.PubSub) (Service, error) {
+	return usecases.NewAlarmService(physicalService, audioService, pubSub)
 }

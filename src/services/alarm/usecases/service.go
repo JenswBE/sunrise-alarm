@@ -11,7 +11,6 @@ import (
 	"github.com/JenswBE/sunrise-alarm/src/utils/pubsub"
 	"github.com/google/uuid"
 	"github.com/rs/zerolog/log"
-	"github.com/samber/lo"
 )
 
 type AlarmService struct {
@@ -20,17 +19,13 @@ type AlarmService struct {
 	ringer          *Ringer
 	physicalService physical.Service
 
-	alarmLightDuration time.Duration
-	alarmSoundDuration time.Duration
-	alarmMaxDuration   time.Duration
-
 	status             Status                          // Managed by manager
 	planningsByAlarmID map[uuid.UUID]entities.Planning // Managed by manager
 	timersByAlarmID    map[uuid.UUID]*time.Timer       // Managed by manager
 	timerChan          chan uuid.UUID                  // Managed by manager
 }
 
-func NewAlarmService(physicalService physical.Service, audioService audio.Service, pubSub pubsub.PubSub, alarmLightDuration, alarmSoundDuration time.Duration) (*AlarmService, error) {
+func NewAlarmService(physicalService physical.Service, audioService audio.Service, pubSub pubsub.PubSub) (*AlarmService, error) {
 	// Setup DB
 	dataPath := "alarms.json"
 	db, err := jsondb.NewJSONDB(dataPath)
@@ -43,12 +38,8 @@ func NewAlarmService(physicalService physical.Service, audioService audio.Servic
 	s := &AlarmService{
 		db:              db,
 		pubSub:          pubSub,
-		ringer:          NewRinger(physicalService, audioService, alarmLightDuration, alarmSoundDuration, abortAlarm),
+		ringer:          NewRinger(physicalService, audioService, abortAlarm),
 		physicalService: physicalService,
-
-		alarmLightDuration: alarmLightDuration,
-		alarmSoundDuration: alarmSoundDuration,
-		alarmMaxDuration:   lo.Max([]time.Duration{alarmLightDuration, alarmSoundDuration}),
 	}
 	return s, s.startManager(abortAlarm)
 }
