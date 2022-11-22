@@ -38,9 +38,6 @@ sudo raspi-config nonint do_memory_split 256
 # Enable I2C (0 = enabled, 1 = disabled)
 sudo raspi-config nonint do_i2c 0
 
-# Set hostname
-sudo hostnamectl set-hostname sunrise
-
 # Disable swap
 # Based on https://raspberrypi.stackexchange.com/questions/84390/how-to-permanently-disable-swap-on-raspbian-stretch-lite
 sudo dphys-swapfile swapoff
@@ -123,6 +120,10 @@ Type=Application
 Name=Set screen timeout
 Exec=/usr/bin/xset dpms 60 60 60
 EOF
+
+# Run Ansible
+cd deployment
+ansible-playbook main.yml
 
 # Reboot
 sudo reboot
