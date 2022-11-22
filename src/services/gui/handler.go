@@ -59,6 +59,7 @@ func (h *Handler) RegisterRoutes(r *gin.Engine) {
 		debug.GET("/", h.handleDebug)
 		debug.POST("/simulate-button-pressed-short", h.handleSimulateButtonPressedShort)
 		debug.POST("/simulate-button-pressed-long", h.handleSimulateButtonPressedLong)
+		debug.POST("/reboot", h.handleReboot)
 	}
 }
 

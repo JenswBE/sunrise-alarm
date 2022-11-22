@@ -2,6 +2,7 @@ package gui
 
 import (
 	"net/http"
+	"os/exec"
 
 	"github.com/gin-gonic/gin"
 
@@ -25,5 +26,13 @@ func (h *Handler) handleSimulateButtonPressedShort(c *gin.Context) {
 
 func (h *Handler) handleSimulateButtonPressedLong(c *gin.Context) {
 	h.pubSub.Publish((*pubsub.EventButtonPressedLong)(nil))
+	redirect(c, "/debug")
+}
+
+func (h *Handler) handleReboot(c *gin.Context) {
+	if err := exec.Command("reboot").Run(); err != nil {
+		h.redirectWithErrorMessage(c, "/debug", "Failed to reboot device: %v", err)
+		return
+	}
 	redirect(c, "/debug")
 }
