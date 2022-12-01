@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"strconv"
 	"strings"
-	"time"
 
 	"github.com/google/uuid"
 	"golang.org/x/exp/slices"
@@ -18,7 +17,7 @@ type Alarm struct {
 	Name     string
 	Hour     uint8
 	Minute   uint8
-	Days     []time.Weekday
+	Days     []ISOWeekday
 	SkipNext bool
 }
 
@@ -65,17 +64,7 @@ func SortAlarms(alarms []Alarm) {
 			if len(b.Days) == 0 {
 				return false
 			}
-			firstDayA := a.Days[0]
-			if firstDayA == 0 {
-				// We consider Sunday last day of the week
-				firstDayA = 6
-			}
-			firstDayB := b.Days[0]
-			if firstDayB == 0 {
-				// We consider Sunday last day of the week
-				firstDayB = 6
-			}
-			return firstDayA < firstDayB
+			return a.Days[0] < b.Days[0]
 		default:
 			return a.Name < b.Name
 		}

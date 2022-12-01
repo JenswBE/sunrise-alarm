@@ -12,8 +12,8 @@ import (
 func TestCalculateNextTime(t *testing.T) {
 	timezone := lo.Must(time.LoadLocation("Europe/Brussels"))
 	now := time.Date(2020, time.September, 19, 14, 30, 0, 0, timezone) // Saturday
-	today := []time.Weekday{now.Weekday()}
-	weekdays := []time.Weekday{time.Monday, time.Tuesday, time.Wednesday, time.Thursday, time.Friday}
+	today := []entities.ISOWeekday{entities.NewISOWeekday(now.Weekday())}
+	weekdays := []entities.ISOWeekday{entities.ISOMonday, entities.ISOTuesday, entities.ISOWednesday, entities.ISOThursday, entities.ISOFriday}
 	testCases := map[string]struct {
 		alarm                entities.Alarm
 		now                  time.Time

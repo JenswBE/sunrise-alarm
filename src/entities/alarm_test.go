@@ -2,7 +2,6 @@ package entities
 
 import (
 	"testing"
-	"time"
 
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/require"
@@ -31,17 +30,17 @@ func TestSortAlarms(t *testing.T) {
 	mondayAt7h := Alarm{
 		ID:   uuid.New(),
 		Hour: 7,
-		Days: []time.Weekday{time.Monday},
+		Days: []ISOWeekday{ISOMonday},
 	}
 	tuesdayAndWednesdayAt7h := Alarm{
 		ID:   uuid.New(),
 		Hour: 7,
-		Days: []time.Weekday{time.Tuesday, time.Wednesday},
+		Days: []ISOWeekday{ISOTuesday, ISOWednesday},
 	}
 	sundayAt7h := Alarm{
 		ID:   uuid.New(),
 		Hour: 7,
-		Days: []time.Weekday{time.Sunday},
+		Days: []ISOWeekday{ISOSunday},
 	}
 
 	testCases := map[string]struct {

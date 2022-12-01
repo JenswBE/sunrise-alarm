@@ -37,7 +37,7 @@ func calculateNextTime(alarm entities.Alarm, after time.Time) time.Time {
 	alarmTime := time.Date(after.Year(), after.Month(), after.Day(), int(alarm.Hour), int(alarm.Minute), 0, 0, after.Location())
 
 	// Check if alarm is exactly at date
-	if len(alarm.Days) == 0 || lo.Contains(alarm.Days, after.Weekday()) {
+	if len(alarm.Days) == 0 || lo.Contains(alarm.Days, entities.NewISOWeekday(after.Weekday())) {
 		if alarmTime.After(after) {
 			// Alarm is at date and still to come
 			return alarmTime
@@ -45,8 +45,8 @@ func calculateNextTime(alarm entities.Alarm, after time.Time) time.Time {
 	}
 
 	// Next alarm is not on date => Calculate next weekday
-	nextDay := calculateNextDay(alarm, after.Weekday())
-	dayDiff := calculateWeekdaysDiff(alarmTime.Weekday(), nextDay)
+	nextDay := calculateNextDay(alarm, entities.NewISOWeekday(after.Weekday()))
+	dayDiff := calculateWeekdaysDiff(entities.NewISOWeekday(alarmTime.Weekday()), nextDay)
 	if dayDiff == 0 {
 		dayDiff = 7
 	}
@@ -54,14 +54,14 @@ func calculateNextTime(alarm entities.Alarm, after time.Time) time.Time {
 }
 
 // calculateNextDay calculates the next day the alarm should trigger
-func calculateNextDay(alarm entities.Alarm, currentWeekday time.Weekday) time.Weekday {
+func calculateNextDay(alarm entities.Alarm, currentWeekday entities.ISOWeekday) entities.ISOWeekday {
 	if len(alarm.Days) == 0 {
 		// No days set => next day is tomorrow
 		return (currentWeekday + 1) % 7
 	}
 
 	// Get next day => First day higher then current day
-	nextDay, found := lo.Find(alarm.Days, func(d time.Weekday) bool { return d > currentWeekday })
+	nextDay, found := lo.Find(alarm.Days, func(d entities.ISOWeekday) bool { return d > currentWeekday })
 	if found {
 		return nextDay
 	}
@@ -70,7 +70,7 @@ func calculateNextDay(alarm entities.Alarm, currentWeekday time.Weekday) time.We
 	return alarm.Days[0]
 }
 
-func calculateWeekdaysDiff(from, to time.Weekday) int {
+func calculateWeekdaysDiff(from, to entities.ISOWeekday) int {
 	if to >= from {
 		return int(to) - int(from)
 	}

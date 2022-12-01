@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"net/http"
 	"strconv"
-	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
@@ -15,8 +14,8 @@ import (
 	"github.com/JenswBE/sunrise-alarm/src/services/gui/entities"
 )
 
-var weekdays = []time.Weekday{time.Monday, time.Tuesday, time.Wednesday, time.Thursday, time.Friday, time.Saturday, time.Sunday}
-var weekdaysPresets = map[string][]time.Weekday{
+var weekdays = globalEntities.ISOWeekdays()
+var weekdaysPresets = map[string][]globalEntities.ISOWeekday{
 	"NONE":    {},
 	"WEEK":    weekdays[0:5],
 	"WEEKEND": weekdays[5:7],

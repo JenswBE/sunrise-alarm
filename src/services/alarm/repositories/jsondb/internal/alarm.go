@@ -1,20 +1,18 @@
 package internal
 
 import (
-	"time"
-
 	"github.com/JenswBE/sunrise-alarm/src/entities"
 	"github.com/google/uuid"
 )
 
 type Alarm struct {
-	ID       uuid.UUID      `json:"id"`
-	Enabled  bool           `json:"enabled"`
-	Name     string         `json:"name"`
-	Hour     uint8          `json:"hour"`
-	Minute   uint8          `json:"minute"`
-	Days     []time.Weekday `json:"days"`
-	SkipNext bool           `json:"skip_next"`
+	ID       uuid.UUID             `json:"id"`
+	Enabled  bool                  `json:"enabled"`
+	Name     string                `json:"name"`
+	Hour     uint8                 `json:"hour"`
+	Minute   uint8                 `json:"minute"`
+	Days     []entities.ISOWeekday `json:"days"`
+	SkipNext bool                  `json:"skip_next"`
 }
 
 func (a Alarm) ToGlobal() entities.Alarm {

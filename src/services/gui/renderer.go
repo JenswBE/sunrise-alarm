@@ -8,8 +8,8 @@ import (
 	"path"
 	"path/filepath"
 	"strings"
-	"time"
 
+	"github.com/JenswBE/sunrise-alarm/src/entities"
 	"github.com/gin-contrib/multitemplate"
 	"github.com/rs/zerolog/log"
 	"github.com/samber/lo"
@@ -70,20 +70,17 @@ func product(a, b int) int {
 	return a * b
 }
 
-func formatDays(days []time.Weekday) string {
+func formatDays(days []entities.ISOWeekday) string {
 	var builder strings.Builder
-	builder.Grow(13)                          // 7 letters of days and 6 spaces
-	for day := time.Monday; day <= 7; day++ { // Start on Monday
-		weekday := time.Weekday(day)
-		if day == 7 {
-			weekday = time.Sunday
-		}
-		if lo.Contains(days, weekday) {
-			builder.WriteByte(weekday.String()[0]) // Add first letter of day
+	builder.Grow(13) // 7 letters of days and 6 spaces
+	for _, isoWeekday := range entities.ISOWeekdays() {
+		if lo.Contains(days, isoWeekday) {
+			builder.WriteByte(isoWeekday.String()[0]) // Add first letter of day
 		} else {
 			builder.WriteRune('_')
 		}
-		if day < 7 {
+		if isoWeekday != entities.ISOSunday {
+			// Append space after each day, except for Sunday
 			builder.WriteRune(' ')
 		}
 	}
@@ -106,6 +103,6 @@ func rawJS(input string) template.JS {
 	return template.JS(input)
 }
 
-func rawWeekday(input time.Weekday) int {
+func rawWeekday(input entities.ISOWeekday) int {
 	return int(input)
 }
