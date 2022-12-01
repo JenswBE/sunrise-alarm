@@ -6,10 +6,14 @@ import (
 	"strings"
 
 	"github.com/google/uuid"
+	"github.com/rs/zerolog"
+	"github.com/samber/lo"
 	"golang.org/x/exp/slices"
 )
 
 const MaxNumberOfAlarms = 8
+
+var _ zerolog.LogObjectMarshaler = Alarm{}
 
 type Alarm struct {
 	ID       uuid.UUID
@@ -19,6 +23,16 @@ type Alarm struct {
 	Minute   uint8
 	Days     []ISOWeekday
 	SkipNext bool
+}
+
+func (a Alarm) MarshalZerologObject(e *zerolog.Event) {
+	e.Stringer("id", a.ID)
+	e.Bool("enabled", a.Enabled)
+	e.Str("name", a.Name)
+	e.Str("time", a.TimeToString())
+	days := lo.Map(a.Days, func(d ISOWeekday, _ int) string { return d.String() })
+	e.Strs("days", days)
+	e.Bool("skip_next", a.SkipNext)
 }
 
 func (a Alarm) TimeToString() string {

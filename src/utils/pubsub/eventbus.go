@@ -30,7 +30,7 @@ func (eb *EventBus) Subscribe(event Event, ch Channel) {
 }
 
 func (eb *EventBus) Publish(event Event) {
-	log.Debug().Interface("event", event).Msgf("New event published of type %T", event)
+	log.Debug().Object("event", event).Msgf("New event published of type %T", event)
 	eb.mutex.RLock()
 	if chans, found := eb.subscribers[event.GetTopic()]; found {
 		go func(data Event, dataChannelSlices []Channel) {

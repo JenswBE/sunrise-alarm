@@ -18,12 +18,12 @@ func NewMockLeds() *MockLeds {
 }
 
 func (l *MockLeds) GetColorAndBrightness() (entities.PresetColor, byte) {
-	log.Debug().Interface("color", l.currentColor).Uint8("brightness", l.currentBrightness).Msg("MockLeds: Current color and brightness requested")
+	log.Debug().Stringer("color", l.currentColor).Uint8("brightness", l.currentBrightness).Msg("MockLeds: Current color and brightness requested")
 	return l.currentColor, l.currentBrightness
 }
 
 func (l *MockLeds) SetColorAndBrightness(color entities.PresetColor, brightness byte) {
-	log.Debug().Interface("color", color).Uint8("brightness", brightness).Msg("MockLeds: Setting new color and brightness")
+	log.Debug().Stringer("color", color).Uint8("brightness", brightness).Msg("MockLeds: Setting new color and brightness")
 	l.currentColor = color
 	l.currentBrightness = brightness
 }

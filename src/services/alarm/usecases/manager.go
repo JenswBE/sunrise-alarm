@@ -93,9 +93,11 @@ func (s *AlarmService) handleAlarmChanged(event *pubsub.EventAlarmChanged) {
 		}
 
 		// Create planning and timer
+		logger.Debug().Msg("Manager.handleAlarmChanged: New alarm created, creating planning and timer...")
 		planning := planner.CalculatePlanning(event.Alarm, time.Now())
 		s.planningsByAlarmID[alarmID] = planning
 		s.timersByAlarmID[alarmID] = createTimer(alarmID, planning, s.timerChan)
+		logger.Debug().Object("planning", planning).Msg("Manager.handleAlarmChanged: Timer created for planning")
 	case pubsub.AlarmChangedActionUpdated:
 		// Check alarm is enabled
 		if !event.Alarm.Enabled {
@@ -106,12 +108,14 @@ func (s *AlarmService) handleAlarmChanged(event *pubsub.EventAlarmChanged) {
 		}
 
 		// Recreate planning and alarm
-		logger.Debug().Msg("Manager.handleAlarmChanged: Updated alarm is enabled, recreating planning and timer.")
+		logger.Debug().Msg("Manager.handleAlarmChanged: Updated alarm is enabled, recreating planning and timer...")
 		s.deletePlanningAndTimer(alarmID, true)
 		planning := planner.CalculatePlanning(event.Alarm, time.Now())
 		s.planningsByAlarmID[alarmID] = planning
 		s.timersByAlarmID[alarmID] = createTimer(alarmID, planning, s.timerChan)
+		logger.Debug().Object("planning", planning).Msg("Manager.handleAlarmChanged: Timer created for planning")
 	case pubsub.AlarmChangedActionDeleted:
+		logger.Debug().Msg("Manager.handleAlarmChanged: Alarm deleted, deleting planning and timer...")
 		s.deletePlanningAndTimer(alarmID, true)
 	}
 }

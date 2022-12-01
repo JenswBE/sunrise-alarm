@@ -32,7 +32,7 @@ func (s *AlarmService) GetNextRingTime() time.Time {
 }
 
 func (s *AlarmService) CreateAlarm(alarm entities.Alarm) (entities.Alarm, error) {
-	log.Debug().Interface("alarm", alarm).Msg("Alarms Service: Creating alarm")
+	log.Debug().Object("alarm", alarm).Msg("Alarms Service: Creating alarm")
 	existingAlarms, err := s.db.List()
 	if err != nil {
 		return entities.Alarm{}, err
@@ -53,7 +53,7 @@ func (s *AlarmService) CreateAlarm(alarm entities.Alarm) (entities.Alarm, error)
 }
 
 func (s *AlarmService) UpdateAlarm(alarm entities.Alarm) error {
-	log.Debug().Interface("alarm", alarm).Msg("Alarms Service: Updating alarm")
+	log.Debug().Object("alarm", alarm).Msg("Alarms Service: Updating alarm")
 	if err := s.db.Update(alarm); err != nil {
 		return err
 	}

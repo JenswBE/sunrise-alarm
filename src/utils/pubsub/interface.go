@@ -1,6 +1,9 @@
 package pubsub
 
+import "github.com/rs/zerolog"
+
 type Event interface {
+	zerolog.LogObjectMarshaler
 	GetTopic() string
 }
 
