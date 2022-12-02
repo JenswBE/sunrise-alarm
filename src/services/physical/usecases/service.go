@@ -60,9 +60,9 @@ func NewPhysicalService(config config.PhysicalConfig, pubSub pubsub.PubSub) *Phy
 		for {
 			switch <-buttonChannel {
 			case buttonpoller.ButtonPressShort:
-				pubSub.Publish((*pubsub.EventButtonPressedShort)(nil))
+				pubSub.Publish(pubsub.EventButtonPressedShort{})
 			case buttonpoller.ButtonPressLong:
-				pubSub.Publish((*pubsub.EventButtonPressedLong)(nil))
+				pubSub.Publish(pubsub.EventButtonPressedLong{})
 			}
 		}
 	}()

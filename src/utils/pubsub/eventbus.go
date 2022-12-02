@@ -30,7 +30,11 @@ func (eb *EventBus) Subscribe(event Event, ch Channel) {
 }
 
 func (eb *EventBus) Publish(event Event) {
-	log.Debug().Object("event", event).Msgf("New event published of type %T", event)
+	log.Debug().Object("event", event).Msgf("EventBus.Publish: New event published of type %T", event)
+	if event == nil {
+		log.Error().Msgf("EventBus.Publish: %T received with value nil. Pointer events are not supported and will be ignored.", event)
+		return
+	}
 	eb.mutex.RLock()
 	if chans, found := eb.subscribers[event.GetTopic()]; found {
 		go func(data Event, dataChannelSlices []Channel) {

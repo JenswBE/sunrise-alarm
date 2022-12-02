@@ -5,7 +5,7 @@ import (
 	"github.com/rs/zerolog"
 )
 
-var _ zerolog.LogObjectMarshaler = EventAlarmChanged{}
+var _ Event = EventAlarmChanged{}
 
 type EventAlarmChanged struct {
 	Action AlarmChangedAction
@@ -18,7 +18,7 @@ func (event EventAlarmChanged) MarshalZerologObject(e *zerolog.Event) {
 	e.Object("alarm", event.Alarm)
 }
 
-func (e *EventAlarmChanged) GetTopic() string {
+func (e EventAlarmChanged) GetTopic() string {
 	return "alarm_changed"
 }
 

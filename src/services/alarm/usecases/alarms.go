@@ -45,7 +45,7 @@ func (s *AlarmService) CreateAlarm(alarm entities.Alarm) (entities.Alarm, error)
 	if err != nil {
 		return entities.Alarm{}, err
 	}
-	s.pubSub.Publish(&pubsub.EventAlarmChanged{
+	s.pubSub.Publish(pubsub.EventAlarmChanged{
 		Action: pubsub.AlarmChangedActionCreated,
 		Alarm:  newAlarm,
 	})
@@ -57,7 +57,7 @@ func (s *AlarmService) UpdateAlarm(alarm entities.Alarm) error {
 	if err := s.db.Update(alarm); err != nil {
 		return err
 	}
-	s.pubSub.Publish(&pubsub.EventAlarmChanged{
+	s.pubSub.Publish(pubsub.EventAlarmChanged{
 		Action: pubsub.AlarmChangedActionUpdated,
 		Alarm:  alarm,
 	})
@@ -69,7 +69,7 @@ func (s *AlarmService) DeleteAlarm(id uuid.UUID) error {
 	if err := s.db.Delete(id); err != nil {
 		return err
 	}
-	s.pubSub.Publish(&pubsub.EventAlarmChanged{
+	s.pubSub.Publish(pubsub.EventAlarmChanged{
 		Action: pubsub.AlarmChangedActionDeleted,
 		Alarm:  entities.Alarm{ID: id},
 	})

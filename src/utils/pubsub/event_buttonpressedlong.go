@@ -2,11 +2,11 @@ package pubsub
 
 import "github.com/rs/zerolog"
 
-var _ zerolog.LogObjectMarshaler = EventButtonPressedLong{}
+var _ Event = EventButtonPressedLong{}
 
 type EventButtonPressedLong struct{}
 
-func (e *EventButtonPressedLong) GetTopic() string {
+func (e EventButtonPressedLong) GetTopic() string {
 	return "button_pressed_long"
 }
 

@@ -53,20 +53,20 @@ func createTimer(alarmID uuid.UUID, planning entities.Planning, timerChan chan u
 // we are sure we don't create race conditions and using locks is not needed.
 func (s *AlarmService) eventLoop(abortAlarm chan struct{}) {
 	events := make(chan pubsub.Event, 1)
-	s.pubSub.Subscribe(&pubsub.EventAlarmChanged{}, events)
-	s.pubSub.Subscribe(&pubsub.EventButtonPressedShort{}, events)
-	s.pubSub.Subscribe(&pubsub.EventButtonPressedLong{}, events)
+	s.pubSub.Subscribe(pubsub.EventAlarmChanged{}, events)
+	s.pubSub.Subscribe(pubsub.EventButtonPressedShort{}, events)
+	s.pubSub.Subscribe(pubsub.EventButtonPressedLong{}, events)
 	for {
 		select {
 		case event := <-events:
 			switch e := event.(type) {
-			case *pubsub.EventAlarmChanged:
+			case pubsub.EventAlarmChanged:
 				log.Debug().Stringer("action", e.Action).Stringer("alarm_id", e.Alarm.ID).Msg("Manager.eventLoop: EventAlarmChanged event received, update plannings and timers...")
 				s.handleAlarmChanged(e)
-			case *pubsub.EventButtonPressedShort:
+			case pubsub.EventButtonPressedShort:
 				log.Debug().Msg("Manager.eventLoop: EventButtonPressedShort event received, handling button press...")
 				s.handleButtonPressed()
-			case *pubsub.EventButtonPressedLong:
+			case pubsub.EventButtonPressedLong:
 				log.Debug().Msg("Manager.eventLoop: EventButtonPressedLong event received, handling button press...")
 				s.handleButtonLongPressed()
 			}
@@ -81,7 +81,7 @@ func (s *AlarmService) eventLoop(abortAlarm chan struct{}) {
 	}
 }
 
-func (s *AlarmService) handleAlarmChanged(event *pubsub.EventAlarmChanged) {
+func (s *AlarmService) handleAlarmChanged(event pubsub.EventAlarmChanged) {
 	alarmID := event.Alarm.ID
 	logger := log.With().Stringer("action", event.Action).Stringer("alarm_id", alarmID).Logger()
 	switch event.Action {

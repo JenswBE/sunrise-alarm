@@ -20,12 +20,12 @@ func (h *Handler) handleDebug(c *gin.Context) {
 }
 
 func (h *Handler) handleSimulateButtonPressedShort(c *gin.Context) {
-	h.pubSub.Publish((*pubsub.EventButtonPressedShort)(nil))
+	h.pubSub.Publish(pubsub.EventButtonPressedShort{})
 	redirect(c, "/debug")
 }
 
 func (h *Handler) handleSimulateButtonPressedLong(c *gin.Context) {
-	h.pubSub.Publish((*pubsub.EventButtonPressedLong)(nil))
+	h.pubSub.Publish(pubsub.EventButtonPressedLong{})
 	redirect(c, "/debug")
 }
 
