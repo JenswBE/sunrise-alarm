@@ -16,4 +16,10 @@ type Buzzer interface {
 type Leds interface {
 	GetColorAndBrightness() (entities.PresetColor, byte)
 	SetColorAndBrightness(color entities.PresetColor, brightness byte)
+	Close() error
+}
+
+type LightSensor interface {
+	GetVisibleLight() (uint32, error)
+	Close() error
 }

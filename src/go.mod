@@ -3,6 +3,7 @@ module github.com/JenswBE/sunrise-alarm/src
 go 1.18
 
 require (
+	github.com/JenswBE/golang-tsl2591 v0.0.0-20221202184812-a7c6c270262a
 	github.com/gin-contrib/multitemplate v0.0.0-20220829131020-8c2a8441bc2b
 	github.com/gin-gonic/gin v1.8.1
 	github.com/go-playground/validator/v10 v10.11.0
@@ -50,4 +51,6 @@ require (
 	gopkg.in/ini.v1 v1.66.4 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
+	periph.io/x/conn/v3 v3.7.0 // indirect
+	periph.io/x/host/v3 v3.8.0 // indirect
 )

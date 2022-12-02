@@ -32,6 +32,10 @@ type PhysicalConfig struct {
 	Leds struct {
 		SunriseDuration time.Duration
 	}
+	LightSensor struct {
+		// Path to the I2C device, e.g. /dev/i2c-1
+		I2CDevice string
+	}
 	Mocked bool
 }
 
@@ -42,6 +46,7 @@ func ParseConfig() (*Config, error) {
 	viper.SetDefault("Physical.Button.GPIONum", 23) // GPIO23 on pin 16
 	viper.SetDefault("Physical.Buzzer.GPIONum", 18) // GPIO18 on pin 12
 	viper.SetDefault("Physical.Leds.SunriseDuration", 5*time.Minute)
+	viper.SetDefault("Physical.LightSensor.I2CDevice", "/dev/i2c-1")
 	viper.SetDefault("Physical.Mocked", false)
 
 	// Parse config file
@@ -64,6 +69,7 @@ func ParseConfig() (*Config, error) {
 		{"Physical.Button.GPIONum", "PHYSICAL_BUTTON_GPIO_PIN"},
 		{"Physical.Buzzer.GPIONum", "PHYSICAL_BUZZER_GPIO_PIN"},
 		{"Physical.Leds.SunriseDuration", "PHYSICAL_LEDS_SUNRISE_DURATION"},
+		{"Physical.LightSensor.I2CDevice", "PHYSICAL_LIGHT_SENSOR_I2C_DEVICE"},
 		{"Physical.Mocked", "PHYSICAL_MOCKED"},
 	})
 	if err != nil {

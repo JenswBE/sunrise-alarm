@@ -27,9 +27,10 @@ func NewP9813Leds() (*P9813Leds, error) {
 	return &P9813Leds{}, nil
 }
 
-func (l *P9813Leds) Close() {
+func (l *P9813Leds) Close() error {
 	l.SetColorAndBrightness(entities.PresetColorBlack, 0)
 	rpio.SpiEnd(rpio.Spi0)
+	return nil
 }
 
 func (l *P9813Leds) GetColorAndBrightness() (entities.PresetColor, byte) {
