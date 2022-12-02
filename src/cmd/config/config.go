@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/go-playground/validator/v10"
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/viper"
 )
@@ -81,12 +80,6 @@ func ParseConfig() (*Config, error) {
 	err = viper.Unmarshal(&config)
 	if err != nil {
 		return nil, fmt.Errorf("unable to decode config into struct: %w", err)
-	}
-
-	// Validate config
-	validate := validator.New()
-	if err := validate.Struct(&config); err != nil {
-		return nil, fmt.Errorf("config validation failed: %w", err)
 	}
 	return &config, nil
 }
