@@ -101,6 +101,7 @@ WorkingDirectory=${HOME:?}/sunrise-alarm
 Environment="GOPATH=${GOPATH:?}"
 Environment="HOME=${HOME:?}"
 Environment="PATH=${PATH:?}"
+Environment="DEBUG=true"
 ExecStartPre=-$(which git) pull
 ExecStartPre=-$(which bash) src/update_vendors.sh
 ExecStartPre=$(which bash) -c "cd src; go build -o ../sunrise-alarm ./cmd/"
