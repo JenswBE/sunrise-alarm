@@ -13,6 +13,11 @@ type Buzzer interface {
 	Off()
 }
 
+type Display interface {
+	SetBrightness(brightness byte) error
+	Close() error
+}
+
 type Leds interface {
 	GetColorAndBrightness() (entities.PresetColor, byte)
 	SetColorAndBrightness(color entities.PresetColor, brightness byte)

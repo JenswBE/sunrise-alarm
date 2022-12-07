@@ -10,10 +10,13 @@ import (
 	"github.com/JenswBE/sunrise-alarm/src/services/physical/repositories/gpiobuzzer"
 	"github.com/JenswBE/sunrise-alarm/src/services/physical/repositories/mockbutton"
 	"github.com/JenswBE/sunrise-alarm/src/services/physical/repositories/mockbuzzer"
+	"github.com/JenswBE/sunrise-alarm/src/services/physical/repositories/mockdisplay"
 	"github.com/JenswBE/sunrise-alarm/src/services/physical/repositories/mockleds"
 	"github.com/JenswBE/sunrise-alarm/src/services/physical/repositories/mocklightsensor"
 	"github.com/JenswBE/sunrise-alarm/src/services/physical/repositories/p9813leds"
+	"github.com/JenswBE/sunrise-alarm/src/services/physical/repositories/rpidisplay"
 	"github.com/JenswBE/sunrise-alarm/src/services/physical/repositories/tsl2591lightsensor"
+	"github.com/JenswBE/sunrise-alarm/src/services/physical/utils/autobacklight"
 	"github.com/JenswBE/sunrise-alarm/src/services/physical/utils/buttonpoller"
 	"github.com/JenswBE/sunrise-alarm/src/services/physical/utils/buzzersequencer"
 	"github.com/JenswBE/sunrise-alarm/src/utils/pubsub"
@@ -25,6 +28,7 @@ type PhysicalService struct {
 	seq *buzzersequencer.BuzzerSequencer
 
 	isMocked        bool
+	display         repositories.Display
 	leds            repositories.Leds
 	lightSensor     repositories.LightSensor
 	sunriseStop     chan bool
@@ -36,29 +40,38 @@ func NewPhysicalService(config config.PhysicalConfig, pubSub pubsub.PubSub) *Phy
 	// Setup devices
 	var devButton repositories.Button
 	var devBuzzer repositories.Buzzer
+	var devDisplay repositories.Display
 	var devLeds repositories.Leds
 	var devLightSensor repositories.LightSensor
 	buttonChannel := make(chan buttonpoller.ButtonPress)
 	if !config.Mocked {
 		// Init real devices
-		if err := rpio.Open(); err != nil {
+		var err error
+		if err = rpio.Open(); err != nil {
 			log.Fatal().Err(err).Msg("RPIO: Failed to initialize GPIO library")
 		}
 		devButton = gpiobutton.NewGPIOButton(config.Button.GPIONum, true)
 		devBuzzer = gpiobuzzer.NewGPIOBuzzer(config.Buzzer.GPIONum)
-		p9813Leds, err := p9813leds.NewP9813Leds()
+		devDisplay, err = rpidisplay.NewRPiDisplay()
+		if err != nil {
+			log.Fatal().Err(err).Msg("Display: Failed to initialize RPi display")
+		}
+		devLeds, err = p9813leds.NewP9813Leds()
 		if err != nil {
 			log.Fatal().Err(err).Msg("LED: Failed to initialize P9813 led driver on SPI0")
 		}
-		devLeds = p9813Leds
 		devLightSensor, err = tsl2591lightsensor.NewTSL2591LightSensor(config.LightSensor.I2CDevice)
 		if err != nil {
 			log.Fatal().Err(err).Msg("LED: Failed to initialize TSL2591 light sensor")
 		}
+
+		// Init automatic backlight adjustment
+		autobacklight.NewAutoBacklight(devDisplay, devLightSensor)
 	} else {
 		// Init mocked devices
 		devButton = mockbutton.NewMockButton()
 		devBuzzer = mockbuzzer.NewMockBuzzer()
+		devDisplay = mockdisplay.NewMockDisplay()
 		devLeds = mockleds.NewMockLeds()
 		devLightSensor = mocklightsensor.NewMockLightSensor(1234)
 	}
@@ -80,6 +93,7 @@ func NewPhysicalService(config config.PhysicalConfig, pubSub pubsub.PubSub) *Phy
 	return &PhysicalService{
 		seq:             buzzersequencer.NewBuzzerSequencer(devBuzzer),
 		isMocked:        config.Mocked,
+		display:         devDisplay,
 		leds:            devLeds,
 		lightSensor:     devLightSensor,
 		sunriseDuration: config.Leds.SunriseDuration,
@@ -87,6 +101,9 @@ func NewPhysicalService(config config.PhysicalConfig, pubSub pubsub.PubSub) *Phy
 }
 
 func (s *PhysicalService) Close() {
+	if err := s.display.Close(); err != nil {
+		log.Error().Err(err).Msg("PhysicalService.Close: Failed to close display")
+	}
 	s.leds.Close()
 	if err := s.lightSensor.Close(); err != nil {
 		log.Error().Err(err).Msg("PhysicalService.Close: Failed to close light sensor")
