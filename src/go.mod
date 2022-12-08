@@ -3,7 +3,7 @@ module github.com/JenswBE/sunrise-alarm/src
 go 1.18
 
 require (
-	github.com/JenswBE/golang-tsl2591 v0.0.0-20221208193347-7f1473e3ec43
+	github.com/JenswBE/golang-tsl2591 v0.0.0-20221208210240-073a36b2ade3
 	github.com/gin-contrib/multitemplate v0.0.0-20220829131020-8c2a8441bc2b
 	github.com/gin-gonic/gin v1.8.1
 	github.com/google/uuid v1.3.0
