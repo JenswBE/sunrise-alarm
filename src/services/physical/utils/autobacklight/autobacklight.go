@@ -64,6 +64,7 @@ func (ab *AutoBacklight) update() {
 	}
 
 	// Set new brightness
+	log.Trace().Uint32("visible_light", visibleLight).Uint8("new_brightness", brightness).Msg("AutoBacklight.update: Updating brightness of display backlight...")
 	if err := ab.display.SetBrightness(brightness); err != nil {
 		log.Warn().Err(err).Msg("AutoBacklight.update: Failed to update display with new brightness. Ignoring error...")
 		return

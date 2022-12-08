@@ -20,7 +20,7 @@ func NewTSL2591LightSensor(i2cDevice string) (*TSL2591LightSensor, error) {
 	sensor, err := tsl2591.NewTSL2591(&tsl2591.Opts{
 		Bus:    i2cDevice,
 		Gain:   tsl2591.GainMed,
-		Timing: tsl2591.Integrationtime600MS,
+		Timing: tsl2591.Integrationtime100MS,
 	})
 	if err != nil {
 		log.Error().Err(err).Msg("TSL2591LightSensor.GetVisibleLight: Failed to open and configure sensor")

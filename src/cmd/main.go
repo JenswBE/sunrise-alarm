@@ -53,8 +53,12 @@ func main() {
 		})
 	}
 
-	// Setup Debug logging if enabled
-	if svcConfig.Debug {
+	// Setup Trace/Debug logging if enabled
+	switch {
+	case svcConfig.Trace:
+		zerolog.SetGlobalLevel(zerolog.TraceLevel)
+		log.Trace().Msg("Main: Trace logging enabled")
+	case svcConfig.Debug:
 		zerolog.SetGlobalLevel(zerolog.DebugLevel)
 		log.Debug().Msg("Main: Debug logging enabled")
 	}

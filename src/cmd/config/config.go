@@ -10,6 +10,7 @@ import (
 
 type Config struct {
 	Debug     bool
+	Trace     bool // Enabling Trace will enable Debug as well
 	LogFormat LogFormat
 	Physical  PhysicalConfig
 }
@@ -41,6 +42,7 @@ type PhysicalConfig struct {
 func ParseConfig() (*Config, error) {
 	// Set defaults
 	viper.SetDefault("Debug", false)
+	viper.SetDefault("Trace", false)
 	viper.SetDefault("LogFormat", LogFormatJSON)
 	viper.SetDefault("Physical.Button.GPIONum", 23) // GPIO23 on pin 16
 	viper.SetDefault("Physical.Buzzer.GPIONum", 18) // GPIO18 on pin 12
@@ -64,6 +66,7 @@ func ParseConfig() (*Config, error) {
 	// Bind ENV variables
 	err = bindEnvs([]envBinding{
 		{"Debug", "DEBUG"},
+		{"Trace", "TRACE"},
 		{"LogFormat", "LOG_FORMAT"},
 		{"Physical.Button.GPIONum", "PHYSICAL_BUTTON_GPIO_PIN"},
 		{"Physical.Buzzer.GPIONum", "PHYSICAL_BUZZER_GPIO_PIN"},
@@ -80,6 +83,9 @@ func ParseConfig() (*Config, error) {
 	err = viper.Unmarshal(&config)
 	if err != nil {
 		return nil, fmt.Errorf("unable to decode config into struct: %w", err)
+	}
+	if config.Trace {
+		config.Debug = true // Trace forces debug as well
 	}
 	return &config, nil
 }
