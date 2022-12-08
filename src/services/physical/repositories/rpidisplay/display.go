@@ -12,10 +12,11 @@ var _ repositories.Display = &RPiDisplay{}
 
 const brightnessFilePath = "/sys/class/backlight/10-0045/brightness"
 const minBrightness = 7
-const maxBrightness = 100
+const maxBrightness = 200
 
 type RPiDisplay struct {
-	brightnessFile *os.File
+	currentBrightness byte
+	brightnessFile    *os.File
 }
 
 func NewRPiDisplay() (*RPiDisplay, error) {
@@ -31,12 +32,6 @@ func (d *RPiDisplay) SetBrightness(brightness byte) error {
 	// Setup logger
 	logger := log.With().Str("path", brightnessFilePath).Uint8("brightness", brightness).Logger()
 
-	// Truncate file
-	if err := d.brightnessFile.Truncate(0); err != nil {
-		logger.Err(err).Msg("RPiDisplay.SetBrightness: Failed to truncate brightness file")
-		return fmt.Errorf("failed to truncate brightness file: %w", err)
-	}
-
 	// Ensure brightness is within limits
 	switch {
 	case brightness < minBrightness:
@@ -45,12 +40,24 @@ func (d *RPiDisplay) SetBrightness(brightness byte) error {
 		brightness = maxBrightness
 	}
 
+	// Check if value should be updated
+	if brightness == d.currentBrightness {
+		return nil // No update needed
+	}
+
+	// Truncate file
+	if err := d.brightnessFile.Truncate(0); err != nil {
+		logger.Err(err).Msg("RPiDisplay.SetBrightness: Failed to truncate brightness file")
+		return fmt.Errorf("failed to truncate brightness file: %w", err)
+	}
+
 	// Write new brightness
 	brightnessContent := fmt.Sprintln(brightness)
 	if _, err := d.brightnessFile.WriteAt([]byte(brightnessContent), 0); err != nil {
 		logger.Error().Err(err).Msg("RPiDisplay.SetBrightness: Failed to write new value to brightness file")
 		return fmt.Errorf("failed to write new value to brightness file: %w", err)
 	}
+	d.currentBrightness = brightness
 	return nil
 }
 
