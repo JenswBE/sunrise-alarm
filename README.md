@@ -11,10 +11,15 @@ Dependencies:
 - Golang
 - ALSA dev library
   - Fedora: `sudo dnf install alsa-lib-devel`
+- GCC
+  - Fedora: `sudo dnf group install "C Development Tools and Libraries" "Development Tools"`
 
 ```bash
+# Change to source dir
+cd src
+
 # Update vendor libraries
-./update-vendors.sh
+./update_vendors.sh
 
 # Auto-restart Sunrise Alarm on changes to the code
 go install github.com/cespare/reflex@latest
@@ -73,7 +78,7 @@ sudo apt install -y firefox-esr onboard libasound2-dev
 # Install Go
 # Update below to latest version at https://go.dev/dl/
 # See https://go.dev/doc/install for official instructions
-GO_URL="https://go.dev/dl/go1.19.3.linux-arm64.tar.gz"
+GO_URL="https://go.dev/dl/go1.20.3.linux-arm64.tar.gz"
 wget -O go.linux-arm64.tar.gz "${GO_URL:?}"
 sudo rm -rf /usr/local/go ~/go || true # Removes old install
 sudo tar -C /usr/local -xzf go.linux-arm64.tar.gz
