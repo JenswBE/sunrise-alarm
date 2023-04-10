@@ -107,6 +107,7 @@ Environment="GOPATH=${GOPATH:?}"
 Environment="HOME=${HOME:?}"
 Environment="PATH=${PATH:?}"
 Environment="DEBUG=true"
+ExecStartPre=-$(which git) config --global --add safe.directory ${HOME:?}/sunrise-alarm
 ExecStartPre=-$(which git) pull
 ExecStartPre=-$(which bash) src/update_vendors.sh
 ExecStartPre=$(which bash) -c "cd src; go build -o ../sunrise-alarm ./cmd/"
