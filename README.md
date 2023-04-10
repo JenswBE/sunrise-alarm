@@ -15,11 +15,11 @@ Dependencies:
   - Fedora: `sudo dnf group install "C Development Tools and Libraries" "Development Tools"`
 
 ```bash
+# Update vendor libraries
+./src/update_vendors.sh
+
 # Change to source dir
 cd src
-
-# Update vendor libraries
-./update_vendors.sh
 
 # Auto-restart Sunrise Alarm on changes to the code
 go install github.com/cespare/reflex@latest

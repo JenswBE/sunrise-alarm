@@ -5,7 +5,7 @@ IFS=$'\n\t'
 
 # Settings
 VENDOR_TMP_DIR=.vendor-tmp
-OUTPUT_DIR=services/gui/html/static/vendor
+OUTPUT_DIR=src/services/gui/html/static/vendor
 
 # Create temporary dir
 rm -rf ${VENDOR_TMP_DIR:?} || true
