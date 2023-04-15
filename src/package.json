@@ -1,0 +1,12 @@
+{
+  "name": "sunrise-alarm",
+  "version": "1.0.0",
+  "dependencies": {
+    "@eonasdan/tempus-dominus": "^6.4.4",
+    "@popperjs/core": "^2.11.7",
+    "bootstrap": "^5.3.0-alpha3",
+    "bootstrap-icons": "^1.10.4",
+    "luxon": "^3.3.0",
+    "simple-keyboard": "^3.5.48"
+  }
+}

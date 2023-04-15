@@ -10,71 +10,42 @@ OUTPUT_DIR=src/services/gui/html/static/vendor
 # Create temporary dir
 rm -rf ${VENDOR_TMP_DIR:?} || true
 mkdir ${VENDOR_TMP_DIR:?}
-cd ${VENDOR_TMP_DIR:?}
-mkdir output
 
 # ===========================================================================
 
-# ===================================
-# =            Bootstrap            =
-# ===================================
+# Get all packages
+npm install --prefix=src
+
 # Bootstrap
-wget -O package.tgz https://registry.npmjs.org/bootstrap/-/bootstrap-5.3.0-alpha3.tgz
-tar -xzf package.tgz
-mkdir output/bootstrap
-mv -t output/bootstrap package/dist package/LICENSE package/README.md
-rm -rf package*
+mkdir ${VENDOR_TMP_DIR:?}/bootstrap
+cp -rt ${VENDOR_TMP_DIR:?}/bootstrap src/node_modules/bootstrap/dist
 
 # Bootstrap Icons
-wget -O package.tgz https://registry.npmjs.org/bootstrap-icons/-/bootstrap-icons-1.10.4.tgz
-tar -xzf package.tgz
-mkdir output/bootstrap-icons
-mv -t output/bootstrap-icons package/font package/LICENSE.md package/README.md
-rm -rf package*
+mkdir ${VENDOR_TMP_DIR:?}/bootstrap-icons
+cp -rt ${VENDOR_TMP_DIR:?}/bootstrap-icons src/node_modules/bootstrap-icons/font
 
-# ===================================
-# =              Luxon              =
-# = https://moment.github.io/luxon/ =
-# ===================================
-wget -O package.tgz https://registry.npmjs.org/luxon/-/luxon-3.3.0.tgz
-tar -xzf package.tgz
-mkdir output/luxon
-mv -t output/luxon package/build/global/luxon.min.js package/README.md
-rm -rf package*
+# Luxon
+mkdir ${VENDOR_TMP_DIR:?}/luxon
+cp -rt ${VENDOR_TMP_DIR:?}/luxon src/node_modules/luxon/build/global/luxon.min.js
 
-# ===================================
-# =         Simple Keyboard         =
-# ===================================
-wget -O package.tgz https://github.com/hodgef/simple-keyboard/archive/refs/tags/3.5.0.tar.gz
-tar -xzf package.tgz
-mkdir output/simple-keyboard
-mv -t output/simple-keyboard simple-keyboard-*/*
-rm -rf package.tgz simple-keyboard*
+# Simple Keyboard
+mkdir ${VENDOR_TMP_DIR:?}/simple-keyboard
+cp -rt ${VENDOR_TMP_DIR:?}/simple-keyboard src/node_modules/simple-keyboard/build
 
-# ===================================
-# =           Time picker           =
-# =    https://getdatepicker.com    =
-# ===================================
 # Popper JS
-wget -O package.tgz https://registry.npmjs.org/@popperjs/core/-/core-2.11.7.tgz
-tar -xzf package.tgz
-mkdir output/popperjs-core
-mv -t output/popperjs-core package/dist package/LICENSE.md package/README.md
-rm -rf package*
+mkdir ${VENDOR_TMP_DIR:?}/popperjs-core
+cp -rt ${VENDOR_TMP_DIR:?}/popperjs-core src/node_modules/@popperjs/core/dist
 
 # Tempus Dominus (time picker)
-wget -O package.tgz https://github.com/Eonasdan/tempus-dominus/archive/refs/tags/v6.4.4.tar.gz
-tar -xzf package.tgz
-mkdir output/tempus-dominus
-mv -t output/tempus-dominus tempus-dominus-*/dist tempus-dominus-*/LICENSE tempus-dominus-*/README.md
-rm -rf package.tgz tempus-dominus*
+mkdir ${VENDOR_TMP_DIR:?}/tempus-dominus
+cp -rt ${VENDOR_TMP_DIR:?}/tempus-dominus src/node_modules/@eonasdan/tempus-dominus/dist
 
 # ===========================================================================
 
 # Move output into place and cleanup
-cd -
 rm -rf ${OUTPUT_DIR:?}
-mkdir -p ${OUTPUT_DIR:?}
-mv ${VENDOR_TMP_DIR:?}/output/* ${OUTPUT_DIR:?}
+mkdir -p ${OUTPUT_DIR:?} # Ensure parent folder exists
+rmdir ${OUTPUT_DIR:?}
+mv ${VENDOR_TMP_DIR:?} ${OUTPUT_DIR:?}
 touch ${OUTPUT_DIR:?}/.gitkeep
 rm -rf ${VENDOR_TMP_DIR:?}

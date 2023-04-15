@@ -8,6 +8,7 @@ DIY alarm clock
 
 Dependencies:
 
+- NodeJS
 - Golang
 - ALSA dev library
   - Fedora: `sudo dnf install alsa-lib-devel`

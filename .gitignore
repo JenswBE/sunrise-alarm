@@ -4,3 +4,4 @@ src/services/gui/html/static/vendor/**
 /sunrise-alarm
 alarms.json
 /config.yml
+node_modules
