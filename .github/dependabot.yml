@@ -8,12 +8,12 @@ updates:
 
   # Maintain dependencies for Golang
   - package-ecosystem: gomod
-    directory: /
+    directory: /src
     schedule:
       interval: weekly
 
   # Maintain dependencies for NPM (vendors)
   - package-ecosystem: npm
-    directory: /
+    directory: /src
     schedule:
       interval: weekly
