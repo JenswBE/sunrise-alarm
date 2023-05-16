@@ -43,14 +43,18 @@ function generateNextRingTimeText(time) {
   const now = luxon.DateTime.local();
   const nextRingDate = luxon.DateTime.fromISO(time);
   const tomorrow = now.plus({ days: 1 });
+  const nextWeek = now.plus({ days: 6 }); // 6 days instead of 7 to prevent time-based edge cases.
 
   // Check if ring is today
-  if (nextRingDate.weekday == now.weekday) {
+  if (nextRingDate.toISODate() == now.toISODate()) {
     day = "Today";
-  } else if (nextRingDate.weekday == tomorrow.weekday) {
+  } else if (nextRingDate.toISODate() == tomorrow.toISODate()) {
     day = "Tomorrow";
-  } else {
+  } else if (nextRingDate < nextWeek) {
     day = nextRingDate.toFormat("cccc");
+  } else {
+    daysDiff = Math.round(nextRingDate.diff(now, "days").as("days"));
+    day = nextRingDate.toFormat("cccc") + ` (in ${daysDiff} days)`;
   }
 
   // Format and set text
