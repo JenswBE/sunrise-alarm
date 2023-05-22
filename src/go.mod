@@ -13,7 +13,7 @@ require (
 	github.com/samber/lo v1.38.1
 	github.com/spf13/viper v1.15.0
 	github.com/stianeikeland/go-rpio/v4 v4.6.0
-	github.com/stretchr/testify v1.8.2
+	github.com/stretchr/testify v1.8.3
 	golang.org/x/exp v0.0.0-20230321023759-10a507213a29
 )
 
