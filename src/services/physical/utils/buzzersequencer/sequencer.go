@@ -11,13 +11,13 @@ type BuzzerSequencer struct {
 	startStop chan bool
 }
 
-func NewBuzzerSequencer(buzzer repositories.Buzzer) *BuzzerSequencer {
+func NewBuzzerSequencer(buzzer repositories.Buzzer, fancySequence bool) *BuzzerSequencer {
 	startStop := make(chan bool, 5)
 	seq := &BuzzerSequencer{
 		buzzer:    buzzer,
 		startStop: startStop,
 	}
-	go seq.worker(startStop)
+	go seq.worker(startStop, fancySequence)
 	return seq
 }
 
@@ -29,12 +29,20 @@ func (s *BuzzerSequencer) Stop() {
 	s.startStop <- false
 }
 
-func (s *BuzzerSequencer) worker(startStop chan bool) {
+func (s *BuzzerSequencer) worker(startStop chan bool, fancySequence bool) {
 	beepSequence := []time.Duration{
-		100 * time.Millisecond, // On
-		100 * time.Millisecond, // Off
-		100 * time.Millisecond, // On
-		1 * time.Second,        // Off
+		500 * time.Millisecond, // On
+		500 * time.Millisecond, // Off
+	}
+	if fancySequence {
+		// Below sequence is a bit fancier,
+		// but seems not always handled correctly.
+		beepSequence = []time.Duration{
+			100 * time.Millisecond, // On
+			100 * time.Millisecond, // Off
+			100 * time.Millisecond, // On
+			1 * time.Second,        // Off
+		}
 	}
 
 	// Start worker loop

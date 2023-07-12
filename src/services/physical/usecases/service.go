@@ -91,7 +91,7 @@ func NewPhysicalService(config config.PhysicalConfig, pubSub pubsub.PubSub) *Phy
 
 	// Build service
 	return &PhysicalService{
-		seq:             buzzersequencer.NewBuzzerSequencer(devBuzzer),
+		seq:             buzzersequencer.NewBuzzerSequencer(devBuzzer, false),
 		isMocked:        config.Mocked,
 		display:         devDisplay,
 		leds:            devLeds,
