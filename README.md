@@ -103,6 +103,7 @@ sudo tee /etc/systemd/system/sunrise-alarm.service <<EOF
 Description=Sunrise Alarm
 
 [Service]
+TimeoutSec=10min
 WorkingDirectory=${HOME:?}/sunrise-alarm
 Environment="GOPATH=${GOPATH:?}"
 Environment="HOME=${HOME:?}"
