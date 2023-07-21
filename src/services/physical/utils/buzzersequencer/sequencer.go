@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/JenswBE/sunrise-alarm/src/services/physical/repositories"
+	"github.com/rs/zerolog/log"
 )
 
 type BuzzerSequencer struct {
@@ -11,13 +12,13 @@ type BuzzerSequencer struct {
 	startStop chan bool
 }
 
-func NewBuzzerSequencer(buzzer repositories.Buzzer, fancySequence bool) *BuzzerSequencer {
+func NewBuzzerSequencer(buzzer repositories.Buzzer, beepSequence []time.Duration) *BuzzerSequencer {
 	startStop := make(chan bool, 5)
 	seq := &BuzzerSequencer{
 		buzzer:    buzzer,
 		startStop: startStop,
 	}
-	go seq.worker(startStop, fancySequence)
+	go seq.worker(startStop, beepSequence)
 	return seq
 }
 
@@ -29,19 +30,13 @@ func (s *BuzzerSequencer) Stop() {
 	s.startStop <- false
 }
 
-func (s *BuzzerSequencer) worker(startStop chan bool, fancySequence bool) {
-	beepSequence := []time.Duration{
-		500 * time.Millisecond, // On
-		500 * time.Millisecond, // Off
-	}
-	if fancySequence {
-		// Below sequence is a bit fancier,
-		// but seems not always handled correctly.
+func (s *BuzzerSequencer) worker(startStop chan bool, beepSequence []time.Duration) {
+	if len(beepSequence) == 0 {
+		// Should not happen => Fallback sequence
+		log.Error().Msg("Beep sequence not set. Falling back to safe value.")
 		beepSequence = []time.Duration{
-			100 * time.Millisecond, // On
-			100 * time.Millisecond, // Off
-			100 * time.Millisecond, // On
-			1 * time.Second,        // Off
+			200 * time.Millisecond, // On
+			200 * time.Millisecond, // Off
 		}
 	}
 

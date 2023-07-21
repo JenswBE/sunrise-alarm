@@ -27,7 +27,8 @@ type PhysicalConfig struct {
 		GPIONum int
 	}
 	Buzzer struct {
-		GPIONum int
+		GPIONum  int
+		Sequence []time.Duration
 	}
 	Leds struct {
 		SunriseDuration time.Duration
@@ -46,6 +47,12 @@ func ParseConfig() (*Config, error) {
 	viper.SetDefault("LogFormat", LogFormatJSON)
 	viper.SetDefault("Physical.Button.GPIONum", 23) // GPIO23 on pin 16
 	viper.SetDefault("Physical.Buzzer.GPIONum", 18) // GPIO18 on pin 12
+	viper.SetDefault("Physical.Buzzer.Sequence", []time.Duration{
+		150 * time.Millisecond, // On
+		150 * time.Millisecond, // Off
+		150 * time.Millisecond, // On
+		1 * time.Second,        // Off
+	})
 	viper.SetDefault("Physical.Leds.SunriseDuration", 5*time.Minute)
 	viper.SetDefault("Physical.LightSensor.I2CDevice", "/dev/i2c-1")
 	viper.SetDefault("Physical.Mocked", false)
@@ -70,6 +77,7 @@ func ParseConfig() (*Config, error) {
 		{"LogFormat", "LOG_FORMAT"},
 		{"Physical.Button.GPIONum", "PHYSICAL_BUTTON_GPIO_PIN"},
 		{"Physical.Buzzer.GPIONum", "PHYSICAL_BUZZER_GPIO_PIN"},
+		{"Physical.Buzzer.Sequence", "PHYSICAL_BUZZER_SEQUENCE"},
 		{"Physical.Leds.SunriseDuration", "PHYSICAL_LEDS_SUNRISE_DURATION"},
 		{"Physical.LightSensor.I2CDevice", "PHYSICAL_LIGHT_SENSOR_I2C_DEVICE"},
 		{"Physical.Mocked", "PHYSICAL_MOCKED"},
