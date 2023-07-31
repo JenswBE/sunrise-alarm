@@ -7,6 +7,6 @@
     "bootstrap": "^5.3.0",
     "bootstrap-icons": "^1.10.5",
     "luxon": "^3.3.0",
-    "simple-keyboard": "^3.6.35"
+    "simple-keyboard": "^3.6.37"
   }
 }
