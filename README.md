@@ -34,6 +34,9 @@ reflex -s -G alarms.json go run ./cmd/ 2>&1 | grep -v "next-ring-time"
 
 ## Deployment
 
+**Known issues**
+- Onscreen keyboard not working since switch to Wayland on Rpi OS 12 (OS only, OSK in alarm settings works)
+
 ```bash
 # Enable SSH access
 sudo raspi-config
@@ -62,11 +65,14 @@ tmpfs /var/spool tmpfs defaults,noatime,mode=1777 0 0
 EOF
 
 # Export logs
-RSYSLOG_SERVER='' # IP or hostname
-sudo tee /etc/rsyslog.d/rsyslog-99-graylog.conf <<EOF
-*.* @${RSYSLOG_SERVER:?}:1514;RSYSLOG_SyslogProtocol23Format
-EOF
-sudo systemctl restart rsyslog
+# Based on https://www.elastic.co/downloads/beats/journalbeat
+wget -qO - https://artifacts.elastic.co/downloads/beats/journalbeat/journalbeat-7.15.2-arm64.deb -O journalbeat.deb
+sudo dpkg -i ./journalbeat.deb
+rm ./journalbeat.deb
+sudo nano /etc/journalbeat/journalbeat.yml
+# 1. Comment key "output.elasticsearch" and children
+# 2. Uncomment key "output.logstash" and configure child "hosts" to Graylog server
+sudo systemctl enable --now journalbeat
 
 # Upgrade system
 sudo apt update
@@ -74,7 +80,7 @@ sudo apt dist-upgrade -y
 sudo reboot # Needed for "Log to RAM" anyway
 
 # Install dependencies
-sudo apt install -y firefox-esr onboard libasound2-dev
+sudo apt install -y libasound2-dev
 
 # Install Go
 # Update below to latest version at https://go.dev/dl/
@@ -90,9 +96,21 @@ export GOPATH=~/go
 EOF
 source /etc/profile.d/add-go-to-path.sh
 
+# Install NodeJS
+# Based on https://github.com/nodesource/distributions#installation-instructions
+NODE_VERSION=20
+sudo mkdir -p /etc/apt/keyrings
+curl -fsSL https://deb.nodesource.com/gpgkey/nodesource-repo.gpg.key | sudo gpg --dearmor -o /etc/apt/keyrings/nodesource.gpg
+sudo tee /etc/apt/sources.list.d/nodesource.list <<EOF
+deb [signed-by=/etc/apt/keyrings/nodesource.gpg] https://deb.nodesource.com/node_${NODE_VERSION:?}.x nodistro main
+EOF
+sudo apt-get update
+sudo apt-get install nodejs -y
+
 # Clone this repo
 git config --global pull.ff only
 git clone https://github.com/JenswBE/sunrise-alarm
+sudo chown -R root:root sunrise-alarm
 cd sunrise-alarm
 
 # Setup Sunrise Alarm
@@ -120,15 +138,6 @@ WantedBy=default.target
 EOF
 sudo systemctl daemon-reload
 sudo systemctl enable --now sunrise-alarm
-
-# Configure screen timeout
-mkdir -p ~/.config/autostart
-tee ~/.config/autostart/screen-timeout.desktop <<EOF
-[Desktop Entry]
-Type=Application
-Name=Set screen timeout
-Exec=/usr/bin/xset dpms 60 60 60
-EOF
 
 # Run Ansible
 cd deployment
