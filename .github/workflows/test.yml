@@ -18,11 +18,15 @@ jobs:
         run: |
           sudo apt install libasound2-dev
 
+      - name: Pull common linter configs
+        run: wget -O .golangci.yml https://raw.githubusercontent.com/JenswBE/setup/main/programming_configs/golang/.golangci.yml
+
       - name: Lint
         uses: golangci/golangci-lint-action@v3
         with:
           working-directory: src
-          args: --timeout=10m
+          args: >
+            --disable errorlint,goerr113,nestif,wrapcheck
 
       - name: Test exhaustive use of case statements
         working-directory: src

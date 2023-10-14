@@ -12,10 +12,10 @@ type EventAlarmChanged struct {
 	Alarm  entities.Alarm
 }
 
-func (event EventAlarmChanged) MarshalZerologObject(e *zerolog.Event) {
-	e.Str("type", "AlarmChanged")
-	e.Stringer("action", event.Action)
-	e.Object("alarm", event.Alarm)
+func (e EventAlarmChanged) MarshalZerologObject(logEvent *zerolog.Event) {
+	logEvent.Str("type", "AlarmChanged")
+	logEvent.Stringer("action", e.Action)
+	logEvent.Object("alarm", e.Alarm)
 }
 
 func (e EventAlarmChanged) GetTopic() string {

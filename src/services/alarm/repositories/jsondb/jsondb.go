@@ -26,7 +26,7 @@ func NewJSONDB(filePath string) (*JSONDB, error) {
 	db := &JSONDB{alarms: map[uuid.UUID]internal.Alarm{}}
 
 	// Open DB file
-	file, err := os.OpenFile(filePath, os.O_RDWR|os.O_CREATE|os.O_SYNC, 0644)
+	file, err := os.OpenFile(filePath, os.O_RDWR|os.O_CREATE|os.O_SYNC, 0o644)
 	if err != nil {
 		return nil, fmt.Errorf("failed to open JSON DB file: %w", err)
 	}

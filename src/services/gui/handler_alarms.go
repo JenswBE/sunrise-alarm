@@ -14,13 +14,15 @@ import (
 	"github.com/JenswBE/sunrise-alarm/src/services/gui/entities"
 )
 
-var weekdays = globalEntities.ISOWeekdays()
-var weekdaysPresets = map[string][]globalEntities.ISOWeekday{
-	"NONE":    {},
-	"WEEK":    weekdays[0:5],
-	"WEEKEND": weekdays[5:7],
-	"ALL":     weekdays,
-}
+var (
+	weekdays        = globalEntities.ISOWeekdays()
+	weekdaysPresets = map[string][]globalEntities.ISOWeekday{
+		"NONE":    {},
+		"WEEK":    weekdays[0:5],
+		"WEEKEND": weekdays[5:7],
+		"ALL":     weekdays,
+	}
+)
 
 func (h *Handler) handleAlarmsList(c *gin.Context) {
 	// List alarms
@@ -31,7 +33,7 @@ func (h *Handler) handleAlarmsList(c *gin.Context) {
 	}
 	globalEntities.SortAlarms(alarms)
 
-	h.htmlWithFlashes(c, http.StatusOK, &entities.AlarmsListTemplate{
+	h.html200WithFlashes(c, &entities.AlarmsListTemplate{
 		BaseData: entities.BaseData{
 			Title:      "Alarms",
 			ParentPath: "alarms",
@@ -73,7 +75,7 @@ func (h *Handler) handleAlarmsForm(c *gin.Context) {
 		isNew = false
 	}
 
-	h.htmlWithFlashes(c, http.StatusOK, &entities.AlarmsFormTemplate{
+	h.html200WithFlashes(c, &entities.AlarmsFormTemplate{
 		BaseData: entities.BaseData{
 			Title:      "New/Edit alarm",
 			ParentPath: "alarms",

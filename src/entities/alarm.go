@@ -1,14 +1,15 @@
 package entities
 
 import (
+	"cmp"
 	"fmt"
+	"slices"
 	"strconv"
 	"strings"
 
 	"github.com/google/uuid"
 	"github.com/rs/zerolog"
 	"github.com/samber/lo"
-	"golang.org/x/exp/slices"
 )
 
 const MaxNumberOfAlarms = 8
@@ -65,22 +66,22 @@ func (a *Alarm) SetTimeFromString(time string) error {
 }
 
 func SortAlarms(alarms []Alarm) {
-	slices.SortFunc(alarms, func(a, b Alarm) bool {
+	slices.SortStableFunc(alarms, func(a, b Alarm) int {
 		switch {
 		case a.Hour != b.Hour:
-			return a.Hour < b.Hour
+			return cmp.Compare(a.Hour, b.Hour)
 		case a.Minute != b.Minute:
-			return a.Minute < b.Minute
+			return cmp.Compare(a.Minute, b.Minute)
 		case len(a.Days) > 0 || len(b.Days) > 0:
 			if len(a.Days) == 0 {
-				return true
+				return -1
 			}
 			if len(b.Days) == 0 {
-				return false
+				return +1
 			}
-			return a.Days[0] < b.Days[0]
+			return cmp.Compare(a.Days[0], b.Days[0])
 		default:
-			return a.Name < b.Name
+			return cmp.Compare(a.Name, b.Name)
 		}
 	})
 }

@@ -42,7 +42,6 @@ func (h *Handler) NewRenderer() multitemplate.Renderer {
 			"rawJS":        rawJS,
 			"rawWeekday":   rawWeekday,
 			"repeat":       lo.Range,
-			"substract":    substract,
 			"toLower":      strings.ToLower,
 		})
 
@@ -60,10 +59,6 @@ func (h *Handler) NewRenderer() multitemplate.Renderer {
 
 func add(a, b int) int {
 	return a + b
-}
-
-func substract(a, b int) int {
-	return a - b
 }
 
 func product(a, b int) int {
@@ -100,7 +95,7 @@ func getStaticURL(parts ...string) string {
 }
 
 func rawJS(input string) template.JS {
-	return template.JS(input)
+	return template.JS(input) //#nosec G203
 }
 
 func rawWeekday(input entities.ISOWeekday) int {

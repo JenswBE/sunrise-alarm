@@ -48,21 +48,20 @@ const (
 	stepStatusDone          stepStatus = "DONE"
 )
 
-func NewRinger(physicalService physical.Service, audioService audio.Service, abortAlarm chan<- struct{}) *Ringer {
+func NewRinger(physicalService physical.Service, audioService audio.Service) *Ringer {
 	// Init
 	ringer := &Ringer{
 		ringingChan:     make(chan bool, 1),
-		abortAlarm:      abortAlarm,
 		audioService:    audioService,
 		physicalService: physicalService,
 	}
 
 	// Start event loop
-	go ringer.eventLoop(abortAlarm)
+	go ringer.eventLoop()
 	return ringer
 }
 
-func (r *Ringer) eventLoop(abortAlarm chan<- struct{}) {
+func (r *Ringer) eventLoop() {
 	trigger := trigger.NewDelayedTrigger()
 	for {
 		select {

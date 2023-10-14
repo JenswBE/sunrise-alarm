@@ -1,7 +1,6 @@
 package gui
 
 import (
-	"net/http"
 	"os/exec"
 
 	"github.com/gin-gonic/gin"
@@ -11,7 +10,7 @@ import (
 )
 
 func (h *Handler) handleDebug(c *gin.Context) {
-	h.htmlWithFlashes(c, http.StatusOK, &entities.DebugTemplate{
+	h.html200WithFlashes(c, &entities.DebugTemplate{
 		BaseData: entities.BaseData{
 			Title:      "Debug",
 			ParentPath: "debug",

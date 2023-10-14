@@ -10,6 +10,6 @@ func (e EventButtonPressedLong) GetTopic() string {
 	return "button_pressed_long"
 }
 
-func (event EventButtonPressedLong) MarshalZerologObject(e *zerolog.Event) {
-	e.Str("type", "ButtonPressedLong")
+func (e EventButtonPressedLong) MarshalZerologObject(logEvent *zerolog.Event) {
+	logEvent.Str("type", "ButtonPressedLong")
 }

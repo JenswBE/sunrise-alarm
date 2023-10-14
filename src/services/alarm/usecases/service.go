@@ -34,14 +34,13 @@ func NewAlarmService(physicalService physical.Service, audioService audio.Servic
 	}
 
 	// Build service
-	abortAlarm := make(chan struct{}, 1)
 	s := &AlarmService{
 		db:              db,
 		pubSub:          pubSub,
-		ringer:          NewRinger(physicalService, audioService, abortAlarm),
+		ringer:          NewRinger(physicalService, audioService),
 		physicalService: physicalService,
 	}
-	return s, s.startManager(abortAlarm)
+	return s, s.startManager()
 }
 
 func (s *AlarmService) Close() error {

@@ -10,9 +10,11 @@ import (
 
 var _ repositories.Display = &RPiDisplay{}
 
-const brightnessFilePath = "/sys/class/backlight/10-0045/brightness"
-const minBrightness = 7
-const maxBrightness = 200
+const (
+	brightnessFilePath = "/sys/class/backlight/10-0045/brightness"
+	minBrightness      = 7
+	maxBrightness      = 200
+)
 
 type RPiDisplay struct {
 	currentBrightness byte

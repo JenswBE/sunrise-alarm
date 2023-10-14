@@ -8,12 +8,14 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-const initialDelay = 10 * time.Second
-const updateDelay = time.Second
-const minLight = 66000
-const maxLight = 1700000
-const minBrightness = 0
-const maxBrightness = math.MaxUint8
+const (
+	initialDelay  = 10 * time.Second
+	updateDelay   = time.Second
+	minLight      = 66000
+	maxLight      = 1700000
+	minBrightness = 0
+	maxBrightness = math.MaxUint8
+)
 
 type AutoBacklight struct {
 	display     repositories.Display

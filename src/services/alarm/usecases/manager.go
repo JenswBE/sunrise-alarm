@@ -12,7 +12,7 @@ import (
 	"github.com/samber/lo"
 )
 
-func (s *AlarmService) startManager(abortAlarm chan struct{}) error {
+func (s *AlarmService) startManager() error {
 	// Calculate initial plannings
 	alarms, err := s.ListAlarms()
 	if err != nil {
@@ -32,7 +32,7 @@ func (s *AlarmService) startManager(abortAlarm chan struct{}) error {
 	}
 
 	// Start manager loop
-	go s.eventLoop(abortAlarm)
+	go s.eventLoop()
 
 	return nil
 }
@@ -51,7 +51,7 @@ func createTimer(alarmID uuid.UUID, planning entities.Planning, timerChan chan u
 // eventLoop handles all manager events.
 // Having a function in a single go-routine handle all data manipulations,
 // we are sure we don't create race conditions and using locks is not needed.
-func (s *AlarmService) eventLoop(abortAlarm chan struct{}) {
+func (s *AlarmService) eventLoop() {
 	events := make(chan pubsub.Event, 1)
 	s.pubSub.Subscribe(pubsub.EventAlarmChanged{}, events)
 	s.pubSub.Subscribe(pubsub.EventButtonPressedShort{}, events)
@@ -70,9 +70,6 @@ func (s *AlarmService) eventLoop(abortAlarm chan struct{}) {
 				log.Debug().Msg("Manager.eventLoop: EventButtonPressedLong event received, handling button press...")
 				s.handleButtonLongPressed()
 			}
-		case <-abortAlarm:
-			log.Debug().Msg("Manager.eventLoop: Abort alarm request received, calling stopAlarm...")
-			s.stopAlarm()
 		case alarmID := <-s.timerChan:
 			// Delay will be set by handle_action (through UpdateSchedule)
 			log.Debug().Msg("Manager.eventLoop: Received trigger from timer, calling handleTimer...")

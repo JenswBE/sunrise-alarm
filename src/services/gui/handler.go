@@ -67,12 +67,12 @@ func html(c *gin.Context, code int, template entities.Template) {
 	c.HTML(code, template.GetTemplateName(), template)
 }
 
-func (h *Handler) htmlWithFlashes(c *gin.Context, code int, template entities.Template) {
+func (h *Handler) html200WithFlashes(c *gin.Context, template entities.Template) {
 	// Get and convert flashes
 	template.SetMessages(h.messages.Get())
 
 	// Display page
-	html(c, code, template)
+	html(c, http.StatusOK, template)
 }
 
 func redirect(c *gin.Context, redirectLocation string) {

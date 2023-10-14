@@ -18,13 +18,19 @@ import (
 )
 
 func main() {
+	os.Exit(run())
+}
+
+func run() int {
 	// Setup logging
 	zerolog.SetGlobalLevel(zerolog.InfoLevel)
+	fatalLog := log.With().Bool("fatal", true).Logger()
 
 	// Parse config
 	svcConfig, err := config.ParseConfig()
 	if err != nil {
-		log.Fatal().Err(err).Msg("Main: Failed to parse config")
+		fatalLog.Err(err).Msg("Main: Failed to parse config")
+		return 1
 	}
 
 	// Setup log format
@@ -69,13 +75,15 @@ func main() {
 	// Setup services
 	audioSvc, err := audio.NewAudioService()
 	if err != nil {
-		log.Fatal().Err(err).Msg("Main: Failed to init audio service")
+		fatalLog.Err(err).Msg("Main: Failed to init audio service")
+		return 1
 	}
 	physicalSvc := physical.NewPhysicalService(svcConfig.Physical, eventBus)
 	defer physicalSvc.Close()
 	alarmSvc, err := alarm.NewAlarmService(physicalSvc, audioSvc, eventBus)
 	if err != nil {
-		log.Fatal().Err(err).Msg("Main: Failed to create the alarm service")
+		fatalLog.Err(err).Msg("Main: Failed to create the alarm service")
+		return 1
 	}
 	defer func() {
 		if err := alarmSvc.Close(); err != nil {
@@ -93,6 +101,8 @@ func main() {
 	router.HTMLRender = guiHandler.NewRenderer()
 	err = router.Run(":8123")
 	if err != nil {
-		log.Fatal().Err(err).Int("port", 8123).Msg("Main: Failed to start GUI")
+		fatalLog.Err(err).Int("port", 8123).Msg("Main: Failed to start GUI")
+		return 1
 	}
+	return 0
 }
