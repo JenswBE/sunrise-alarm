@@ -10,8 +10,13 @@
       community.general.ini_file:
         path: "{{ ansible_user_dir }}/.config/wayfire.ini"
         section: idle
-        option: dpms_timeout
-        value: "60"
+        option: "{{ item.option }}"
+        value: "{{ item.value }}"
+      loop:
+        - option: disable_on_fullscreen
+          value: "false"
+        - option: dpms_timeout
+          value: "60"
 
     - name: Include setup SNMP
       ansible.builtin.include_tasks: snmp.yml
