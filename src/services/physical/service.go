@@ -15,7 +15,7 @@ type Service interface {
 	StopBuzzer()
 
 	GetLEDState() entities.LEDState
-	SetLEDState(entities.LEDState)
+	SetLEDState(state entities.LEDState)
 	ResetLEDState()
 	StartSunriseSimulation()
 	StopSunriseSimulation()
