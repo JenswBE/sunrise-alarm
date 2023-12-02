@@ -18,5 +18,5 @@
         - option: dpms_timeout
           value: "60"
 
-    - name: Include setup SNMP
-      ansible.builtin.include_tasks: snmp.yml
+    - name: Include Zabbix agent tasks
+      ansible.builtin.include_tasks: zabbix-agent.yml

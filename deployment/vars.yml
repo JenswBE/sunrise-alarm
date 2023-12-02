@@ -1,1 +1,2 @@
-snmpd_location: Zaventem, Belgium
+zabbix_version: "6.4"
+app_zabbix_agent_server: "kubo.jensw.eu" # Incoming connections will be accepted only from the hosts listed here.
