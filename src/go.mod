@@ -6,7 +6,7 @@ require (
 	github.com/JenswBE/golang-tsl2591 v0.0.0-20221208210240-073a36b2ade3
 	github.com/gin-contrib/multitemplate v0.0.0-20230212012517-45920c92c271
 	github.com/gin-gonic/gin v1.9.1
-	github.com/google/uuid v1.4.0
+	github.com/google/uuid v1.5.0
 	github.com/hajimehoshi/go-mp3 v0.3.4
 	github.com/hajimehoshi/oto/v2 v2.4.2
 	github.com/rs/zerolog v1.31.0
