@@ -11,7 +11,7 @@ require (
 	github.com/hajimehoshi/oto/v2 v2.4.2
 	github.com/rs/zerolog v1.31.0
 	github.com/samber/lo v1.39.0
-	github.com/spf13/viper v1.18.1
+	github.com/spf13/viper v1.18.2
 	github.com/stianeikeland/go-rpio/v4 v4.6.0
 	github.com/stretchr/testify v1.8.4
 	golang.org/x/exp v0.0.0-20230905200255-921286631fa9
