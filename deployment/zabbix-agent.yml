@@ -17,7 +17,7 @@
       ansible.builtin.lineinfile:
         path: /etc/zabbix/zabbix_agent2.conf
         regexp: "^Server="
-        line: "Server={{ app_zabbix_agent_server }}"
+        line: "Server={{ query('community.dns.lookup', app_zabbix_agent_server, nxdomain_handling='fail')[0] }}"
 
     - name: Zabbix agent - Restart if config was changed
       when: zabbix_agent_config.changed

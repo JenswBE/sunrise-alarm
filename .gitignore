@@ -5,3 +5,4 @@ src/services/gui/html/static/vendor/**
 alarms.json
 /config.yml
 node_modules
+deployment/collections

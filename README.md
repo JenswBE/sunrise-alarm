@@ -35,6 +35,7 @@ reflex -s -G alarms.json go run ./cmd/ 2>&1 | grep -v "next-ring-time"
 ## Deployment
 
 **Known issues**
+
 - Onscreen keyboard not working since switch to Wayland on Rpi OS 12 (OS only, OSK in alarm settings works)
 
 ```bash
@@ -141,7 +142,8 @@ sudo systemctl enable --now sunrise-alarm
 
 # Run Ansible
 cd deployment
-ansible-playbook main.yml
+LC_ALL=C.UTF-8 ansible-galaxy collection install -r requirements.yml
+LC_ALL=C.UTF-8 ansible-playbook main.yml
 
 # Reboot
 sudo reboot
