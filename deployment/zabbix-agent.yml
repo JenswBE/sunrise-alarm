@@ -5,7 +5,7 @@
   block:
     - name: Zabbix agent - Ensure Zabbix repo is installed
       ansible.builtin.apt:
-        deb: "https://repo.zabbix.com/zabbix/{{ zabbix_version }}/debian/pool/main/z/zabbix-release/zabbix-release_latest+debian{{ ansible_distribution_major_version }}_all.deb"
+        deb: "https://repo.zabbix.com/zabbix/{{ zabbix_version }}/debian-arm64/pool/main/z/zabbix-release/zabbix-release_latest+debian{{ ansible_distribution_major_version }}_all.deb"
 
     - name: Zabbix agent - Ensure agent is installed
       ansible.builtin.package:
