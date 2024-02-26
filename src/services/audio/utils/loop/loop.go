@@ -8,7 +8,13 @@ type Loop struct {
 	length  int
 }
 
+// New creates a new loop reader.
+// Will panic if provided data is nil or empty.
 func New(data []byte) *Loop {
+	if len(data) == 0 {
+		panic("Loop reader: Provided data is nil or empty")
+	}
+
 	return &Loop{
 		data:    data,
 		pointer: 0,
@@ -18,9 +24,10 @@ func New(data []byte) *Loop {
 
 func (l *Loop) Reset() { l.pointer = 0 }
 
-// return bytes as long as you are asked for it
+// Read returns bytes and loops data if needed.
+// Will always return nil for err.
 func (l *Loop) Read(p []byte) (n int, err error) {
-	for i := 0; i < len(p); i++ {
+	for i := range len(p) {
 		dataPos := (l.pointer + i) % l.length
 		p[i] = l.data[dataPos]
 	}

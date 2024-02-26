@@ -1,4 +1,4 @@
 # This script is intended to be sourced like "source lint.sh" or ". lint.sh".
 golangci-lint run \
     --config <(curl --silent https://raw.githubusercontent.com/JenswBE/setup/main/programming_configs/golang/.golangci.yml) \
-    --disable errorlint,goerr113,nestif,wrapcheck \
+    --disable errorlint,goerr113,nestif,wrapcheck

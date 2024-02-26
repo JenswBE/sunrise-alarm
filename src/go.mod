@@ -1,6 +1,6 @@
 module github.com/JenswBE/sunrise-alarm/src
 
-go 1.21
+go 1.22
 
 require (
 	github.com/JenswBE/golang-tsl2591 v0.0.0-20221208210240-073a36b2ade3
