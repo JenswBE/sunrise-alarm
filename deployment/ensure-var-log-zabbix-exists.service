@@ -1,0 +1,9 @@
+[Unit]
+Description=Ensure /var/log/zabbix exists
+After=var-log.mount
+Requires=var-log.mount
+
+[Service]
+Type=oneshot
+ExecStartPre=/usr/bin/mkdir -p /var/log/zabbix
+ExecStart=/usr/bin/chown zabbix:zabbix /var/log/zabbix

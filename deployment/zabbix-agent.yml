@@ -12,6 +12,37 @@
         name: zabbix-agent2
         state: present
 
+    - name: Setup ensure-var-log-zabbix-exists.service
+      register: setup_log_dir
+      ansible.builtin.copy:
+        src: ensure-var-log-zabbix-exists.service
+        dest: /etc/systemd/system/ensure-var-log-zabbix-exists.service
+        owner: root
+        group: root
+        mode: "644"
+
+    - name: Setup zabbix-agent2 drop-in folder
+      ansible.builtin.file:
+        path: /etc/systemd/system/zabbix-agent2.service.d/
+        state: directory
+        owner: root
+        group: root
+        mode: "755"
+
+    - name: Setup zabbix-agent2 drop-in
+      register: zabbix_agent2_dropin
+      ansible.builtin.copy:
+        src: zabbix-agent2_dropin.service
+        dest: /etc/systemd/system/zabbix-agent2.service.d/ensure-log-dir-exists.conf
+        owner: root
+        group: root
+        mode: "644"
+
+    - name: Reload systemd daemon
+      when: setup_log_dir.changed or zabbix_agent2_dropin.changed
+      ansible.builtin.systemd:
+        daemon_reload: true
+
     - name: Zabbix agent - Update config
       register: zabbix_agent_config
       ansible.builtin.lineinfile:

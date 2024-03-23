@@ -142,7 +142,7 @@ sudo systemctl enable --now sunrise-alarm
 
 # Run Ansible
 cd deployment
-LC_ALL=C.UTF-8 ansible-galaxy collection install -r requirements.yml
+LC_ALL=C.UTF-8 ansible-galaxy collection install --force -r requirements.yml
 LC_ALL=C.UTF-8 ansible-playbook main.yml
 
 # Reboot
