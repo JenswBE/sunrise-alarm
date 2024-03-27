@@ -6,6 +6,24 @@
       ansible.builtin.hostname:
         name: sunrise
 
+    - name: Fix screen glitches - Disable vc4-kms-v3d
+      become: true
+      ansible.builtin.lineinfile:
+        path: /boot/firmware/config.txt
+        regexp: "{{ item.regexp }}"
+        line: "{{ item.line }}"
+        insertafter: "#?dtoverlay=vc4-kms-v3d"
+      loop:
+        - regexp: "#?dtoverlay=vc4-kms-v3d"
+          line: "#dtoverlay=vc4-kms-v3d"
+        # Following lines have to be in reverse order to have correct order in config.txt
+        - regexp: "ignore_lcd=0"
+          line: "ignore_lcd=0"
+        - regexp: "dtoverlay=vc4-fkms-v3d"
+          line: "dtoverlay=vc4-fkms-v3d"
+        - regexp: "# Bugfix for https://github.com/raspberrypi/linux/issues/4686#issuecomment-1427354271"
+          line: "# Bugfix for https://github.com/raspberrypi/linux/issues/4686#issuecomment-1427354271"
+
     - name: Configure screen timeout
       community.general.ini_file:
         path: "{{ ansible_user_dir }}/.config/wayfire.ini"
