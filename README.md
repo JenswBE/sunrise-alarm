@@ -86,7 +86,7 @@ sudo apt install -y libasound2-dev
 # Install Go
 # Update below to latest version at https://go.dev/dl/
 # See https://go.dev/doc/install for official instructions
-GO_URL="https://go.dev/dl/go1.22.0.linux-arm64.tar.gz"
+GO_URL="https://go.dev/dl/go1.23.0.linux-arm64.tar.gz"
 wget -O go.linux-arm64.tar.gz "${GO_URL:?}"
 sudo rm -rf /usr/local/go ~/go || true # Removes old install
 sudo tar -C /usr/local -xzf go.linux-arm64.tar.gz

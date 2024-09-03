@@ -2,10 +2,10 @@
 package pubsub
 
 import (
+	"slices"
 	"sync"
 
 	"github.com/rs/zerolog/log"
-	"golang.org/x/exp/slices"
 )
 
 // EventBus is an in-memory pub/sub service based on channels.

@@ -1,6 +1,6 @@
 module github.com/JenswBE/sunrise-alarm/src
 
-go 1.22
+go 1.23.0
 
 require (
 	github.com/JenswBE/golang-tsl2591 v0.0.0-20221208210240-073a36b2ade3
@@ -14,7 +14,6 @@ require (
 	github.com/spf13/viper v1.19.0
 	github.com/stianeikeland/go-rpio/v4 v4.6.0
 	github.com/stretchr/testify v1.9.0
-	golang.org/x/exp v0.0.0-20230905200255-921286631fa9
 )
 
 require (
@@ -57,6 +56,7 @@ require (
 	go.uber.org/multierr v1.9.0 // indirect
 	golang.org/x/arch v0.8.0 // indirect
 	golang.org/x/crypto v0.23.0 // indirect
+	golang.org/x/exp v0.0.0-20230905200255-921286631fa9 // indirect
 	golang.org/x/net v0.25.0 // indirect
 	golang.org/x/sys v0.20.0 // indirect
 	golang.org/x/text v0.16.0 // indirect
