@@ -2,7 +2,7 @@
   "name": "sunrise-alarm",
   "version": "1.0.0",
   "dependencies": {
-    "@eonasdan/tempus-dominus": "^6.9.10",
+    "@eonasdan/tempus-dominus": "^6.9.11",
     "@popperjs/core": "^2.11.8",
     "bootstrap": "^5.3.3",
     "bootstrap-icons": "^1.11.3",
