@@ -1,3 +1,5 @@
+# :warning: This project is no longer maintained
+
 # Sunrise Alarm
 
 DIY alarm clock
